@@ -17,7 +17,8 @@
     "react-dom": "^19.0.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.5.0",
-    "save-dev": "^0.0.1-security"
+    "save-dev": "^0.0.1-security",
+    "swiper": "^11.2.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
