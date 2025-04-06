@@ -9,7 +9,7 @@ import Contact from "./pages/Contact";
 function App() {
   return (
     <Layout style={{ width: "100vw", height: "100vh" }}>
-      <Header>
+      <Header style={{ padding: 0, background: 'none', position: 'relative'}}>
         <Navbar />
       </Header>
       <Content style={{ padding: "48px" }}>

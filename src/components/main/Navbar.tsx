@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu } from 'antd'
+import { Image, Menu } from 'antd'
 import { HomeOutlined, InfoCircleOutlined, PhoneOutlined } from '@ant-design/icons'
 
 const Navbar = () => {
@@ -34,13 +34,29 @@ const Navbar = () => {
   ];
 
   return (
-    <Menu
-      theme="dark"
-      mode="horizontal"
-      selectedKeys={[getSelectedKey()]}
-      items={items}
-      style={{ lineHeight: '64px' }}
-    />
+    <>
+      <div
+        style={{
+          // background: "black",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: 200,
+          height: 64,
+          color: '#3EC6E0',
+          fontSize: '1rem'
+        }}
+      >
+        Aunya Pool Villa
+      </div>
+      <Menu
+        theme="light"
+        mode="horizontal"
+        selectedKeys={[getSelectedKey()]}
+        items={items}
+        style={{ lineHeight: "64px", background: "#F6E7D3", paddingLeft: 200 }}
+      />
+    </>
   );
 };
 
