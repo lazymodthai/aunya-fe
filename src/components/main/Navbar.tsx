@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   AppBar,
@@ -7,13 +7,16 @@ import {
   Tabs,
   Tab,
   Box,
-  useTheme,
   useMediaQuery,
   Button,
+  Paper,
+  BottomNavigation,
+  BottomNavigationAction,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import BedroomParentIcon from '@mui/icons-material/BedroomParent';
 import MapIcon from '@mui/icons-material/Map';
+import BookOnlineIcon from '../../assets/icons/booking.png';
 
 const menuItems = [
   { label: "หน้าหลัก", icon: <HomeIcon />, path: "/" },
@@ -23,10 +26,8 @@ const menuItems = [
 
 const Navbar = () => {
   const location = useLocation();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery("(max-width:800px)");
 
-  // กำหนดค่า tab ที่เลือกตาม path
   const getTabValue = () => {
     const path = location.pathname;
     if (path === "/") return 0;
@@ -37,75 +38,147 @@ const Navbar = () => {
 
   const [value, setValue] = useState(getTabValue());
 
-  const handleChange = (event: any, newValue: any) => {
+  useEffect(() => {
+    setValue(getTabValue());
+  }, [location]);
+
+  const handleChange = (event:any, newValue:any) => {
+    setValue(newValue);
+  };
+
+  const handleBottomNavChange = (event:any, newValue:any) => {
+    // If the booking button is clicked (index 3)
+    if (newValue === 3) {
+      // Handle booking action here
+      console.log("Booking button clicked");
+      return;
+    }
     setValue(newValue);
   };
 
   return (
-    <AppBar
-      position="static"
-      sx={{ bgcolor: "#2D336B", color: "black", boxShadow: 1 }}
-    >
-      <Toolbar>
-        {/* Logo */}
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{
-            color: "#fff",
-            marginRight: "20px",
-            fontWeight: "bold",
-            width: isMobile ? "100%" : "200px",
-          }}
-        >
-          Aunya Pool Villa
-        </Typography>
-
-        {/* Navigation Tabs */}
-        <Box sx={{ flexGrow: 1 }}>
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            textColor="inherit"
-            indicatorColor="secondary"
+    <>
+      <AppBar
+        position="static"
+        sx={{ bgcolor: "#2D336B", color: "black", boxShadow: 1 }}
+      >
+        <Toolbar>
+          {/* Logo - always visible */}
+          <Typography
+            variant="h6"
+            component="div"
             sx={{
-              "& .MuiTab-root": {
-                textTransform: "none",
-                fontSize: "1rem",
-                color: "#fff",
-                minWidth: "auto",
-                padding: "12px 16px",
-              },
+              color: "#fff",
+              marginRight: "20px",
+              fontWeight: "bold",
+              width: isMobile ? "100%" : "200px",
+              textAlign: isMobile ? "center" : "left",
             }}
           >
-            {menuItems.map((i) => (
-              <Tab
-                key={i.label}
-                icon={i.icon}
-                iconPosition="start"
-                label={i.label}
+            Aunya Pool Villa
+          </Typography>
+
+          {/* Navigation Tabs - only on desktop */}
+          {!isMobile && (
+            <>
+              <Box sx={{ flexGrow: 1 }}>
+                <Tabs
+                  value={value}
+                  onChange={handleChange}
+                  textColor="inherit"
+                  indicatorColor="secondary"
+                  sx={{
+                    "& .MuiTab-root": {
+                      textTransform: "none",
+                      fontSize: "1rem",
+                      color: "#fff",
+                      minWidth: "auto",
+                      padding: "12px 16px",
+                    },
+                  }}
+                >
+                  {menuItems.map((item) => (
+                    <Tab
+                      key={item.label}
+                      icon={item.icon}
+                      iconPosition="start"
+                      label={item.label}
+                      component={Link}
+                      to={item.path}
+                    />
+                  ))}
+                </Tabs>
+              </Box>
+              <Button
+                sx={{
+                  bgcolor: "#FFF2F2",
+                  color: "#B03052",
+                  height: "100%",
+                  width: 200,
+                  fontSize: "1.8rem",
+                  padding: "0 24px",
+                  borderRadius: 3,
+                }}
+              >
+                จองเลย!
+              </Button>
+            </>
+          )}
+        </Toolbar>
+      </AppBar>
+
+      {/* Bottom Navigation for Mobile */}
+      {isMobile && (
+        <Paper
+          sx={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1100,
+          }}
+          elevation={3}
+        >
+          <BottomNavigation
+            value={value}
+            onChange={handleBottomNavChange}
+            showLabels
+            sx={{ bgcolor: "#2D336B" }}
+          >
+            {menuItems.map((item, index) => (
+              <BottomNavigationAction
+                key={item.label}
+                label={item.label}
+                icon={item.icon}
                 component={Link}
-                to={i.path}
+                to={item.path}
+                sx={{ 
+                  color: value === index ? "#fff" : "rgba(255, 255, 255, 0.7)",
+                  "&.Mui-selected": {
+                    color: "#fff",
+                  },
+                }}
               />
             ))}
-          </Tabs>
-        </Box>
+            <BottomNavigationAction
+              label="จองเลย!"
+              icon={<Box component={'img'} src={BookOnlineIcon} width={24} />}
+              sx={{
+                bgcolor: "#FFF2F2",
+                color: "#B03052",
+                "&.Mui-selected": {
+                  color: "#B03052",
+                  bgcolor: "#FFF2F2",
+                },
+              }}
+            />
+          </BottomNavigation>
+        </Paper>
+      )}
 
-        <Button
-          sx={{
-            bgcolor: "#FFF2F2",
-            color: "#B03052",
-            height: "100%",
-            width: 200,
-            fontSize: "1.8rem",
-            padding: "0 24px",
-            borderRadius: 3
-          }}
-        >
-          จองเลย!
-        </Button>
-      </Toolbar>
-    </AppBar>
+      {/* Add padding at the bottom of the page to prevent content from being hidden behind the bottom bar */}
+      {isMobile && <Box sx={{ height: "56px" }} />}
+    </>
   );
 };
 

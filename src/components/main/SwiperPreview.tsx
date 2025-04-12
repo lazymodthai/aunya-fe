@@ -12,8 +12,10 @@ const items = [
 ]
 
 import './styles.css';
-import { Box } from "@mui/material";
+import { Box, useMediaQuery } from "@mui/material";
 function SwiperPreview() {
+  const isMobile = useMediaQuery("(max-width:800px)")
+  
   return (
     <Swiper
       spaceBetween={30}
@@ -29,7 +31,7 @@ function SwiperPreview() {
       modules={[Autoplay]}
     >
       {items.map((i) => (
-        <SwiperSlide key={i.id} style={{ height: 600 }}>
+        <SwiperSlide key={i.id} style={{ height: '50vh' }}>
           <Box component={"img"} src={i.src} onClick={()=>alert(1)} sx={{borderRadius: 2}}/>
         </SwiperSlide>
       ))}
