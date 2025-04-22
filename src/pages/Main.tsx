@@ -22,6 +22,15 @@ import MicrowaveIcon from '../assets/icons/microwave.svg'
 import WaterIcon from '../assets/icons/water.png'
 import BookingCalendar from "../components/main/BookingCalendar"
 
+import PhoneIcon from "../assets/icons/phone.svg"
+import FacebookIcon from "../assets/icons/facebook.svg"
+import LineIcon from "../assets/icons/line.svg"
+
+import SpeakerIcon from "../assets/icons/speaker.svg"
+import NopetIcon from "../assets/icons/nopet.png"
+
+
+
 const info = [
   { key: 'room', text: "3 ห้องนอน", icon: <Box component={'img'} src={BedIcon} width={24} />},
   { key: 'bath', text: "3 ห้องน้ำ", icon: <Box component={'img'} src={ShowerIcon} width={24} />},
@@ -46,13 +55,18 @@ const facilities = [
   { key: 'water', text: "ฟรีน้ำดื่ม 1 แพ็ค", icon: <Box component={'img'} src={WaterIcon} width={24} />},
 ]
 
+const policy = [
+  { key: 'lound', text: "ใช้เสียงดังได้ถึงเที่ยงคืน", icon: <Box component={'img'} src={SpeakerIcon} width={24} />},
+  { key: 'pet', text: "ห้ามนำสัตว์เลี้ยงเข้าพัก", icon: <Box component={'img'} src={NopetIcon} width={24} />},
+]
+
 const bookingData = [
-  {m: 4, d: 1, price: 5500, promotion: 'yes', reserved: 'yes'},
-  {m: 4, d: 2, price: 5500, promotion: 'no', reserved: 'yes'},
-  {m: 4, d: 3, price: 6000, promotion: 'no', reserved: 'no'},
-  {m: 4, d: 4, price: 6000, promotion: 'no', reserved: 'no'},
-  {m: 4, d: 5, price: 5500, promotion: 'no', reserved: 'no'},
-  {m: 4, d: 6, price: 5500, promotion: 'no', reserved: 'yes'},
+  {m: 4, d: 1, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
+  {m: 4, d: 2, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
+  {m: 4, d: 3, price: 6000, promotion: 'no', reserved: 'no', maintenance: 'no' },
+  {m: 4, d: 4, price: 6000, promotion: 'no', reserved: 'no', maintenance: 'no' },
+  {m: 4, d: 5, price: 5500, promotion: 'no', reserved: 'no', maintenance: 'no' },
+  {m: 4, d: 6, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
 ];
 
 function Main() {
@@ -75,44 +89,105 @@ function Main() {
         </Grid>
 
         <Grid
-          size={isMobile ? 12 : 6}
-          border={`1px solid #A9B5DF`}
+          size={12}
           borderRadius={2}
           padding={2}
+          my={isMobile ? -2 : 0}
         >
-          <Grid size={12} mb={2}>
-            <Typography variant="h5">ข้อมูลทั่วไป</Typography>
+          <Grid container gap={1} justifyContent={'end'}>
+            <Box sx={{ bgcolor: "#fff", pl: 1, pr: 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #77B3D4' }}>
+              <Box component={'img'} src={PhoneIcon} width={20} />
+              <Typography variant="body2" sx={{fontWeight: 500, color: '#77B3D4'}}>{!isMobile ? '088-084-4455':'คุณเป็ด'}</Typography>
+            </Box>
+            <Box sx={{ bgcolor: "#fff", pl: 1, pr: 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #77B3D4' }}>
+              <Box component={'img'} src={PhoneIcon} width={20} />
+              <Typography variant="body2" sx={{fontWeight: 500, color: '#77B3D4'}}>{!isMobile ? '083-181-8502:':'คุณเจ้น'}</Typography>
+            </Box>
+            <Box sx={{ bgcolor: "#fff", pl: 1, pr: isMobile ? 1 : 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #3b5998' }}>
+              <Box component={'img'} src={FacebookIcon} width={20} />
+              {!isMobile && <Typography variant="body2" sx={{fontWeight: 500, color: '#3b5998'}}>อันหยาพูลวิลล่า นครศรีธรรมราช Aunya Pool Villa</Typography>}
+            </Box>
+            <Box sx={{ bgcolor: "#fff", pl: 1, pr: isMobile ? 1 : 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #2CCF54' }}>
+              <Box component={'img'} src={LineIcon} width={20} />
+              {!isMobile && <Typography variant="body2" sx={{fontWeight: 500, color: '#2CCF54'}}>jent11</Typography>}
+            </Box>
           </Grid>
-          <Grid container gap={2} pl={2}>
-            {info.map((i) => (
-              <Grid key={i.key} size={12} container gap={2} color={"#2D336B"}>
-                {i.icon}
-                <Typography variant="body1" fontSize={14}>{i.text}</Typography>
-              </Grid>
-            ))}
+        </Grid>
+        
+        <Grid container size={isMobile ? 12 : 6}>
+          <Grid
+            size={12}
+            border={`1px solid #A9B5DF`}
+            borderRadius={2}
+            padding={2}
+          >
+            <Grid size={12} mb={2}>
+              <Typography variant="h5">ข้อมูลทั่วไป</Typography>
+            </Grid>
+            <Grid container gap={2} pl={2}>
+              {info.map((i) => (
+                <Grid key={i.key} size={12} container gap={2} color={"#2D336B"}>
+                  {i.icon}
+                  <Typography variant="body1" fontSize={14}>
+                    {i.text}
+                  </Typography>
+                </Grid>
+              ))}
+            </Grid>
           </Grid>
-
-          <Grid size={12} mb={2} mt={4}>
-            <Typography variant="h5">สิ่งอำนวยความสะดวก</Typography>
-          </Grid>
-          <Grid container gap={2} pl={2}>
-            {facilities.map((i) => (
-              <Grid key={i.key} size={12} container gap={2} color={"#2D336B"}>
-                {i.icon}
-                <Typography variant="body1" fontSize={14}>{i.text}</Typography>
-              </Grid>
-            ))}
+          <Grid
+            size={12}
+            border={`1px solid #A9B5DF`}
+            borderRadius={2}
+            padding={2}
+          >
+            <Grid size={12} mb={2}>
+              <Typography variant="h5">ปฏิทินวันว่าง</Typography>
+            </Grid>
+            <BookingCalendar bookingData={bookingData} />
           </Grid>
         </Grid>
 
-        <Grid
-          size={isMobile ? 12 : 6}
-          border={`1px solid #A9B5DF`}
-          borderRadius={2}
-          padding={2}
-        >
-          <BookingCalendar bookingData={bookingData} />
+        <Grid container size={isMobile ? 12 : 6}>
+          <Grid
+            size={12}
+            border={`1px solid #A9B5DF`}
+            borderRadius={2}
+            padding={2}
+          >
+            <Grid size={12} mb={2}>
+              <Typography variant="h5">สิ่งอำนวยความสะดวก</Typography>
+            </Grid>
+            <Grid container gap={2} pl={2}>
+              {facilities.map((i) => (
+                <Grid key={i.key} size={12} container gap={2} color={"#2D336B"}>
+                  {i.icon}
+                  <Typography variant="body1" fontSize={14}>
+                    {i.text}
+                  </Typography>
+                </Grid>
+              ))}
+            </Grid>
+
+            <Grid size={12} mb={2} mt={4}>
+              <Typography variant="h5">ข้อกำหนดการเข้าพัก</Typography>
+            </Grid>
+            <Grid container gap={2} pl={2}>
+              {policy.map((i) => (
+                <Grid key={i.key} size={12} container gap={2} color={"#2D336B"}>
+                  {i.icon}
+                  <Typography variant="body1" fontSize={14}>
+                    {i.text}
+                  </Typography>
+                </Grid>
+              ))}
+            </Grid>
+          </Grid>
         </Grid>
+
+        
+
+        
       </Grid>
     </>
   );

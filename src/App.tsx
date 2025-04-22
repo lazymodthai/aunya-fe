@@ -6,9 +6,19 @@ import Box from '@mui/material/Box'
 
 import Navbar from './components/main/Navbar'
 import Main from './pages/Main'
-import About from './pages/About'
-import Contact from './pages/Contact'
+import Room from './pages/Room'
+import Map from './pages/Map'
 import { useMediaQuery } from '@mui/material'
+import Booking from './pages/Booking'
+
+const bookingData = [
+  {m: 4, d: 1, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
+  {m: 4, d: 2, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
+  {m: 4, d: 3, price: 6000, promotion: 'no', reserved: 'no', maintenance: 'no' },
+  {m: 4, d: 4, price: 6000, promotion: 'no', reserved: 'no', maintenance: 'no' },
+  {m: 4, d: 5, price: 5500, promotion: 'no', reserved: 'no', maintenance: 'no' },
+  {m: 4, d: 6, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
+];
 
 // สร้าง theme สำหรับ MUI
 const theme = createTheme({
@@ -86,8 +96,9 @@ function App() {
           }}>
             <Routes>
               <Route path="/" element={<Main />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
+              <Route path="/room" element={<Room />} />
+              <Route path="/map" element={<Map />} />
+              <Route path="/booking" element={<Booking bookingData={bookingData}/>} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Box>

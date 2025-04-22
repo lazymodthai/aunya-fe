@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
@@ -20,19 +20,20 @@ import BookOnlineIcon from '../../assets/icons/booking.png';
 
 const menuItems = [
   { label: "หน้าหลัก", icon: <HomeIcon />, path: "/" },
-  { label: "ห้อง", icon: <BedroomParentIcon />, path: "/about" },
-  { label: "แผนที่", icon: <MapIcon />, path: "/contact" },
+  { label: "ห้อง", icon: <BedroomParentIcon />, path: "/room" },
+  { label: "แผนที่", icon: <MapIcon />, path: "/map" },
 ];
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:800px)");
 
   const getTabValue = () => {
     const path = location.pathname;
     if (path === "/") return 0;
-    if (path === "/about") return 1;
-    if (path === "/contact") return 2;
+    if (path === "/room") return 1;
+    if (path === "/map") return 2;
     return 0;
   };
 
@@ -119,6 +120,7 @@ const Navbar = () => {
                   padding: "0 24px",
                   borderRadius: 3,
                 }}
+                onClick={()=>navigate('/booking')}
               >
                 จองเลย!
               </Button>
@@ -162,6 +164,7 @@ const Navbar = () => {
             ))}
             <BottomNavigationAction
               label="จองเลย!"
+              onClick={()=>navigate('/booking')}
               icon={<Box component={'img'} src={BookOnlineIcon} width={24} />}
               sx={{
                 bgcolor: "#FFF2F2",
