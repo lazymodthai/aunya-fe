@@ -1,5 +1,5 @@
 # Use Node.js official image
-FROM node:18-alpine
+FROM node:22-alpine
 
 # Enable corepack for Yarn 4
 RUN corepack enable
