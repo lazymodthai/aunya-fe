@@ -7,7 +7,8 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: [
-      'artico.in.th'
+      'artico.in.th',
+      'www.artico.in.th'
     ],
     hmr: {
       host: 'artico.in.th',
