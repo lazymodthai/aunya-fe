@@ -1,5 +1,7 @@
 import {
+  Box,
   Button,
+  Divider,
   Grid,
   Step,
   StepLabel,
@@ -19,6 +21,10 @@ import { addDays, format, parseISO, set } from "date-fns";
 import { FormatDate, formatDateTime } from "../utils/date";
 import AuthAPI from "../apis/auth";
 import BookingAPI from "../apis/booking";
+import Loading from "../components/Loading";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { useClipboard } from 'use-clipboard-copy';
 
 type Props = {
   bookingData: any;
@@ -29,21 +35,26 @@ function Booking(props: Props) {
   const [checkinDate, setCheckinDate] = useState<Date | null>(null);
   const [checkoutDate, setCheckoutDate] = useState<Date | null>(null);
   const [guestNumber, setGuestNumber] = useState<number | null>(null);
-  const [additionGuestNumber, setAdditionGuestNumber] = useState<number | null>(null);
+  const [additionGuestNumber, setAdditionGuestNumber] = useState<number | null>(
+    null
+  );
   const [name, setName] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [step, setStep] = useState<number>(0);
   const [skipped, setSkipped] = useState(new Set<number>());
-  const [isInvalidPhoneNumber, setIsInvalidPhoneNumber] = useState<boolean>(false);
+  const [isInvalidPhoneNumber, setIsInvalidPhoneNumber] =
+    useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [copying, setCopying] = useState<boolean>(false);
+
+  const [refCode, setRefCode] = useState<string>("");
 
   const isStepSkipped = (step: number) => {
     return skipped.has(step);
   };
 
-
   const handleBook = async () => {
     if (isInvalidPhoneNumber) return;
-
     const payload = {
       checkinDate: checkinDate,
       checkoutDate: checkoutDate,
@@ -51,16 +62,24 @@ function Booking(props: Props) {
       additionGuestNumber: additionGuestNumber,
       name: name,
       phoneNumber: phoneNumber,
-    }
+    };
     try {
-      const data = await BookingAPI.book(payload);
-      console.log(data)
+      setLoading(true);
+      const { data } = await BookingAPI.book(payload);
+      setRefCode(data.refCode);
+      setStep(2);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    if (step === 1) {
+      await handleBook();
+      return;
+    }
     let newSkipped = skipped;
     if (isStepSkipped(step)) {
       newSkipped = new Set(newSkipped.values());
@@ -86,6 +105,14 @@ function Booking(props: Props) {
 
   const handleReset = () => {
     setStep(0);
+  };
+
+  const clipboard = useClipboard();
+
+  const handleCopy = async () => {
+    clipboard.copy('123-456-789-0');
+    setCopying(true);
+    setTimeout(() => setCopying(false), 2000);
   };
 
   const renderStep = () => {
@@ -119,7 +146,8 @@ function Booking(props: Props) {
                 if (num <= 0) {
                   setGuestNumber(1);
                   return;
-                } if (num > 10) {
+                }
+                if (num > 10) {
                   setGuestNumber(10);
                   return;
                 } else {
@@ -194,13 +222,119 @@ function Booking(props: Props) {
             <Typography>
               Check-out: วันที่ {FormatDate(checkoutDate!, 4)}
             </Typography>
-             <Typography>
-              รวมเข้าพัก: {(checkoutDate!.getTime() - checkinDate!.getTime()) / (1000 * 60 * 60 * 24)} คืน
-             </Typography>
-            <Typography>จำนวนผู้เข้าพัก: {guestNumber} คน</Typography>
-            <Typography>ชื่อผู้จอง: {name}</Typography>
             <Typography>
-              เบอร์โทรศัพท์มือถือ: {phoneNumber}
+              รวมเข้าพัก:{" "}
+              {(checkoutDate!.getTime() - checkinDate!.getTime()) /
+                (1000 * 60 * 60 * 24)}{" "}
+              คืน
+            </Typography>
+            <Typography>
+              จำนวนผู้เข้าพัก: {guestNumber} คน{" "}
+              {!!additionGuestNumber ? `+ เสริม ${additionGuestNumber} คน` : ""}
+            </Typography>
+            <Typography>ชื่อผู้จอง: {name}</Typography>
+            <Typography>เบอร์โทรศัพท์มือถือ: {phoneNumber}</Typography>
+          </>
+        );
+
+      case 2:
+        return (
+          <>
+            <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
+              ยอดชำระของท่าน
+            </Typography>
+
+            <Typography>
+              ค่าห้องพัก{" "}
+              {(
+                (5000 * (checkoutDate!.getTime() - checkinDate!.getTime())) /
+                (1000 * 60 * 60 * 24)
+              ).toLocaleString("th-TH")}{" "}
+              บาท
+            </Typography>
+            <Typography>
+              ค่าเตียงเสริม{" "}
+              {((additionGuestNumber || 0) * 200).toLocaleString("th-TH")} บาท
+            </Typography>
+            <Typography
+              sx={{ fontSize: 24, fontWeight: 600, color: "#2196f3" }}
+            >
+              {(
+                (5000 * (checkoutDate!.getTime() - checkinDate!.getTime())) /
+                  (1000 * 60 * 60 * 24) +
+                (additionGuestNumber || 0) * 200
+              ).toLocaleString("th-TH", {
+                style: "currency",
+                currency: "THB",
+              })}
+            </Typography>
+            <Divider />
+            <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
+              ช่องทางชำระเงิน:
+            </Typography>
+            <Typography sx={{ alignItems: "center", display: "flex", gap: 1 }}>
+              ธนาคาร:{" "}
+              <Box
+                component={"img"}
+                src={
+                  "https://whatphone.net/wp-content/uploads/2018/10/new-k-plus-logo.png"
+                }
+                sx={{ width: 24 }}
+              />
+              <span style={{ fontWeight: 600, color: "#0dab2dff" }}>
+                กสิกรไทย
+              </span>
+            </Typography>
+            <Typography sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              ชื่อบัญชี:{" "}
+              <span style={{ fontWeight: 600, color: "#f36e21ff" }}>
+                นาง สุจิตรา อ่อนคำ
+              </span>
+            </Typography>
+            <Typography sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              หมายเลขบัญชี:{" "}
+              <span style={{ fontWeight: 600, color: "#f36e21ff" }}>
+                123-456-789-0
+              </span>
+              <Box
+                onClick={handleCopy}
+                sx={{
+                  cursor: "pointer",
+                  // ป้องกันการ select text
+                  userSelect: "none",
+                  WebkitUserSelect: "none",
+                  MozUserSelect: "none",
+                  msUserSelect: "none",
+                  // ป้องกันการ highlight บน mobile
+                  WebkitTapHighlightColor: "transparent",
+                  WebkitTouchCallout: "none",
+                  // ป้องกันการ drag
+                  WebkitUserDrag: "none",
+                  KhtmlUserDrag: "none",
+                  MozUserDrag: "none",
+                  OUserDrag: "none",
+                  userDrag: "none",
+                }}
+                display={"flex"}
+                gap={1}
+                alignItems={"center"}
+                border={`1px solid ${copying ? "#077537ff" : "  #7d7d7dff"}`}
+                borderRadius={2}
+                p={0.5}
+                fontSize={12}
+                color={copying ? "#077537ff" : "#7d7d7dff"}
+              >
+                {copying ? (
+                  <CheckCircleIcon
+                    sx={{ width: 18, height: 18, color: "#077537ff" }}
+                  />
+                ) : (
+                  <ContentCopyIcon
+                    sx={{ width: 18, height: 18, color: "#7d7d7dff" }}
+                  />
+                )}
+                {copying? `คัดลอกแล้ว`:`คัดลอก`}
+              </Box>
             </Typography>
           </>
         );
@@ -219,6 +353,7 @@ function Booking(props: Props) {
       gap={2}
       width={isMobile ? undefined : 600}
     >
+      {loading && <Loading />}
       <Grid textAlign={"center"}>
         <Typography sx={{ fontSize: 24 }}>จองห้องพัก</Typography>
       </Grid>
@@ -282,7 +417,14 @@ function Booking(props: Props) {
               )
             }
             sx={{ height: 50, borderRadius: 2 }}
-            disabled={!checkinDate || !checkoutDate || !guestNumber || !name || !phoneNumber || isInvalidPhoneNumber}
+            disabled={
+              !checkinDate ||
+              !checkoutDate ||
+              !guestNumber ||
+              !name ||
+              !phoneNumber ||
+              isInvalidPhoneNumber
+            }
           >
             {step === steps.length - 1 ? "ยืนยัน" : "ถัดไป"}
           </Button>

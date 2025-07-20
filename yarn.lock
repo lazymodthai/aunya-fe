@@ -1566,6 +1566,7 @@ __metadata:
     swiper: "npm:^11.2.6"
     typescript: "npm:~5.7.2"
     typescript-eslint: "npm:^8.24.1"
+    use-clipboard-copy: "npm:^0.2.0"
     vite: "npm:^6.2.0"
   languageName: unknown
   linkType: soft
@@ -1699,6 +1700,13 @@ __metadata:
   version: 3.0.0
   resolution: "chownr@npm:3.0.0"
   checksum: 10/b63cb1f73d171d140a2ed8154ee6566c8ab775d3196b0e03a2a94b5f6a0ce7777ee5685ca56849403c8d17bd457a6540672f9a60696a6137c7a409097495b82c
+  languageName: node
+  linkType: hard
+
+"clipboard-copy@npm:^3.0.0":
+  version: 3.2.0
+  resolution: "clipboard-copy@npm:3.2.0"
+  checksum: 10/f908842945a0c6b38fe513f559e8905519f24c1f287fc8d5f03fcf79d52172a09b6fdaf760377c84ad22b587b95060ebb782344e2c526490935db295398572bd
   languageName: node
   linkType: hard
 
@@ -3857,6 +3865,17 @@ __metadata:
   dependencies:
     punycode: "npm:^2.1.0"
   checksum: 10/b271ca7e3d46b7160222e3afa3e531505161c9a4e097febae9664e4b59912f4cbe94861361a4175edac3a03fee99d91e44b6a58c17a634bc5a664b19fc76fbcb
+  languageName: node
+  linkType: hard
+
+"use-clipboard-copy@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "use-clipboard-copy@npm:0.2.0"
+  dependencies:
+    clipboard-copy: "npm:^3.0.0"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 10/185c5b435aca3d9a5249be85d9b916e6cb0f43e88087c7e716c971372945931a18c1b80fd19b08d7541bb39f97bac8c1e28f86853dc2d527ef1ce65399517812
   languageName: node
   linkType: hard
 
