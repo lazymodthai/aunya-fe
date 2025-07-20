@@ -30,7 +30,6 @@ const CustomDatePicker = (props: Props) => {
     return false;
   };
 
-  // ตรวจสอบว่าวันที่อยู่ในช่วง check-in ถึงวันที่เลือก
   const isDateInRange = (date: Date) => {
     if (!props.checkInDate || !props.value) return false;
     
@@ -44,7 +43,6 @@ const CustomDatePicker = (props: Props) => {
     return dateTime >= startTime && dateTime <= endTime;
   };
 
-  // ตรวจสอบว่าวันที่เป็นวันเริ่มต้นหรือสิ้นสุดของช่วง
   const isRangeStart = (date: Date) => {
     if (!props.checkInDate || !props.value) return false;
     
@@ -65,7 +63,6 @@ const CustomDatePicker = (props: Props) => {
     return dateTime === Math.max(checkInTime, valueTime);
   };
 
-  // ตรวจสอบว่าวันที่เป็น check-in date
   const isCheckInDate = (date: Date) => {
     if (!props.checkInDate) return false;
     
@@ -74,14 +71,12 @@ const CustomDatePicker = (props: Props) => {
            date.getDate() === props.checkInDate.getDate();
   };
 
-  // ตรวจสอบว่ามีวันที่ disable อยู่ในช่วงที่จะเลือกหรือไม่
   const hasDisabledDateInRange = (endDate: Date) => {
     if (!props.checkInDate || !props.disabledDates) return false;
     
     const startTime = new Date(props.checkInDate).getTime();
     const endTime = new Date(endDate).getTime();
     
-    // สลับถ้า end date มาก่อน start date
     const rangeStart = Math.min(startTime, endTime);
     const rangeEnd = Math.max(startTime, endTime);
     
@@ -91,14 +86,42 @@ const CustomDatePicker = (props: Props) => {
     });
   };
 
-  // Custom shouldDisableDate ที่รวมการตรวจสอบช่วงวันที่
+  const getNextDisabledDate = () => {
+    if (!props.checkInDate || !props.disabledDates) return null;
+    
+    const checkInTime = new Date(props.checkInDate).getTime();
+    
+    const nextDisabledDates = props.disabledDates
+      .filter(date => new Date(date).getTime() > checkInTime)
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    
+    return nextDisabledDates.length > 0 ? nextDisabledDates[0] : null;
+  };
+
   const customShouldDisableDate = (date: Date) => {
     // ตรวจสอบ disabled dates ตามปกติ
-    if (shouldDisableDate(date)) return true;
+    if (shouldDisableDate(date)) {
+      if (props.checkInDate) {
+        const nextDisabledDate = getNextDisabledDate();
+        if (nextDisabledDate) {
+          const isNextDisabledDate = date.getFullYear() === nextDisabledDate.getFullYear() &&
+                                    date.getMonth() === nextDisabledDate.getMonth() &&
+                                    date.getDate() === nextDisabledDate.getDate();
+          return !isNextDisabledDate;
+        }
+      }
+      return true;
+    }
     
-    // ถ้ามี checkInDate และกำลังจะเลือกวันที่ที่มี disabled date ในช่วง
     if (props.checkInDate && hasDisabledDateInRange(date)) {
       return true;
+    }
+    
+    if (props.checkInDate) {
+      const nextDisabledDate = getNextDisabledDate();
+      if (nextDisabledDate && new Date(date).getTime() > new Date(nextDisabledDate).getTime()) {
+        return true;
+      }
     }
     
     return false;
@@ -162,10 +185,19 @@ const CustomDatePicker = (props: Props) => {
             const isStart = isRangeStart(date);
             const isEnd = isRangeEnd(date);
 
+            const isSelectableDisabledDate = isDisabled && props.checkInDate && (() => {
+              const nextDisabledDate = getNextDisabledDate();
+              if (nextDisabledDate) {
+                return date.getFullYear() === nextDisabledDate.getFullYear() &&
+                       date.getMonth() === nextDisabledDate.getMonth() &&
+                       date.getDate() === nextDisabledDate.getDate();
+              }
+              return false;
+            })();
+
             let sx: any = {};
 
-            // สไตล์สำหรับวันที่ถูก disable
-            if (isDisabled) {
+            if (isDisabled && !isSelectableDisabledDate) {
               sx = {
                 color: '#f44336 !important',
                 backgroundColor: '#ffebee !important',
@@ -175,9 +207,7 @@ const CustomDatePicker = (props: Props) => {
                 fontWeight: 'bold'
               };
             }
-            // สไตล์สำหรับ check-in date
             else if (isCheckIn) {
-              // ตรวจสอบว่าเป็นวันเดียวกันกับวันที่เลือกหรือไม่
               const isSameDay = props.value && 
                 date.getFullYear() === props.value.getFullYear() &&
                 date.getMonth() === props.value.getMonth() &&
@@ -190,11 +220,9 @@ const CustomDatePicker = (props: Props) => {
                 '&:hover': {
                   backgroundColor: '#1976d2 !important',
                 },
-                // ถ้าเป็นวันเดียวกัน ให้เป็นวงกลม
                 ...(isSameDay && {
                   borderRadius: '50% !important',
                 }),
-                // ถ้าไม่เป็นวันเดียวกัน ให้มีเฉพาะด้านซ้ายโค้งมน
                 ...(!isSameDay && {
                   borderTopLeftRadius: '50% !important',
                   borderBottomLeftRadius: '50% !important',
@@ -212,7 +240,6 @@ const CustomDatePicker = (props: Props) => {
                 '&:hover': {
                   backgroundColor: '#bbdefb !important',
                 },
-                // กำหนดรูปแบบขอบของช่วง
                 borderRadius: '0 !important',
                 ...(isStart && {
                   borderTopLeftRadius: '50% !important',

@@ -2,11 +2,12 @@ import { SxProps, TextField } from "@mui/material";
 
 type Props = {
   onChange: (e: any) => void;
-  value: number;
+  value: number | null;
   min?: number;
   max?: number;
   label?: string;
   sx?: SxProps;
+  disabled?: boolean;
 };
 
 function NumberField(props: Props) {
@@ -35,6 +36,7 @@ function NumberField(props: Props) {
         },
       }}
       sx={props.sx}
+      disabled={props.disabled}
     />
   );
 }

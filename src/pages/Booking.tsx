@@ -9,13 +9,16 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import CustomDatePicker from "../components/booking/CustomDatePicker";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NumberField from "../components/booking/NumberField";
 import { isValidThaiPhoneNumber } from "../utils/input";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import CheckIcon from '@mui/icons-material/Check';
-import {addDays, format, parseISO} from 'date-fns'
+import CheckIcon from "@mui/icons-material/Check";
+import { addDays, format, parseISO, set } from "date-fns";
+import { FormatDate, formatDateTime } from "../utils/date";
+import AuthAPI from "../apis/auth";
+import BookingAPI from "../apis/booking";
 
 type Props = {
   bookingData: any;
@@ -25,16 +28,33 @@ function Booking(props: Props) {
   const isMobile = useMediaQuery("(max-width:800px)");
   const [checkinDate, setCheckinDate] = useState<Date | null>(null);
   const [checkoutDate, setCheckoutDate] = useState<Date | null>(null);
-  const [guestNumber, setGuestNumber] = useState<number>(1);
+  const [guestNumber, setGuestNumber] = useState<number | null>(null);
+  const [additionGuestNumber, setAdditionGuestNumber] = useState<number | null>(null);
   const [name, setName] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [step, setStep] = useState<number>(0);
   const [skipped, setSkipped] = useState(new Set<number>());
-  const [isInvalidPhoneNumber, setIsInvalidPhoneNumber] =
-    useState<boolean>(false);
+  const [isInvalidPhoneNumber, setIsInvalidPhoneNumber] = useState<boolean>(false);
 
   const isStepSkipped = (step: number) => {
     return skipped.has(step);
+  };
+
+  const handleBook = async () => {
+    const payload = {
+      checkinDate: checkinDate,
+      checkoutDate: checkoutDate,
+      guestNumber: guestNumber,
+      additionGuestNumber: additionGuestNumber,
+      name: name,
+      phoneNumber: phoneNumber,
+    }
+    try {
+      const data = await BookingAPI.book(payload);
+      console.log(data)
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleNext = () => {
@@ -70,91 +90,118 @@ function Booking(props: Props) {
       case 0:
         return (
           <>
-            <Grid>
-              <CustomDatePicker
-                label="เลือกวันที่ Check-in"
-                onChange={(e) => {
-                  setCheckinDate(e);
-                  setCheckoutDate(null);
-                }}
-                value={checkinDate}
-                sx={{ width: "100%" }}
-                disabledDates={[new Date("2025-07-23"), new Date("2025-07-26")]}
-              />
-            </Grid>
-            <Grid>
-              <CustomDatePicker
-                label="เลือกวันที่ Check-out"
-                onChange={(e) => setCheckoutDate(e)}
-                value={checkoutDate}
-                sx={{ width: "100%" }}
-                minDate={addDays(checkinDate || new Date(), 1)}
-                checkInDate={checkinDate}
-                disabledDates={[new Date("2025-07-23"), new Date("2025-07-26")]}
-              />
-            </Grid>
-            <Grid>
-              <NumberField
-                label="จำนวนผู้เข้าพัก"
-                onChange={(e) => {
-                  const num = parseInt(e.target.value);
-                  if (num <= 0) {
-                    setGuestNumber(1);
-                    return;
-                  } else {
-                    setGuestNumber(num);
-                  }
-                }}
-                value={guestNumber}
-                sx={{ width: "100%" }}
-              />
-            </Grid>
-            <Grid>
-              <TextField
-                label="ชื่อผู้จอง"
-                variant="outlined"
-                onChange={(e) => setName(e.target.value)}
-                value={name}
-                slotProps={{
-                  input: {
-                    inputProps: {
-                      maxLength: 50,
-                    },
-                  },
-                }}
-                sx={{ width: "100%" }}
-              />
-            </Grid>
-
-            <Grid>
-              <TextField
-                label="เบอร์โทรศัพท์มือถือ"
-                variant="outlined"
-                onChange={(e) => {
-                  setIsInvalidPhoneNumber(
-                    !isValidThaiPhoneNumber(e.target.value)
-                  );
-                  setPhoneNumber(e.target.value.replace(/\D/g, ""));
-                }}
-                value={phoneNumber}
-                sx={{ width: "100%" }}
-                slotProps={{
-                  input: {
-                    inputProps: {
-                      maxLength: 10,
-                      pattern: "[0-9]*",
-                      inputMode: "numeric",
-                    },
-                  },
-                }}
-                error={isInvalidPhoneNumber}
-                helperText={
-                  isInvalidPhoneNumber ? "เบอร์โทรศัพท์ไม่ถูกต้อง" : ""
+            <CustomDatePicker
+              label="เลือกวันที่ Check-in"
+              onChange={(e) => {
+                setCheckinDate(e);
+                setCheckoutDate(null);
+              }}
+              value={checkinDate}
+              sx={{ width: "100%" }}
+              disabledDates={[new Date("2025-07-23"), new Date("2025-07-26")]}
+            />
+            <CustomDatePicker
+              label="เลือกวันที่ Check-out"
+              onChange={(e) => setCheckoutDate(e)}
+              value={checkoutDate}
+              sx={{ width: "100%" }}
+              minDate={addDays(checkinDate || new Date(), 1)}
+              checkInDate={checkinDate}
+              disabledDates={[new Date("2025-07-23"), new Date("2025-07-26")]}
+            />
+            <NumberField
+              label="จำนวนผู้เข้าพัก"
+              onChange={(e) => {
+                const num = parseInt(e.target.value);
+                if (num <= 0) {
+                  setGuestNumber(1);
+                  return;
+                } if (num > 10) {
+                  setGuestNumber(10);
+                  return;
+                } else {
+                  setGuestNumber(num);
+                  setAdditionGuestNumber(null);
                 }
-              />
-            </Grid>
+              }}
+              value={guestNumber}
+              sx={{ width: "100%" }}
+            />
+            <NumberField
+              label="ผู้เข้าพักเพิ่มเติม (ท่านละ 200 บาท)"
+              onChange={(e) => {
+                const num = parseInt(e.target.value);
+                if (num > 10) {
+                  setAdditionGuestNumber(10);
+                  return;
+                } else {
+                  setAdditionGuestNumber(num);
+                }
+              }}
+              value={additionGuestNumber}
+              disabled={!guestNumber || guestNumber < 10}
+              sx={{ width: "100%" }}
+            />
+            <TextField
+              label="ชื่อผู้จอง"
+              variant="outlined"
+              onChange={(e) => setName(e.target.value)}
+              value={name}
+              slotProps={{
+                input: {
+                  inputProps: {
+                    maxLength: 50,
+                  },
+                },
+              }}
+              sx={{ width: "100%" }}
+            />
+            <TextField
+              label="เบอร์โทรศัพท์มือถือ"
+              variant="outlined"
+              onChange={(e) => {
+                setIsInvalidPhoneNumber(
+                  !isValidThaiPhoneNumber(e.target.value)
+                );
+                setPhoneNumber(e.target.value.replace(/\D/g, ""));
+              }}
+              value={phoneNumber}
+              sx={{ width: "100%" }}
+              slotProps={{
+                input: {
+                  inputProps: {
+                    maxLength: 10,
+                    pattern: "[0-9]*",
+                    inputMode: "numeric",
+                  },
+                },
+              }}
+              error={isInvalidPhoneNumber}
+              helperText={isInvalidPhoneNumber ? "เบอร์โทรศัพท์ไม่ถูกต้อง" : ""}
+            />
           </>
         );
+
+      case 1:
+        return (
+          <>
+            <Typography>
+              Check-in: วันที่ {FormatDate(checkinDate!, 4)}
+            </Typography>
+            <Typography>
+              Check-out: วันที่ {FormatDate(checkoutDate!, 4)}
+            </Typography>
+             <Typography>
+              รวมเข้าพัก: {(checkoutDate!.getTime() - checkinDate!.getTime()) / (1000 * 60 * 60 * 24)} วัน
+             </Typography>
+            <Typography>จำนวนผู้เข้าพัก: {guestNumber} คน</Typography>
+            <Typography>ชื่อผู้จอง: {name}</Typography>
+            <Typography>
+              เบอร์โทรศัพท์มือถือ: {phoneNumber}
+            </Typography>
+          </>
+        );
+
       default:
         break;
     }
@@ -163,11 +210,16 @@ function Booking(props: Props) {
   const steps = ["เลือกวันเข้าพัก", "ยืนยันรายการ", "ชำระเงิน"];
 
   return (
-    <Grid container direction={"column"} gap={2} width={isMobile ? undefined : 600}>
-      <Grid textAlign={'center'}>
-        <Typography sx={{fontSize: 24}}>จองห้องพัก</Typography>
+    <Grid
+      container
+      direction={"column"}
+      gap={2}
+      width={isMobile ? undefined : 600}
+    >
+      <Grid textAlign={"center"}>
+        <Typography sx={{ fontSize: 24 }}>จองห้องพัก</Typography>
       </Grid>
-      <Stepper activeStep={step} sx={{mt: 2}}>
+      <Stepper activeStep={step} sx={{ mt: 2 }}>
         {steps.map((label, index) => {
           const stepProps: { completed?: boolean } = {};
           const labelProps: {
@@ -208,7 +260,7 @@ function Booking(props: Props) {
               disabled={step === 0}
               onClick={handleBack}
               startIcon={<ArrowBackIosIcon />}
-              sx={{height: 50, borderRadius: 2}}
+              sx={{ height: 50, borderRadius: 2 }}
             >
               ย้อนกลับ
             </Button>
@@ -219,8 +271,14 @@ function Booking(props: Props) {
             fullWidth
             variant="contained"
             onClick={handleNext}
-            endIcon={step === steps.length - 1 ? <CheckIcon /> : <ArrowForwardIosIcon />}
-            sx={{height: 50, borderRadius: 2}}
+            endIcon={
+              step === steps.length - 1 ? (
+                <CheckIcon />
+              ) : (
+                <ArrowForwardIosIcon />
+              )
+            }
+            sx={{ height: 50, borderRadius: 2 }}
           >
             {step === steps.length - 1 ? "ยืนยัน" : "ถัดไป"}
           </Button>
