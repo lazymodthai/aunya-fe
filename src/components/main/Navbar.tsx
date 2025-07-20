@@ -145,7 +145,7 @@ const Navbar = () => {
             value={value}
             onChange={handleBottomNavChange}
             showLabels
-            sx={{ bgcolor: "#2D336B" }}
+            sx={{ bgcolor: "#2D336B", height: "70px", pb: "10px" }}
           >
             {menuItems.map((item, index) => (
               <BottomNavigationAction

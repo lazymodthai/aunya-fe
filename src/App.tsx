@@ -1,5 +1,5 @@
 import './App.css'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import Box from '@mui/material/Box'
@@ -24,14 +24,14 @@ const bookingData = [
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#3EC6E0',
+      main: '#B03052',
     },
     secondary: {
       main: '#E8A87C',
     },
-    background: {
-      default: '#FFFFFF',
-      paper: '#F6E7D3',
+    background: {  
+      default: '#e3e3e3',
+      paper: '#fff',
     },
   },
   typography: {
