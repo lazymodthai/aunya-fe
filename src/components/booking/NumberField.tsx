@@ -23,7 +23,7 @@ function NumberField(props: Props) {
           e.preventDefault();
         }
       }}
-      value={props.value}
+      value={props.value || ""}
       slotProps={{
         input: {
           inputProps: {
