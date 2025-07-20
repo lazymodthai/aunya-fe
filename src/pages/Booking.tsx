@@ -40,7 +40,10 @@ function Booking(props: Props) {
     return skipped.has(step);
   };
 
+
   const handleBook = async () => {
+    if (isInvalidPhoneNumber) return;
+
     const payload = {
       checkinDate: checkinDate,
       checkoutDate: checkoutDate,
@@ -192,7 +195,7 @@ function Booking(props: Props) {
               Check-out: วันที่ {FormatDate(checkoutDate!, 4)}
             </Typography>
              <Typography>
-              รวมเข้าพัก: {(checkoutDate!.getTime() - checkinDate!.getTime()) / (1000 * 60 * 60 * 24)} วัน
+              รวมเข้าพัก: {(checkoutDate!.getTime() - checkinDate!.getTime()) / (1000 * 60 * 60 * 24)} คืน
              </Typography>
             <Typography>จำนวนผู้เข้าพัก: {guestNumber} คน</Typography>
             <Typography>ชื่อผู้จอง: {name}</Typography>
@@ -279,6 +282,7 @@ function Booking(props: Props) {
               )
             }
             sx={{ height: 50, borderRadius: 2 }}
+            disabled={!checkinDate || !checkoutDate || !guestNumber || !name || !phoneNumber || isInvalidPhoneNumber}
           >
             {step === steps.length - 1 ? "ยืนยัน" : "ถัดไป"}
           </Button>

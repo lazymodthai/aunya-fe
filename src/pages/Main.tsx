@@ -97,11 +97,11 @@ function Main() {
           <Grid container gap={1} justifyContent={'end'}>
             <Box sx={{ bgcolor: "#fff", pl: 1, pr: 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #77B3D4' }}>
               <Box component={'img'} src={PhoneIcon} width={20} />
-              <Typography variant="body2" sx={{fontWeight: 500, color: '#77B3D4'}}>{!isMobile ? '088-084-4455':'คุณเป็ด'}</Typography>
+              <Typography variant="body2" sx={{fontWeight: 500, color: '#77B3D4'}}>{!isMobile ? '088-084-4455':'คุณธนิก'}</Typography>
             </Box>
             <Box sx={{ bgcolor: "#fff", pl: 1, pr: 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #77B3D4' }}>
               <Box component={'img'} src={PhoneIcon} width={20} />
-              <Typography variant="body2" sx={{fontWeight: 500, color: '#77B3D4'}}>{!isMobile ? '083-181-8502:':'คุณเจ้น'}</Typography>
+              <Typography variant="body2" sx={{fontWeight: 500, color: '#77B3D4'}}>{!isMobile ? '083-181-8502:':'คุณสุ'}</Typography>
             </Box>
             <Box sx={{ bgcolor: "#fff", pl: 1, pr: isMobile ? 1 : 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #3b5998' }}>
               <Box component={'img'} src={FacebookIcon} width={20} />
