@@ -1,8 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { th } from 'date-fns/locale';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { SxProps } from '@mui/material';
+
+type DisabledDateRange = {
+  checkinDate: string;
+  checkoutDate: string;
+};
 
 type Props = {
   label: string
@@ -11,87 +16,121 @@ type Props = {
   sx?: SxProps
   disabled?: boolean
   minDate?: Date | null
-  disabledDates?: Date[]
+  disabledDates?: DisabledDateRange[]
   checkInDate?: Date | null
+  maximumMonth?: number
 }
 
 const CustomDatePicker = (props: Props) => {
   const [open, setOpen] = useState(false);
 
+  const dynamicMinDate = useMemo(() => {
+    if (props.checkInDate) {
+      return props.checkInDate;
+    }
+    return props.minDate || new Date();
+  }, [props.checkInDate, props.minDate]);
+
+  // 2. Logic การคำนวณ maxDate ยังคงเดิม
+  const maxDate = useMemo(() => {
+    if (props.checkInDate) {
+      const checkIn = new Date(props.checkInDate);
+      const targetYear = checkIn.getFullYear();
+      const targetMonth = checkIn.getMonth() + 1;
+      const lastDayOfNextMonth = new Date(targetYear, targetMonth + 1, 0);
+      return lastDayOfNextMonth;
+    }
+
+    if (props.maximumMonth && props.maximumMonth > 0) {
+      const today = new Date();
+      const targetMonth = today.getMonth() + props.maximumMonth - 1;
+      const lastDayOfMonth = new Date(today.getFullYear(), targetMonth + 1, 0);
+      return lastDayOfMonth;
+    }
+
+    return undefined;
+  }, [props.checkInDate, props.maximumMonth]);
+
+  const flatDisabledDates = useMemo(() => {
+    if (!props.disabledDates) return [];
+    
+    const allDisabled: Date[] = [];
+    props.disabledDates.forEach(range => {
+      const startDate = new Date(range.checkinDate);
+      const endDate = new Date(range.checkoutDate);
+
+      let currentDate = new Date(startDate);
+      while (currentDate < endDate) {
+        allDisabled.push(new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    });
+    return allDisabled;
+  }, [props.disabledDates]);
+
+
   const shouldDisableDate = (date: Date) => {
-    if (props.disabledDates) {
-      return props.disabledDates.some(disabledDate => {
+    if (flatDisabledDates) {
+      return flatDisabledDates.some(disabledDate => {
         return date.getFullYear() === disabledDate.getFullYear() &&
                date.getMonth() === disabledDate.getMonth() &&
                date.getDate() === disabledDate.getDate();
       });
     }
-
     return false;
   };
 
   const isDateInRange = (date: Date) => {
     if (!props.checkInDate || !props.value) return false;
-    
-    const checkInTime = new Date(props.checkInDate).getTime();
-    const valueTime = new Date(props.value).getTime();
-    const dateTime = new Date(date).getTime();
-    
+    const checkInTime = new Date(props.checkInDate).setHours(0,0,0,0);
+    const valueTime = new Date(props.value).setHours(0,0,0,0);
+    const dateTime = new Date(date).setHours(0,0,0,0);
     const startTime = Math.min(checkInTime, valueTime);
     const endTime = Math.max(checkInTime, valueTime);
-    
     return dateTime >= startTime && dateTime <= endTime;
   };
 
   const isRangeStart = (date: Date) => {
     if (!props.checkInDate || !props.value) return false;
-    
-    const checkInTime = new Date(props.checkInDate).getTime();
-    const valueTime = new Date(props.value).getTime();
-    const dateTime = new Date(date).getTime();
-    
+    const checkInTime = new Date(props.checkInDate).setHours(0,0,0,0);
+    const valueTime = new Date(props.value).setHours(0,0,0,0);
+    const dateTime = new Date(date).setHours(0,0,0,0);
     return dateTime === Math.min(checkInTime, valueTime);
   };
 
   const isRangeEnd = (date: Date) => {
     if (!props.checkInDate || !props.value) return false;
-    
-    const checkInTime = new Date(props.checkInDate).getTime();
-    const valueTime = new Date(props.value).getTime();
-    const dateTime = new Date(date).getTime();
-    
+    const checkInTime = new Date(props.checkInDate).setHours(0,0,0,0);
+    const valueTime = new Date(props.value).setHours(0,0,0,0);
+    const dateTime = new Date(date).setHours(0,0,0,0);
     return dateTime === Math.max(checkInTime, valueTime);
   };
 
   const isCheckInDate = (date: Date) => {
     if (!props.checkInDate) return false;
-    
     return date.getFullYear() === props.checkInDate.getFullYear() &&
            date.getMonth() === props.checkInDate.getMonth() &&
            date.getDate() === props.checkInDate.getDate();
   };
-
+  
   const hasDisabledDateInRange = (endDate: Date) => {
-    if (!props.checkInDate || !props.disabledDates) return false;
-    
+    if (!props.checkInDate || !flatDisabledDates) return false;
     const startTime = new Date(props.checkInDate).getTime();
     const endTime = new Date(endDate).getTime();
-    
     const rangeStart = Math.min(startTime, endTime);
     const rangeEnd = Math.max(startTime, endTime);
     
-    return props.disabledDates.some(disabledDate => {
+    return flatDisabledDates.some(disabledDate => {
       const disabledTime = new Date(disabledDate).getTime();
       return disabledTime > rangeStart && disabledTime < rangeEnd;
     });
   };
 
   const getNextDisabledDate = () => {
-    if (!props.checkInDate || !props.disabledDates) return null;
-    
+    if (!props.checkInDate || !flatDisabledDates) return null;
     const checkInTime = new Date(props.checkInDate).getTime();
     
-    const nextDisabledDates = props.disabledDates
+    const nextDisabledDates = flatDisabledDates
       .filter(date => new Date(date).getTime() > checkInTime)
       .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
     
@@ -99,7 +138,6 @@ const CustomDatePicker = (props: Props) => {
   };
 
   const customShouldDisableDate = (date: Date) => {
-    // ตรวจสอบ disabled dates ตามปกติ
     if (shouldDisableDate(date)) {
       if (props.checkInDate) {
         const nextDisabledDate = getNextDisabledDate();
@@ -142,8 +180,9 @@ const CustomDatePicker = (props: Props) => {
         open={open}
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}
-        disablePast
-        minDate={props.minDate || new Date()}
+        disablePast={!props.checkInDate}
+        minDate={dynamicMinDate}
+        maxDate={maxDate}
         shouldDisableDate={customShouldDisableDate}
         localeText={{
           okButtonLabel: 'ตกลง',
@@ -153,29 +192,10 @@ const CustomDatePicker = (props: Props) => {
         slotProps={{
           textField: {
             onClick: () => setOpen(true),
-            inputProps: {
-              readOnly: true,
-            },
-            onFocus: (e:any) => {
-              e.target.blur();
-              setOpen(true);
-            },
-            onKeyDown: (e) => {
-              e.preventDefault();
-              setOpen(true);
-            },
-            onKeyUp: (e) => {
-              e.preventDefault();
-            },
-            onKeyPress: (e) => {
-              e.preventDefault();
-            },
-            onPaste: (e) => {
-              e.preventDefault();
-            },
-            style: {
-              cursor: 'pointer'
-            }
+            inputProps: { readOnly: true, },
+            onFocus: (e:any) => { e.target.blur(); setOpen(true); },
+            onKeyDown: (e) => { e.preventDefault(); },
+            style: { cursor: 'pointer' }
           },
           day: (ownerState) => {
             const date = ownerState.day;
@@ -231,7 +251,6 @@ const CustomDatePicker = (props: Props) => {
                 })
               };
             }
-            // สไตล์สำหรับวันที่อยู่ในช่วง
             else if (inRange) {
               sx = {
                 backgroundColor: '#e3f2fd !important',

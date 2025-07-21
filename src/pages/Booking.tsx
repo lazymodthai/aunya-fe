@@ -46,12 +46,30 @@ function Booking(props: Props) {
     useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [copying, setCopying] = useState<boolean>(false);
+  const [disableDate, setDisableDate] = useState<any[]>([])
 
   const [refCode, setRefCode] = useState<string>("");
 
   const isStepSkipped = (step: number) => {
     return skipped.has(step);
   };
+
+  const getDate = async () => {
+    try {
+      setLoading(true);
+      const { data } = await BookingAPI.getBookedDate();
+      console.log(data)
+      setDisableDate(data)
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(()=>{
+    getDate()
+  },[])
 
   const handleBook = async () => {
     if (isInvalidPhoneNumber) return;
@@ -128,7 +146,8 @@ function Booking(props: Props) {
               }}
               value={checkinDate}
               sx={{ width: "100%" }}
-              disabledDates={[new Date("2025-07-23"), new Date("2025-07-26")]}
+              disabledDates={disableDate}
+              maximumMonth={3}
             />
             <CustomDatePicker
               label="เลือกวันที่ Check-out"
@@ -137,7 +156,7 @@ function Booking(props: Props) {
               sx={{ width: "100%" }}
               minDate={addDays(checkinDate || new Date(), 1)}
               checkInDate={checkinDate}
-              disabledDates={[new Date("2025-07-23"), new Date("2025-07-26")]}
+              disabledDates={disableDate}
             />
             <NumberField
               label="จำนวนผู้เข้าพัก"
@@ -159,7 +178,7 @@ function Booking(props: Props) {
               sx={{ width: "100%" }}
             />
             <NumberField
-              label="ผู้เข้าพักเพิ่มเติม (ท่านละ 200 บาท)"
+              label="ผู้เข้าพักเพิ่มเติม (ท่านละ 300 บาท)"
               onChange={(e) => {
                 const num = parseInt(e.target.value);
                 if (num > 10) {
@@ -254,7 +273,7 @@ function Booking(props: Props) {
             </Typography>
             <Typography>
               ค่าเตียงเสริม{" "}
-              {((additionGuestNumber || 0) * 200).toLocaleString("th-TH")} บาท
+              {((additionGuestNumber || 0) * 300).toLocaleString("th-TH")} บาท
             </Typography>
             <Typography
               sx={{ fontSize: 24, fontWeight: 600, color: "#2196f3" }}
@@ -262,7 +281,7 @@ function Booking(props: Props) {
               {(
                 (5000 * (checkoutDate!.getTime() - checkinDate!.getTime())) /
                   (1000 * 60 * 60 * 24) +
-                (additionGuestNumber || 0) * 200
+                (additionGuestNumber || 0) * 300
               ).toLocaleString("th-TH", {
                 style: "currency",
                 currency: "THB",
