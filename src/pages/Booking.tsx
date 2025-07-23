@@ -35,9 +35,8 @@ function Booking(props: Props) {
   const [checkinDate, setCheckinDate] = useState<Date | null>(null);
   const [checkoutDate, setCheckoutDate] = useState<Date | null>(null);
   const [guestNumber, setGuestNumber] = useState<number | null>(null);
-  const [additionGuestNumber, setAdditionGuestNumber] = useState<number | null>(
-    null
-  );
+  const [additionGuestNumber, setAdditionGuestNumber] = useState<number | null>(null);
+  const [additionTowel, setAdditionTowel] = useState<number | null>(null);
   const [name, setName] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [step, setStep] = useState<number>(0);
@@ -46,12 +45,30 @@ function Booking(props: Props) {
     useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [copying, setCopying] = useState<boolean>(false);
+  const [disableDate, setDisableDate] = useState<any[]>([])
 
   const [refCode, setRefCode] = useState<string>("");
 
   const isStepSkipped = (step: number) => {
     return skipped.has(step);
   };
+
+  const getDate = async () => {
+    try {
+      setLoading(true);
+      const { data } = await BookingAPI.getBookedDate();
+      console.log(data)
+      setDisableDate(data)
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(()=>{
+    getDate()
+  },[])
 
   const handleBook = async () => {
     if (isInvalidPhoneNumber) return;
@@ -128,7 +145,8 @@ function Booking(props: Props) {
               }}
               value={checkinDate}
               sx={{ width: "100%" }}
-              disabledDates={[new Date("2025-07-23"), new Date("2025-07-26")]}
+              disabledDates={disableDate}
+              maximumMonth={3}
             />
             <CustomDatePicker
               label="เลือกวันที่ Check-out"
@@ -137,7 +155,7 @@ function Booking(props: Props) {
               sx={{ width: "100%" }}
               minDate={addDays(checkinDate || new Date(), 1)}
               checkInDate={checkinDate}
-              disabledDates={[new Date("2025-07-23"), new Date("2025-07-26")]}
+              disabledDates={disableDate}
             />
             <NumberField
               label="จำนวนผู้เข้าพัก"
@@ -159,11 +177,11 @@ function Booking(props: Props) {
               sx={{ width: "100%" }}
             />
             <NumberField
-              label="ผู้เข้าพักเพิ่มเติม (ท่านละ 200 บาท)"
+              label="ที่นอนเสริม (ชุดละ 300 บาท)"
               onChange={(e) => {
                 const num = parseInt(e.target.value);
-                if (num > 10) {
-                  setAdditionGuestNumber(10);
+                if (num > 2) {
+                  setAdditionGuestNumber(2);
                   return;
                 } else {
                   setAdditionGuestNumber(num);
@@ -171,6 +189,20 @@ function Booking(props: Props) {
               }}
               value={additionGuestNumber}
               disabled={!guestNumber || guestNumber < 10}
+              sx={{ width: "100%" }}
+            />
+            <NumberField
+              label="เพิ่มผ้าขนหนู+ผ้าเช็ดผม (ชุดละ 100 บาท)"
+              onChange={(e) => {
+                const num = parseInt(e.target.value);
+                if (num > 20) {
+                  setAdditionTowel(20);
+                  return;
+                } else {
+                  setAdditionTowel(num);
+                }
+              }}
+              value={additionTowel}
               sx={{ width: "100%" }}
             />
             <TextField
@@ -216,24 +248,24 @@ function Booking(props: Props) {
       case 1:
         return (
           <>
-            <Typography>
-              Check-in: วันที่ {FormatDate(checkinDate!, 4)}
+            <Typography sx={{display: 'flex', gap: 1}}>
+              Check-in: <span style={{color: "#0b538eff"}}>วันที่ {FormatDate(checkinDate!, 4)}</span>
             </Typography>
-            <Typography>
-              Check-out: วันที่ {FormatDate(checkoutDate!, 4)}
+            <Typography sx={{display: 'flex', gap: 1}}>
+              Check-out: <span style={{color: "#0b538eff"}}>วันที่ {FormatDate(checkoutDate!, 4)}</span>
             </Typography>
-            <Typography>
-              รวมเข้าพัก:{" "}
-              {(checkoutDate!.getTime() - checkinDate!.getTime()) /
-                (1000 * 60 * 60 * 24)}{" "}
-              คืน
+            <Typography sx={{display: 'flex', gap: 1}}>
+              รวมเข้าพัก: 
+              <span style={{color: "#0b538eff"}}>{(checkoutDate!.getTime() - checkinDate!.getTime()) /
+                (1000 * 60 * 60 * 24)} คืน</span>
             </Typography>
-            <Typography>
-              จำนวนผู้เข้าพัก: {guestNumber} คน{" "}
-              {!!additionGuestNumber ? `+ เสริม ${additionGuestNumber} คน` : ""}
+            <Typography sx={{display: 'flex', gap: 1}}>
+              จำนวนผู้เข้าพัก: <span style={{color: "#0b538eff"}}>{guestNumber} คน</span>
             </Typography>
-            <Typography>ชื่อผู้จอง: {name}</Typography>
-            <Typography>เบอร์โทรศัพท์มือถือ: {phoneNumber}</Typography>
+            <Typography sx={{display: 'flex', gap: 1}}>ที่นอนเสริม: <span style={{color: "#0b538eff"}}>{additionGuestNumber} ชุด</span></Typography>
+            <Typography sx={{display: 'flex', gap: 1}}>ชุดผ้าขนหนู+ผ้าเช็ดผม(เพิ่มเติม): <span style={{color: "#0b538eff"}}>{additionTowel} ชุด</span></Typography>
+            <Typography sx={{display: 'flex', gap: 1}}>ชื่อผู้จอง: <span style={{color: "#0b538eff"}}>{name}</span></Typography>
+            <Typography sx={{display: 'flex', gap: 1}}>เบอร์โทรศัพท์มือถือ: <span style={{color: "#0b538eff"}}>{phoneNumber}</span></Typography>
           </>
         );
 
@@ -253,16 +285,27 @@ function Booking(props: Props) {
               บาท
             </Typography>
             <Typography>
-              ค่าเตียงเสริม{" "}
-              {((additionGuestNumber || 0) * 200).toLocaleString("th-TH")} บาท
+              เสริมที่นอน
+              {((additionGuestNumber || 0) * 300).toLocaleString("th-TH")} บาท
+            </Typography>
+            <Typography>
+              เซ็ตผ้าขนหนู+ผ้าเช็ดผม(เพิ่มเติม)
+              {((additionTowel || 0) * 100).toLocaleString("th-TH")} บาท
+            </Typography>
+            <Typography>
+              ค่ามัดจำ{" "}
+              2,000 บาท <span style={{color: "#939393ff"}}>(คืนหลัง Check-out)</span>
+            </Typography>
+            <Typography sx={{fontSize: 18, fontWeight: 600}}>
+              รวมยอดชำระ:
             </Typography>
             <Typography
-              sx={{ fontSize: 24, fontWeight: 600, color: "#2196f3" }}
+              sx={{ fontSize: 24, fontWeight: 600, color: "#2196f3", mt: -2 }}
             >
               {(
                 (5000 * (checkoutDate!.getTime() - checkinDate!.getTime())) /
                   (1000 * 60 * 60 * 24) +
-                (additionGuestNumber || 0) * 200
+                (additionGuestNumber || 0) * 300 + 2000
               ).toLocaleString("th-TH", {
                 style: "currency",
                 currency: "THB",
