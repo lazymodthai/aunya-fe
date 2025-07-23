@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 const instanceAuth = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL || 'http://localhost:3005/',
+  baseURL: import.meta.env.VITE_BASE_URL || 'https://api.artico.in.th/',
   timeout: 10000,
   headers: {
     Accept: "application/json",
@@ -10,7 +10,7 @@ const instanceAuth = axios.create({
 });
 
 const instanceBooking = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL || 'http://localhost:3005/',
+  baseURL: import.meta.env.VITE_BASE_URL || 'https://api.artico.in.th/',
   timeout: 10000,
   headers: {
     Accept: "application/json",
