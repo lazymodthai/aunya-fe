@@ -5,8 +5,8 @@ function Map() {
   const isMobile = useMediaQuery("(max-width:800px)");
 
   const handleNavigation = () => {
-    const lat = 8.421749891652277;
-    const lng = 99.86375253928468;
+    const lat = 8.421749308902015;
+    const lng = 99.86632397235644;
     
     const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
     
