@@ -184,11 +184,7 @@ function Main() {
             </Grid>
           </Grid>
         </Grid>
-
-        
-
-        
-      </Grid>
+      </Grid>      
     </>
   );
 }
