@@ -8,10 +8,18 @@ import Navbar from './components/main/Navbar'
 import Main from './pages/Main'
 import Room from './pages/Room'
 import Map from './pages/Map'
-import { useMediaQuery } from '@mui/material'
+import { Grid, Typography, useMediaQuery } from '@mui/material'
 import Booking from './pages/Booking'
 import Login from './pages/member/Login'
 import Register from './pages/member/Register'
+
+import PhoneIcon from "./assets/icons/phone.svg"
+import LineIcon from "./assets/icons/line.svg"
+
+import PoolIcon from './assets/icons/pool.svg'
+import KaraokeIcon from './assets/icons/karaoke.svg'
+import TreesIcon from './assets/icons/trees.svg'
+import BilliardIcon from './assets/icons/billiard.svg'
 
 const bookingData = [
   {m: 4, d: 1, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
@@ -62,7 +70,7 @@ const theme = createTheme({
 });
 
 function App() {
-  const isMobile = useMediaQuery("(max-width:390px)");
+  const isMobile = useMediaQuery("(max-width:800px)");
   
   // นำค่า padding มาสร้างเป็นตัวแปรเพื่อใช้กำหนดให้สอดคล้องกับการแสดงผลบนมือถือหรือเดสก์ท็อป
   const padding = isMobile ? '8px' : '12px';
@@ -108,6 +116,81 @@ function App() {
 
             </Routes>
           </Box>
+          {!isMobile && (
+          <Box
+            sx={{
+              width: '100vw',
+              bgcolor: "#2D336B",
+              color: "#fff",
+              padding: 4,
+              zIndex: 1000
+            }}
+          >
+            <Box sx={{ maxWidth: 1366, margin: '0 auto', px: 2 }}>
+              <Grid container spacing={4}>
+                <Grid size={4}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                    อันหยาพูลวิลล่า นครศรีธรรมราช
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1, lineHeight: 1.6 }}>
+                    Aunya Pool Villa Nakhon Si Thammarat
+                  </Typography>
+                  <Typography variant="body2" sx={{ lineHeight: 1.6, opacity: 0.9 }}>
+                    บ้านพักตากอากาศที่มาพร้อมกับสิ่งอำนวยความสะดวกครบครัน 
+                    เหมาะสำหรับการพักผ่อนกับครอบครัวและเพื่อนฝูง
+                  </Typography>
+                </Grid>
+
+                <Grid size={4}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                    ติดต่อเรา
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Box component={'img'} src={PhoneIcon} width={16} sx={{ filter: 'brightness(0) invert(1)' }} />
+                    <Typography variant="body2">088-084-4455 (คุณธนิก)</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Box component={'img'} src={PhoneIcon} width={16} sx={{ filter: 'brightness(0) invert(1)' }} />
+                    <Typography variant="body2">083-181-8502 (คุณสุ)</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Box component={'img'} src={LineIcon} width={16} />
+                    <Typography variant="body2">Line: jent11</Typography>
+                  </Box>
+                </Grid>
+
+                <Grid size={4}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                    สิ่งอำนวยความสะดวกเด่น
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Box component={'img'} src={PoolIcon} width={16} sx={{ filter: 'brightness(0) invert(1)' }} />
+                    <Typography variant="body2">สระว่ายน้ำระบบเกลือ</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Box component={'img'} src={KaraokeIcon} width={16} sx={{ filter: 'brightness(0) invert(1)' }} />
+                    <Typography variant="body2">ลำโพง JBL Partybox</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Box component={'img'} src={TreesIcon} width={16} sx={{ filter: 'brightness(0) invert(1)' }} />
+                    <Typography variant="body2">ชั้นดาดฟ้าชมวิว 360°</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box component={'img'} src={BilliardIcon} width={16} sx={{ filter: 'brightness(0) invert(1)' }} />
+                    <Typography variant="body2">โต๊ะพูล 7 ฟุต</Typography>
+                  </Box>
+                </Grid>
+
+              </Grid>
+
+              <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.2)', mt: 3, pt: 3, textAlign: 'center' }}>
+                <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                  © 2024 อันหยาพูลวิลล่า นครศรีธรรมราช - All rights reserved
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        )}
         </Box>
     </ThemeProvider>
   )
