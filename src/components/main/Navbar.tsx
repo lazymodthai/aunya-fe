@@ -17,11 +17,13 @@ import HomeIcon from "@mui/icons-material/Home";
 import BedroomParentIcon from '@mui/icons-material/BedroomParent';
 import MapIcon from '@mui/icons-material/Map';
 import BookOnlineIcon from '../../assets/icons/booking.png';
+import PersonIcon from '@mui/icons-material/Person';
 
 const menuItems = [
   { label: "หน้าหลัก", icon: <HomeIcon />, path: "/" },
   { label: "ห้อง", icon: <BedroomParentIcon />, path: "/room" },
   { label: "แผนที่", icon: <MapIcon />, path: "/map" },
+  { label: "สมาชิก", icon: <PersonIcon />, path: "/member/login" },
 ];
 
 const Navbar = () => {
@@ -34,6 +36,7 @@ const Navbar = () => {
     if (path === "/") return 0;
     if (path === "/room") return 1;
     if (path === "/map") return 2;
+    if (path.startsWith("/member")) return 3;
     return 0;
   };
 
