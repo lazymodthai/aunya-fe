@@ -95,19 +95,19 @@ function Main() {
           my={isMobile ? -2 : 0}
         >
           <Grid container gap={1} justifyContent={'end'}>
-            <Box sx={{ bgcolor: "#fff", pl: 1, pr: 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #77B3D4' }}>
+            <Box onClick={() => window.location.href = 'tel:0880844455'} sx={{ bgcolor: "#fff", pl: 1, pr: 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #77B3D4', cursor: 'pointer' }}>
               <Box component={'img'} src={PhoneIcon} width={20} />
               <Typography variant="body2" sx={{fontWeight: 500, color: '#77B3D4'}}>{!isMobile ? '088-084-4455':'คุณธนิก'}</Typography>
             </Box>
-            <Box sx={{ bgcolor: "#fff", pl: 1, pr: 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #77B3D4' }}>
+            <Box onClick={() => window.location.href = 'tel:0831818502'} sx={{ bgcolor: "#fff", pl: 1, pr: 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #77B3D4', cursor: 'pointer' }}>
               <Box component={'img'} src={PhoneIcon} width={20} />
               <Typography variant="body2" sx={{fontWeight: 500, color: '#77B3D4'}}>{!isMobile ? '083-181-8502:':'คุณสุ'}</Typography>
             </Box>
-            <Box sx={{ bgcolor: "#fff", pl: 1, pr: isMobile ? 1 : 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #3b5998' }}>
+            <Box onClick={() => window.location.href = 'https://www.facebook.com/muangkhon399'} sx={{ bgcolor: "#fff", pl: 1, pr: isMobile ? 1 : 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #3b5998', cursor: 'pointer' }}>
               <Box component={'img'} src={FacebookIcon} width={20} />
               {!isMobile && <Typography variant="body2" sx={{fontWeight: 500, color: '#3b5998'}}>อันหยาพูลวิลล่า นครศรีธรรมราช Aunya Pool Villa</Typography>}
             </Box>
-            <Box sx={{ bgcolor: "#fff", pl: 1, pr: isMobile ? 1 : 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #2CCF54' }}>
+            <Box onClick={() => window.location.href = 'https://line.me/ti/p/~jent11'} sx={{ bgcolor: "#fff", pl: 1, pr: isMobile ? 1 : 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #2CCF54', cursor: 'pointer' }}>
               <Box component={'img'} src={LineIcon} width={20} />
               {!isMobile && <Typography variant="body2" sx={{fontWeight: 500, color: '#2CCF54'}}>jent11</Typography>}
             </Box>

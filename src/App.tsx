@@ -10,6 +10,8 @@ import Room from './pages/Room'
 import Map from './pages/Map'
 import { useMediaQuery } from '@mui/material'
 import Booking from './pages/Booking'
+import Login from './pages/member/Login'
+import Register from './pages/member/Register'
 
 const bookingData = [
   {m: 4, d: 1, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
@@ -100,6 +102,10 @@ function App() {
               <Route path="/map" element={<Map />} />
               <Route path="/booking" element={<Booking bookingData={bookingData}/>} />
               <Route path="*" element={<Navigate to="/" replace />} />
+              {/* Member system */}
+              <Route path="/member/login" element={<Login />} />
+              <Route path="/member/register" element={<Register />} />
+
             </Routes>
           </Box>
         </Box>
