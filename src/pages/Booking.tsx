@@ -20,7 +20,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import { addDays, format, parseISO, set } from "date-fns";
 import { FormatDate, formatDateTime } from "../utils/date";
 import AuthAPI from "../apis/auth";
-import BookingAPI from "../apis/booking";
+import BookingAPI, { BookingInterface } from "../apis/booking";
 import Loading from "../components/Loading";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -72,13 +72,15 @@ function Booking(props: Props) {
 
   const handleBook = async () => {
     if (isInvalidPhoneNumber) return;
-    const payload = {
+    const payload:BookingInterface = {
       checkinDate: checkinDate,
       checkoutDate: checkoutDate,
       guestNumber: guestNumber,
       additionGuestNumber: additionGuestNumber,
       name: name,
       phoneNumber: phoneNumber,
+      totalPrice: 5000,
+      roomId: 'e81b34e9-394d-41d4-84c8-c2cc9c71e6d6'
     };
     try {
       setLoading(true);
