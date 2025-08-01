@@ -59,3 +59,48 @@ export const formatLaserId= (value: string) => {
     return value.replace(/^([A-Z0-9]{3})([A-Z0-9]{0,7})([A-Z0-9]{0,2})$/, '$1-$2-$3');
   }
 }
+
+
+/**
+ * เปลี่ยนฟอร์แมตเลขบัญชีให้เป็นรูปแบบที่กำหนด
+ * - ถ้ามีตั้งแต่ 10 หลักขึ้นไป: ###-#-#####-########
+ * - ถ้ามี 5-9 หลัก: ###-#-##### (ตามจำนวนหลักที่เหลือ)
+ * - ถ้ามีน้อยกว่า 5 หลัก: ###-# (ตามจำนวนหลักที่มี)
+ * @param accountNumber เลขบัญชีที่ต้องการเปลี่ยนฟอร์แมต
+ * @returns เลขบัญชีในรูปแบบที่กำหนด
+ */
+export function formatAccountNumber(accountNumber: string): string {
+  // ลบช่องว่างและอักขระที่ไม่ใช่ตัวเลข
+  const digits = accountNumber.replace(/\D/g, '');
+  
+  // ถ้าไม่มีตัวเลข ให้คืนค่าว่าง
+  if (digits.length === 0) {
+    return '';
+  }
+  
+  // จัดการกรณีที่มีน้อยกว่า 5 หลัก
+  if (digits.length < 5) {
+    // ถ้ามีน้อยกว่า 4 หลัก
+    if (digits.length <= 3) {
+      return digits;
+    }
+    // ถ้ามี 4 หลัก
+    return `${digits.substring(0, 3)}-${digits.substring(3)}`;
+  }
+  
+  // จัดการกรณีที่มี 5-9 หลัก
+  if (digits.length < 10) {
+    const part1 = digits.substring(0, 3);
+    const part2 = digits.substring(3, 4);
+    const part3 = digits.substring(4);
+    return `${part1}-${part2}-${part3}`;
+  }
+  
+  // จัดการกรณีที่มีตั้งแต่ 10 หลักขึ้นไป
+  const part1 = digits.substring(0, 3);
+  const part2 = digits.substring(3, 4);
+  const part3 = digits.substring(4, 9);
+  const part4 = digits.substring(9);
+  
+  return `${part1}-${part2}-${part3}-${part4}`;
+}

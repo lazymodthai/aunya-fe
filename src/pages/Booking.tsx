@@ -13,22 +13,33 @@ import {
 import CustomDatePicker from "../components/booking/CustomDatePicker";
 import { useEffect, useState } from "react";
 import NumberField from "../components/booking/NumberField";
-import { isValidThaiPhoneNumber } from "../utils/input";
+import { formatAccountNumber, isValidThaiPhoneNumber } from "../utils/input";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import CheckIcon from "@mui/icons-material/Check";
-import { addDays, format, parseISO, set } from "date-fns";
-import { FormatDate, formatDateTime } from "../utils/date";
+import { addDays } from "date-fns";
+import { FormatDate } from "../utils/date";
 import AuthAPI from "../apis/auth";
-import BookingAPI from "../apis/booking";
+import BookingAPI, { BookingInterface } from "../apis/booking";
 import Loading from "../components/Loading";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useClipboard } from 'use-clipboard-copy';
+import QRPayment from "../components/booking/QRPayment";
+import MultiImageUpload from "../components/MultiImageUpload";
 
 type Props = {
   bookingData: any;
 };
+
+const QRcode = '1100400100824'
+const QRname = 'นางสุจิตรา อ่อนคำ'
+const roomPrice = 5000
+const additionGuestNumberPrice = 300
+const additionTowelPrice = 100
+const depositPrice = 2000
+const bankName = 'กรุงไทย'
+const bankAccount = '7790516787'
 
 function Booking(props: Props) {
   const isMobile = useMediaQuery("(max-width:800px)");
@@ -46,8 +57,14 @@ function Booking(props: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const [copying, setCopying] = useState<boolean>(false);
   const [disableDate, setDisableDate] = useState<any[]>([])
+  const [totalDate, setTotalDate] = useState<number>(0)
+  const [totalPrice, setTotalPrice] = useState<number>(0)
 
   const [refCode, setRefCode] = useState<string>("");
+
+
+
+  
 
   const isStepSkipped = (step: number) => {
     return skipped.has(step);
@@ -67,18 +84,39 @@ function Booking(props: Props) {
   }
 
   useEffect(()=>{
-    getDate()
-  },[])
+    if(step === 0) getDate()
+  },[step])
+
+  useEffect(() => {
+    if (checkinDate && checkoutDate) {
+      setTotalDate(
+        (checkoutDate!.getTime() - checkinDate!.getTime()) / (1000 * 60 * 60 * 24)
+      );
+    }
+  },[checkinDate, checkoutDate])
+
+  useEffect(() => {
+    if (totalDate) {
+      setTotalPrice(
+        (roomPrice * totalDate) +
+        (additionGuestNumber || 0) * additionGuestNumberPrice +
+        (additionTowel || 0) * additionTowelPrice +
+        depositPrice
+      );
+    }
+  }, [totalDate, additionGuestNumber, additionTowel]);
 
   const handleBook = async () => {
     if (isInvalidPhoneNumber) return;
-    const payload = {
+    const payload:BookingInterface = {
       checkinDate: checkinDate,
       checkoutDate: checkoutDate,
       guestNumber: guestNumber,
       additionGuestNumber: additionGuestNumber,
       name: name,
       phoneNumber: phoneNumber,
+      totalPrice: totalPrice,
+      roomId: 'e81b34e9-394d-41d4-84c8-c2cc9c71e6d6'
     };
     try {
       setLoading(true);
@@ -111,23 +149,10 @@ function Booking(props: Props) {
     setStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handleSkip = () => {
-    setStep((prevActiveStep) => prevActiveStep + 1);
-    setSkipped((prevSkipped) => {
-      const newSkipped = new Set(prevSkipped.values());
-      newSkipped.add(step);
-      return newSkipped;
-    });
-  };
-
-  const handleReset = () => {
-    setStep(0);
-  };
-
   const clipboard = useClipboard();
 
   const handleCopy = async () => {
-    clipboard.copy('123-456-789-0');
+    clipboard.copy(bankAccount);
     setCopying(true);
     setTimeout(() => setCopying(false), 2000);
   };
@@ -177,7 +202,7 @@ function Booking(props: Props) {
               sx={{ width: "100%" }}
             />
             <NumberField
-              label="ที่นอนเสริม (ชุดละ 300 บาท)"
+              label={`ที่นอนเสริม (ชุดละ ${additionGuestNumberPrice} บาท)`}
               onChange={(e) => {
                 const num = parseInt(e.target.value);
                 if (num > 2) {
@@ -192,7 +217,7 @@ function Booking(props: Props) {
               sx={{ width: "100%" }}
             />
             <NumberField
-              label="เพิ่มผ้าขนหนู+ผ้าเช็ดผม (ชุดละ 100 บาท)"
+              label={`เพิ่มผ้าขนหนู+ผ้าเช็ดผม (ชุดละ ${additionTowelPrice} บาท)`}
               onChange={(e) => {
                 const num = parseInt(e.target.value);
                 if (num > 20) {
@@ -248,24 +273,50 @@ function Booking(props: Props) {
       case 1:
         return (
           <>
-            <Typography sx={{display: 'flex', gap: 1}}>
-              Check-in: <span style={{color: "#0b538eff"}}>วันที่ {FormatDate(checkinDate!, 4)}</span>
+            <Typography sx={{ display: "flex", gap: 1 }}>
+              {`Check-in: `}
+              <span style={{ color: "#0b538eff" }}>
+                วันที่ {FormatDate(checkinDate!, 4)}
+              </span>
             </Typography>
-            <Typography sx={{display: 'flex', gap: 1}}>
-              Check-out: <span style={{color: "#0b538eff"}}>วันที่ {FormatDate(checkoutDate!, 4)}</span>
+            <Typography sx={{ display: "flex", gap: 1 }}>
+              {`Check-out: `}
+              <span style={{ color: "#0b538eff" }}>
+                วันที่ {FormatDate(checkoutDate!, 4)}
+              </span>
             </Typography>
-            <Typography sx={{display: 'flex', gap: 1}}>
-              รวมเข้าพัก: 
-              <span style={{color: "#0b538eff"}}>{(checkoutDate!.getTime() - checkinDate!.getTime()) /
-                (1000 * 60 * 60 * 24)} คืน</span>
+            <Typography sx={{ display: "flex", gap: 1 }}>
+              รวมเข้าพัก:
+              <span style={{ color: "#0b538eff" }}>
+                {`${totalDate} `}
+                คืน
+              </span>
             </Typography>
-            <Typography sx={{display: 'flex', gap: 1}}>
-              จำนวนผู้เข้าพัก: <span style={{color: "#0b538eff"}}>{guestNumber} คน</span>
+            <Typography sx={{ display: "flex", gap: 1 }}>
+              จำนวนผู้เข้าพัก:{" "}
+              <span style={{ color: "#0b538eff" }}>{guestNumber} คน</span>
             </Typography>
-            <Typography sx={{display: 'flex', gap: 1}}>ที่นอนเสริม: <span style={{color: "#0b538eff"}}>{additionGuestNumber} ชุด</span></Typography>
-            <Typography sx={{display: 'flex', gap: 1}}>ชุดผ้าขนหนู+ผ้าเช็ดผม(เพิ่มเติม): <span style={{color: "#0b538eff"}}>{additionTowel} ชุด</span></Typography>
-            <Typography sx={{display: 'flex', gap: 1}}>ชื่อผู้จอง: <span style={{color: "#0b538eff"}}>{name}</span></Typography>
-            <Typography sx={{display: 'flex', gap: 1}}>เบอร์โทรศัพท์มือถือ: <span style={{color: "#0b538eff"}}>{phoneNumber}</span></Typography>
+            {!!additionGuestNumber &&
+              <Typography sx={{ display: "flex", gap: 1 }}>
+                ที่นอนเสริม:{" "}
+                <span style={{ color: "#57768fff" }}>
+                  {additionGuestNumber} ชุด
+                </span>
+              </Typography>
+            }
+            {!!additionTowel && 
+              <Typography sx={{ display: "flex", gap: 1 }}>
+                ชุดผ้าขนหนู+ผ้าเช็ดผม(เพิ่มเติม):{" "}
+                <span style={{ color: "#0b538eff" }}>{additionTowel} ชุด</span>
+              </Typography>
+            }
+            <Typography sx={{ display: "flex", gap: 1 }}>
+              ชื่อผู้จอง: <span style={{ color: "#0b538eff" }}>{name}</span>
+            </Typography>
+            <Typography sx={{ display: "flex", gap: 1 }}>
+              เบอร์โทรศัพท์มือถือ:{" "}
+              <span style={{ color: "#0b538eff" }}>{phoneNumber}</span>
+            </Typography>
           </>
         );
 
@@ -279,34 +330,31 @@ function Booking(props: Props) {
             <Typography>
               ค่าห้องพัก{" "}
               {(
-                (5000 * (checkoutDate!.getTime() - checkinDate!.getTime())) /
-                (1000 * 60 * 60 * 24)
+                roomPrice * totalDate
               ).toLocaleString("th-TH")}{" "}
               บาท
             </Typography>
             <Typography>
-              เสริมที่นอน
-              {((additionGuestNumber || 0) * 300).toLocaleString("th-TH")} บาท
+              {`เสริมที่นอน ${((additionGuestNumber || 0) * additionGuestNumberPrice).toLocaleString(
+                "th-TH"
+              )} บาท`}
             </Typography>
             <Typography>
-              เซ็ตผ้าขนหนู+ผ้าเช็ดผม(เพิ่มเติม)
-              {((additionTowel || 0) * 100).toLocaleString("th-TH")} บาท
+              {`เซ็ตผ้าขนหนู+ผ้าเช็ดผม(เพิ่มเติม) ${(
+                (additionTowel || 0) * additionTowelPrice
+              ).toLocaleString("th-TH")} บาท`}
             </Typography>
             <Typography>
-              ค่ามัดจำ{" "}
-              2,000 บาท <span style={{color: "#939393ff"}}>(คืนหลัง Check-out)</span>
+              {`ค่ามัดจำ ${depositPrice.toLocaleString("th-TH")} บาท `}
+              <span style={{ color: "#939393ff" }}>(คืนหลัง Check-out)</span>
             </Typography>
-            <Typography sx={{fontSize: 18, fontWeight: 600}}>
-              รวมยอดชำระ:
+            <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
+              {`รวมยอดชำระทั้งสิ้น:`}
             </Typography>
             <Typography
-              sx={{ fontSize: 24, fontWeight: 600, color: "#2196f3", mt: -2 }}
+              sx={{ fontSize: 24, fontWeight: 600, color: "#15a13aff", mt: -2 }}
             >
-              {(
-                (5000 * (checkoutDate!.getTime() - checkinDate!.getTime())) /
-                  (1000 * 60 * 60 * 24) +
-                (additionGuestNumber || 0) * 300 + 2000
-              ).toLocaleString("th-TH", {
+              {totalPrice.toLocaleString("th-TH", {
                 style: "currency",
                 currency: "THB",
               })}
@@ -320,24 +368,24 @@ function Booking(props: Props) {
               <Box
                 component={"img"}
                 src={
-                  "https://whatphone.net/wp-content/uploads/2018/10/new-k-plus-logo.png"
+                  "https://e7.pngegg.com/pngimages/591/354/png-clipart-krung-thai-bank-money-credit-kasikornbank-bank-blue-text-thumbnail.png"
                 }
                 sx={{ width: 24 }}
               />
-              <span style={{ fontWeight: 600, color: "#0dab2dff" }}>
-                กสิกรไทย
+              <span style={{ fontWeight: 600, color: "#00A3E3" }}>
+                {bankName}
               </span>
             </Typography>
             <Typography sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               ชื่อบัญชี:{" "}
-              <span style={{ fontWeight: 600, color: "#f36e21ff" }}>
-                นาง สุจิตรา อ่อนคำ
+              <span style={{ fontWeight: 600, color: "#00A3E3" }}>
+                {QRname}
               </span>
             </Typography>
             <Typography sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               หมายเลขบัญชี:{" "}
-              <span style={{ fontWeight: 600, color: "#f36e21ff" }}>
-                123-456-789-0
+              <span style={{ fontWeight: 600, color: "#00A3E3" }}>
+                {formatAccountNumber(bankAccount)}
               </span>
               <Box
                 onClick={handleCopy}
@@ -376,11 +424,34 @@ function Booking(props: Props) {
                     sx={{ width: 18, height: 18, color: "#7d7d7dff" }}
                   />
                 )}
-                {copying? `คัดลอกแล้ว`:`คัดลอก`}
+                {copying ? `คัดลอกแล้ว` : `คัดลอก`}
               </Box>
             </Typography>
+            <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
+              หรือโอนผ่าน QR Payment:
+            </Typography>
+            <Box sx={{display: 'flex', flexDirection: 'column', gap: 1, justifyContent: 'center', alignItems: 'center', mt: 1, p: 2, borderRadius: 2, border: '1px solid #08080809'}}>
+              <QRPayment qrId={QRcode} value={totalPrice} />
+
+              <Typography sx={{ fontSize: 12, fontWeight: 600 }}>
+                {QRcode.slice(0, 0) + 'x-xxxx-xxxx' + QRcode.slice(9).replace(/(\d)(\d{2})(\d)/, "$1-$2-$3")}
+              </Typography>
+              <Typography sx={{ fontSize: 12, fontWeight: 600 }}>
+                {QRname}
+              </Typography>
+            </Box>
           </>
         );
+
+      case 3:
+        return <>
+            <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
+              แนบสลิปชำระเงิน
+            </Typography>
+            <Box sx={{height: 400}}>
+              <MultiImageUpload maxImages={1} minHeight="370px"/>
+            </Box>
+          </>;
 
       default:
         break;
@@ -453,7 +524,7 @@ function Booking(props: Props) {
             variant="contained"
             onClick={handleNext}
             endIcon={
-              step === steps.length - 1 ? (
+              step === steps.length ? (
                 <CheckIcon />
               ) : (
                 <ArrowForwardIosIcon />
@@ -469,12 +540,11 @@ function Booking(props: Props) {
               isInvalidPhoneNumber
             }
           >
-            {step === steps.length - 1 ? "ยืนยัน" : "ถัดไป"}
+            {step === steps.length ? "ยืนยัน" : "ถัดไป"}
           </Button>
         </Grid>
       </Grid>
     </Grid>
   );
 }
-
 export default Booking;
