@@ -116,7 +116,7 @@ function Booking(props: Props) {
       name: name,
       phoneNumber: phoneNumber,
       totalPrice: totalPrice,
-      roomId: 'e81b34e9-394d-41d4-84c8-c2cc9c71e6d6'
+      roomId: 'c33657ba-21a9-47e8-9f2b-e082607c308c'
     };
     try {
       setLoading(true);
