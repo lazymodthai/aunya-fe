@@ -274,13 +274,13 @@ function Booking(props: Props) {
         return (
           <>
             <Typography sx={{ display: "flex", gap: 1 }}>
-              Check-in:{" "}
+              {`Check-in: `}
               <span style={{ color: "#0b538eff" }}>
                 วันที่ {FormatDate(checkinDate!, 4)}
               </span>
             </Typography>
             <Typography sx={{ display: "flex", gap: 1 }}>
-              Check-out:{" "}
+              {`Check-out: `}
               <span style={{ color: "#0b538eff" }}>
                 วันที่ {FormatDate(checkoutDate!, 4)}
               </span>
@@ -288,8 +288,7 @@ function Booking(props: Props) {
             <Typography sx={{ display: "flex", gap: 1 }}>
               รวมเข้าพัก:
               <span style={{ color: "#0b538eff" }}>
-                {(checkoutDate!.getTime() - checkinDate!.getTime()) /
-                  (1000 * 60 * 60 * 24)}{" "}
+                {`${totalDate} `}
                 คืน
               </span>
             </Typography>
@@ -297,16 +296,20 @@ function Booking(props: Props) {
               จำนวนผู้เข้าพัก:{" "}
               <span style={{ color: "#0b538eff" }}>{guestNumber} คน</span>
             </Typography>
-            <Typography sx={{ display: "flex", gap: 1 }}>
-              ที่นอนเสริม:{" "}
-              <span style={{ color: "#0b538eff" }}>
-                {additionGuestNumber} ชุด
-              </span>
-            </Typography>
-            <Typography sx={{ display: "flex", gap: 1 }}>
-              ชุดผ้าขนหนู+ผ้าเช็ดผม(เพิ่มเติม):{" "}
-              <span style={{ color: "#0b538eff" }}>{additionTowel} ชุด</span>
-            </Typography>
+            {!!additionGuestNumber &&
+              <Typography sx={{ display: "flex", gap: 1 }}>
+                ที่นอนเสริม:{" "}
+                <span style={{ color: "#57768fff" }}>
+                  {additionGuestNumber} ชุด
+                </span>
+              </Typography>
+            }
+            {!!additionTowel && 
+              <Typography sx={{ display: "flex", gap: 1 }}>
+                ชุดผ้าขนหนู+ผ้าเช็ดผม(เพิ่มเติม):{" "}
+                <span style={{ color: "#0b538eff" }}>{additionTowel} ชุด</span>
+              </Typography>
+            }
             <Typography sx={{ display: "flex", gap: 1 }}>
               ชื่อผู้จอง: <span style={{ color: "#0b538eff" }}>{name}</span>
             </Typography>
@@ -342,7 +345,7 @@ function Booking(props: Props) {
               ).toLocaleString("th-TH")} บาท`}
             </Typography>
             <Typography>
-              {`ค่ามัดจำ 2,000 บาท `}
+              {`ค่ามัดจำ ${depositPrice.toLocaleString("th-TH")} บาท `}
               <span style={{ color: "#939393ff" }}>(คืนหลัง Check-out)</span>
             </Typography>
             <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
