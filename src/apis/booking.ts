@@ -4,8 +4,8 @@ import { InstanceBookingAPI } from "./instance";
 const path = "booking";
 
 export interface BookingInterface {
-  checkinDate: Date | null;
-  checkoutDate: Date | null;
+  checkinDate: Date | string | null;
+  checkoutDate: Date | string | null;
   guestNumber: number | null;
   additionGuestNumber: number | null;
   name: string;

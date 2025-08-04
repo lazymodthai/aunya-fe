@@ -28,6 +28,8 @@ import LineIcon from "../assets/icons/line.svg"
 
 import SpeakerIcon from "../assets/icons/speaker.svg"
 import NopetIcon from "../assets/icons/nopet.png"
+import PricesAPI from "../apis/prices"
+import { useEffect, useState } from "react"
 
 
 
@@ -60,17 +62,36 @@ const policy = [
   { key: 'pet', text: "ห้ามนำสัตว์เลี้ยงเข้าพัก", icon: <Box component={'img'} src={NopetIcon} width={24} />},
 ]
 
-const bookingData = [
-  {m: 4, d: 1, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
-  {m: 4, d: 2, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
-  {m: 4, d: 3, price: 6000, promotion: 'no', reserved: 'no', maintenance: 'no' },
-  {m: 4, d: 4, price: 6000, promotion: 'no', reserved: 'no', maintenance: 'no' },
-  {m: 4, d: 5, price: 5500, promotion: 'no', reserved: 'no', maintenance: 'no' },
-  {m: 4, d: 6, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
-];
+interface BookingData {
+  date: string;
+  price: number;
+  status: 'Available' | 'Unavailable' | 'Maintenance';
+  [key: string]: any;
+}
 
 function Main() {
   const isMobile = useMediaQuery("(max-width:800px)")
+  const [bookingData, setBookingData] = useState<BookingData[]>([])
+
+
+  const getPriceByMonth = async (month: number) => {
+    if (month < 1 || month > 12) return;
+    try {
+      const { data } = await PricesAPI.getPrices({
+        month: month + 1,
+        year: new Date().getFullYear(),
+        roomId: "e81b34e9-394d-41d4-84c8-c2cc9c71e6d6",
+      });
+      setBookingData(data.prices);
+      console.log(data.prices)
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(()=>{
+    getPriceByMonth(new Date().getMonth())
+  },[])
   
   return (
     <>
@@ -88,32 +109,107 @@ function Main() {
           <SwiperPreview />
         </Grid>
 
-        <Grid
-          size={12}
-          borderRadius={2}
-          padding={2}
-          my={isMobile ? -2 : 0}
-        >
-          <Grid container gap={1} justifyContent={'end'}>
-            <Box onClick={() => window.location.href = 'tel:0880844455'} sx={{ bgcolor: "#fff", pl: 1, pr: 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #77B3D4', cursor: 'pointer' }}>
-              <Box component={'img'} src={PhoneIcon} width={20} />
-              <Typography variant="body2" sx={{fontWeight: 500, color: '#77B3D4'}}>{!isMobile ? '088-084-4455':'คุณธนิก'}</Typography>
+        <Grid size={12} borderRadius={2} padding={2} my={isMobile ? -2 : 0}>
+          <Grid container gap={1} justifyContent={"end"}>
+            <Box
+              onClick={() => (window.location.href = "tel:0880844455")}
+              sx={{
+                bgcolor: "#fff",
+                pl: 1,
+                pr: 2,
+                py: 1,
+                borderRadius: 6,
+                display: "flex",
+                gap: 1,
+                border: "1px solid #77B3D4",
+                cursor: "pointer",
+              }}
+            >
+              <Box component={"img"} src={PhoneIcon} width={20} />
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 500, color: "#77B3D4" }}
+              >
+                {!isMobile ? "088-084-4455" : "คุณธนิก"}
+              </Typography>
             </Box>
-            <Box onClick={() => window.location.href = 'tel:0831818502'} sx={{ bgcolor: "#fff", pl: 1, pr: 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #77B3D4', cursor: 'pointer' }}>
-              <Box component={'img'} src={PhoneIcon} width={20} />
-              <Typography variant="body2" sx={{fontWeight: 500, color: '#77B3D4'}}>{!isMobile ? '083-181-8502:':'คุณสุ'}</Typography>
+            <Box
+              onClick={() => (window.location.href = "tel:0831818502")}
+              sx={{
+                bgcolor: "#fff",
+                pl: 1,
+                pr: 2,
+                py: 1,
+                borderRadius: 6,
+                display: "flex",
+                gap: 1,
+                border: "1px solid #77B3D4",
+                cursor: "pointer",
+              }}
+            >
+              <Box component={"img"} src={PhoneIcon} width={20} />
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 500, color: "#77B3D4" }}
+              >
+                {!isMobile ? "083-181-8502:" : "คุณสุ"}
+              </Typography>
             </Box>
-            <Box onClick={() => window.location.href = 'https://www.facebook.com/muangkhon399'} sx={{ bgcolor: "#fff", pl: 1, pr: isMobile ? 1 : 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #3b5998', cursor: 'pointer' }}>
-              <Box component={'img'} src={FacebookIcon} width={20} />
-              {!isMobile && <Typography variant="body2" sx={{fontWeight: 500, color: '#3b5998'}}>อันหยาพูลวิลล่า นครศรีธรรมราช Aunya Pool Villa</Typography>}
+            <Box
+              onClick={() =>
+                (window.location.href = "https://www.facebook.com/muangkhon399")
+              }
+              sx={{
+                bgcolor: "#fff",
+                pl: 1,
+                pr: isMobile ? 1 : 2,
+                py: 1,
+                borderRadius: 6,
+                display: "flex",
+                gap: 1,
+                border: "1px solid #3b5998",
+                cursor: "pointer",
+              }}
+            >
+              <Box component={"img"} src={FacebookIcon} width={20} />
+              {!isMobile && (
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 500, color: "#3b5998" }}
+                >
+                  อันหยาพูลวิลล่า นครศรีธรรมราช Aunya Pool Villa
+                </Typography>
+              )}
             </Box>
-            <Box onClick={() => window.location.href = 'https://line.me/ti/p/~jent11'} sx={{ bgcolor: "#fff", pl: 1, pr: isMobile ? 1 : 2, py: 1, borderRadius: 6, display: 'flex', gap: 1, border: '1px solid #2CCF54', cursor: 'pointer' }}>
-              <Box component={'img'} src={LineIcon} width={20} />
-              {!isMobile && <Typography variant="body2" sx={{fontWeight: 500, color: '#2CCF54'}}>jent11</Typography>}
+            <Box
+              onClick={() =>
+                (window.location.href = "https://line.me/ti/p/~jent11")
+              }
+              sx={{
+                bgcolor: "#fff",
+                pl: 1,
+                pr: isMobile ? 1 : 2,
+                py: 1,
+                borderRadius: 6,
+                display: "flex",
+                gap: 1,
+                border: "1px solid #2CCF54",
+                cursor: "pointer",
+              }}
+            >
+              <Box component={"img"} src={LineIcon} width={20} />
+              {!isMobile && (
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 500, color: "#2CCF54" }}
+                >
+                  jent11
+                </Typography>
+              )}
             </Box>
           </Grid>
         </Grid>
-        
+
         <Grid container size={isMobile ? 12 : 6}>
           <Grid
             size={12}
@@ -144,7 +240,10 @@ function Main() {
             <Grid size={12} mb={2}>
               <Typography variant="h5">ปฏิทินวันว่าง</Typography>
             </Grid>
-            <BookingCalendar bookingData={bookingData} />
+            <BookingCalendar
+              bookingData={bookingData}
+              onChangeMonth={(val) => getPriceByMonth(val)}
+            />
           </Grid>
         </Grid>
 
@@ -184,7 +283,7 @@ function Main() {
             </Grid>
           </Grid>
         </Grid>
-      </Grid>      
+      </Grid>
     </>
   );
 }

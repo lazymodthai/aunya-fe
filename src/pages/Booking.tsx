@@ -17,7 +17,7 @@ import { formatAccountNumber, isValidThaiPhoneNumber } from "../utils/input";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import CheckIcon from "@mui/icons-material/Check";
-import { addDays } from "date-fns";
+import { addDays, format } from "date-fns";
 import { FormatDate } from "../utils/date";
 import AuthAPI from "../apis/auth";
 import BookingAPI, { BookingInterface } from "../apis/booking";
@@ -50,6 +50,11 @@ function Booking(props: Props) {
   const [additionTowel, setAdditionTowel] = useState<number | null>(null);
   const [name, setName] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [discountCode, setDiscountCode] = useState<string>("");
+  const [discount, setDiscount] = useState<number>(0);
+  const [percentageDiscount, setPercentageDiscount] = useState<number>(0);
+
+
   const [step, setStep] = useState<number>(0);
   const [skipped, setSkipped] = useState(new Set<number>());
   const [isInvalidPhoneNumber, setIsInvalidPhoneNumber] =
@@ -107,16 +112,16 @@ function Booking(props: Props) {
   }, [totalDate, additionGuestNumber, additionTowel]);
 
   const handleBook = async () => {
-    if (isInvalidPhoneNumber) return;
+    if (isInvalidPhoneNumber || !checkinDate || !checkoutDate || !guestNumber || !name || !phoneNumber) return;
     const payload:BookingInterface = {
-      checkinDate: checkinDate,
-      checkoutDate: checkoutDate,
+      checkinDate: format(checkinDate, 'yyyy-MM-dd'),
+      checkoutDate: format(checkoutDate, 'yyyy-MM-dd'),
       guestNumber: guestNumber,
       additionGuestNumber: additionGuestNumber,
       name: name,
       phoneNumber: phoneNumber,
       totalPrice: totalPrice,
-      roomId: 'c33657ba-21a9-47e8-9f2b-e082607c308c'
+      roomId: 'e81b34e9-394d-41d4-84c8-c2cc9c71e6d6'
     };
     try {
       setLoading(true);
@@ -317,6 +322,21 @@ function Booking(props: Props) {
               เบอร์โทรศัพท์มือถือ:{" "}
               <span style={{ color: "#0b538eff" }}>{phoneNumber}</span>
             </Typography>
+            <Divider />
+            <TextField
+              label="รหัสส่วนลด (ถ้ามี)"
+              variant="outlined"
+              onChange={(e) => setDiscountCode(e.target.value)}
+              value={discountCode}
+              sx={{ width: "100%" }}
+              slotProps={{
+                input: {
+                  inputProps: {
+                    maxLength: 10,
+                  },
+                },
+              }}
+            />
           </>
         );
 
