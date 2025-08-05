@@ -17,6 +17,7 @@ import {
   ChevronRight as ChevronRightIcon,
   Close as CloseIcon
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 // Define the type for the booking data
 interface BookingData {
@@ -125,6 +126,7 @@ const DrawerContent = styled(Box)(({ theme }) => ({
 const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChangeMonth }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery("(max-width:940px)");
+  const navigate = useNavigate()
 
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [currentMonthData, setCurrentMonthData] = useState<(BookingData | null)[]>([]);
@@ -237,7 +239,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
 
   const handleBookingClick = () => {
     if (selectedDay) {
-      console.log(`Booking for: ${selectedDay.date}`);
+      navigate(`/booking?startDate=${selectedDay.date}`)
     }
     handleClose();
   };

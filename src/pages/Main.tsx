@@ -83,9 +83,8 @@ function Main() {
         roomId: "e81b34e9-394d-41d4-84c8-c2cc9c71e6d6",
       });
       setBookingData(data.prices);
-      console.log(data.prices)
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
