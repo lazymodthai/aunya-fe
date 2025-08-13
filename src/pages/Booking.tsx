@@ -17,7 +17,7 @@ import { formatAccountNumber, isValidThaiPhoneNumber } from "../utils/input";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import CheckIcon from "@mui/icons-material/Check";
-import { addDays } from "date-fns";
+import { addDays, format } from "date-fns";
 import { FormatDate } from "../utils/date";
 import AuthAPI from "../apis/auth";
 import BookingAPI, { BookingInterface } from "../apis/booking";
@@ -27,6 +27,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useClipboard } from 'use-clipboard-copy';
 import QRPayment from "../components/booking/QRPayment";
 import MultiImageUpload from "../components/MultiImageUpload";
+import { useSearchParams } from "react-router-dom";
 
 type Props = {
   bookingData: any;
@@ -34,7 +35,7 @@ type Props = {
 
 const QRcode = '1100400100824'
 const QRname = 'นางสุจิตรา อ่อนคำ'
-const roomPrice = 5000
+// const roomPrice = 5000
 const additionGuestNumberPrice = 300
 const additionTowelPrice = 100
 const depositPrice = 2000
@@ -50,6 +51,13 @@ function Booking(props: Props) {
   const [additionTowel, setAdditionTowel] = useState<number | null>(null);
   const [name, setName] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [discountCode, setDiscountCode] = useState<string>("");
+  const [discount, setDiscount] = useState<number>(0);
+  const [percentageDiscount, setPercentageDiscount] = useState<number>(0);
+  const [roomPrices, setRoomPrices] = useState<{date: string, price: number}[]>([]);
+  const [totalRoomPrice, setTotalRoomPrice] = useState<number>(0);
+
+
   const [step, setStep] = useState<number>(0);
   const [skipped, setSkipped] = useState(new Set<number>());
   const [isInvalidPhoneNumber, setIsInvalidPhoneNumber] =
@@ -61,10 +69,7 @@ function Booking(props: Props) {
   const [totalPrice, setTotalPrice] = useState<number>(0)
 
   const [refCode, setRefCode] = useState<string>("");
-
-
-
-  
+  const [searchParams] = useSearchParams() 
 
   const isStepSkipped = (step: number) => {
     return skipped.has(step);
@@ -74,10 +79,9 @@ function Booking(props: Props) {
     try {
       setLoading(true);
       const { data } = await BookingAPI.getBookedDate();
-      console.log(data)
       setDisableDate(data)
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -90,41 +94,52 @@ function Booking(props: Props) {
   useEffect(() => {
     if (checkinDate && checkoutDate) {
       setTotalDate(
-        (checkoutDate!.getTime() - checkinDate!.getTime()) / (1000 * 60 * 60 * 24)
+        (checkoutDate!.getDate() - checkinDate!.getDate())
       );
     }
   },[checkinDate, checkoutDate])
 
+  useEffect(()=>{
+    setTotalRoomPrice(roomPrices.reduce((accumulator, currentValue) => accumulator + currentValue.price, 0))
+  },[roomPrices])
+
   useEffect(() => {
     if (totalDate) {
       setTotalPrice(
-        (roomPrice * totalDate) +
+        totalRoomPrice +
         (additionGuestNumber || 0) * additionGuestNumberPrice +
         (additionTowel || 0) * additionTowelPrice +
         depositPrice
       );
     }
-  }, [totalDate, additionGuestNumber, additionTowel]);
+  }, [totalDate, additionGuestNumber, additionTowel, totalRoomPrice]);
+
+  useEffect(()=>{
+    if(searchParams.get('startDate')) {
+      setCheckinDate(new Date(String(searchParams.get('startDate'))))
+    }
+  },[searchParams])
 
   const handleBook = async () => {
-    if (isInvalidPhoneNumber) return;
+    if (isInvalidPhoneNumber || !checkinDate || !checkoutDate || !guestNumber || !name || !phoneNumber) return;
     const payload:BookingInterface = {
-      checkinDate: checkinDate,
-      checkoutDate: checkoutDate,
+      checkinDate: format(checkinDate, 'yyyy-MM-dd'),
+      checkoutDate: format(checkoutDate, 'yyyy-MM-dd'),
       guestNumber: guestNumber,
       additionGuestNumber: additionGuestNumber,
       name: name,
       phoneNumber: phoneNumber,
       totalPrice: totalPrice,
-      roomId: 'c33657ba-21a9-47e8-9f2b-e082607c308c'
+      roomId: 'e81b34e9-394d-41d4-84c8-c2cc9c71e6d6'
     };
     try {
       setLoading(true);
       const { data } = await BookingAPI.book(payload);
       setRefCode(data.refCode);
+      setRoomPrices(data.prices.map((p:any)=>({date: p.date, price: Number(p.price)})))
       setStep(2);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -317,6 +332,21 @@ function Booking(props: Props) {
               เบอร์โทรศัพท์มือถือ:{" "}
               <span style={{ color: "#0b538eff" }}>{phoneNumber}</span>
             </Typography>
+            <Divider />
+            <TextField
+              label="รหัสส่วนลด (ถ้ามี)"
+              variant="outlined"
+              onChange={(e) => setDiscountCode(e.target.value)}
+              value={discountCode}
+              sx={{ width: "100%" }}
+              slotProps={{
+                input: {
+                  inputProps: {
+                    maxLength: 10,
+                  },
+                },
+              }}
+            />
           </>
         );
 
@@ -330,7 +360,7 @@ function Booking(props: Props) {
             <Typography>
               ค่าห้องพัก{" "}
               {(
-                roomPrice * totalDate
+                totalRoomPrice
               ).toLocaleString("th-TH")}{" "}
               บาท
             </Typography>

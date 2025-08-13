@@ -17,5 +17,14 @@ const instanceBooking = axios.create({
   }
 });
 
+const instacePrices = axios.create({
+  baseURL: import.meta.env.VITE_BASE_URL || 'http://localhost:3005/',
+  timeout: 10000,
+  headers: {
+    Accept: "application/json",
+  }
+});
+
 export class InstanceAuthAPI { static api = instanceAuth }
 export class InstanceBookingAPI { static api = instanceBooking }
+export class InstancePricesAPI { static api = instacePrices }
