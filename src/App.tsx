@@ -20,6 +20,7 @@ import PoolIcon from './assets/icons/pool.svg'
 import KaraokeIcon from './assets/icons/karaoke.svg'
 import TreesIcon from './assets/icons/trees.svg'
 import BilliardIcon from './assets/icons/billiard.svg'
+import Dashboard from '@pages/member/admin/Dashboard'
 
 const bookingData = [
   {m: 4, d: 1, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
@@ -113,6 +114,7 @@ function App() {
               {/* Member system */}
               <Route path="/member/login" element={<Login />} />
               <Route path="/member/register" element={<Register />} />
+              <Route path="/member/admin/dashboard" element={<Dashboard />} />
 
             </Routes>
           </Box>
