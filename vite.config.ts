@@ -24,11 +24,11 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: [
-      'www.artico.in.th',
-      'artico.in.th'
+      'www.aunyapoolvilla.com',
+      'aunyapoolvilla.com'
     ],
     hmr: {
-      host: 'artico.in.th',
+      host: 'aunyapoolvilla.com',
       protocol: 'wss'
     }
   }
