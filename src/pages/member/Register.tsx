@@ -1,9 +1,9 @@
 import { Button, Grid, SxProps, TextField, Typography, useMediaQuery } from '@mui/material'
-import React, { useState } from 'react'
-import AuthAPI from '../../apis/auth';
-import { validateEmailRFC } from '../../utils/validation';
-import Noti from '../../components/Noti';
-import Loading from "../../components/Loading";
+import { useState } from 'react'
+import AuthAPI from '@apis/auth';
+import { validateEmailRFC } from '@utils/validation';
+import Noti from '@components/Noti';
+import Loading from "@components/Loading";
 import { useNavigate } from 'react-router-dom';
 
 const textFieldStyle: SxProps = {

@@ -1,37 +1,37 @@
 import { Box, Grid, Typography, useMediaQuery } from "@mui/material"
-import SwiperPreview from "../components/main/SwiperPreview"
+import SwiperPreview from "@components/main/SwiperPreview"
 
-import BedIcon from '../assets/icons/bed.svg'
-import ShowerIcon from '../assets/icons/shower.svg'
-import PeopleIcon from '../assets/icons/people.svg'
-import AddUserIcon from '../assets/icons/add-user.svg'
-import CarIcon from '../assets/icons/car.svg'
+import BedIcon from '@assets/icons/bed.svg'
+import ShowerIcon from '@assets/icons/shower.svg'
+import PeopleIcon from '@assets/icons/people.svg'
+import AddUserIcon from '@assets/icons/add-user.svg'
+import CarIcon from '@assets/icons/car.svg'
 
-import PoolIcon from '../assets/icons/pool.svg'
-import BathtubIcon from '../assets/icons/bathtub.svg'
-import SofaIcon from '../assets/icons/sofa.svg'
-import KaraokeIcon from '../assets/icons/karaoke.svg'
-import TvIcon from '../assets/icons/tv.svg'
-import WifiIcon from '../assets/icons/wifi.svg'
-import BunkBedIcon from '../assets/icons/bunk-bed.svg'
-import RubberDuckIcon from '../assets/icons/rubber-duck.svg'
-import TreesIcon from '../assets/icons/trees.svg'
-import BilliardIcon from '../assets/icons/billiard.svg'
-import BbqIcon from '../assets/icons/bbq.svg'
-import MicrowaveIcon from '../assets/icons/microwave.svg'
-import WaterIcon from '../assets/icons/water.png'
-import BookingCalendar from "../components/main/BookingCalendar"
+import PoolIcon from '@assets/icons/pool.svg'
+import BathtubIcon from '@assets/icons/bathtub.svg'
+import SofaIcon from '@assets/icons/sofa.svg'
+import KaraokeIcon from '@assets/icons/karaoke.svg'
+import TvIcon from '@assets/icons/tv.svg'
+import WifiIcon from '@assets/icons/wifi.svg'
+import BunkBedIcon from '@assets/icons/bunk-bed.svg'
+import RubberDuckIcon from '@assets/icons/rubber-duck.svg'
+import TreesIcon from '@assets/icons/trees.svg'
+import BilliardIcon from '@assets/icons/billiard.svg'
+import BbqIcon from '@assets/icons/bbq.svg'
+import MicrowaveIcon from '@assets/icons/microwave.svg'
+import WaterIcon from '@assets/icons/water.png'
+import BookingCalendar from "@components/main/BookingCalendar"
 
-import PhoneIcon from "../assets/icons/phone.svg"
-import FacebookIcon from "../assets/icons/facebook.svg"
-import LineIcon from "../assets/icons/line.svg"
+import PhoneIcon from "@assets/icons/phone.svg"
+import FacebookIcon from "@assets/icons/facebook.svg"
+import LineIcon from "@assets/icons/line.svg"
 
-import SpeakerIcon from "../assets/icons/speaker.svg"
-import NopetIcon from "../assets/icons/nopet.png"
-import PricesAPI from "../apis/prices"
+import SpeakerIcon from "@assets/icons/speaker.svg"
+import NopetIcon from "@assets/icons/nopet.png"
+import PricesAPI from "@apis/prices"
 import { useEffect, useState } from "react"
 
-
+const roomId = import.meta.env.VITE_ROOM_ID
 
 const info = [
   { key: 'room', text: "3 ห้องนอน", icon: <Box component={'img'} src={BedIcon} width={24} />},
@@ -80,7 +80,7 @@ function Main() {
       const { data } = await PricesAPI.getPrices({
         month: month + 1,
         year: new Date().getFullYear(),
-        roomId: "e81b34e9-394d-41d4-84c8-c2cc9c71e6d6",
+        roomId: roomId
       });
       setBookingData(data.prices);
     } catch (error) {

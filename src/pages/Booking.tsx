@@ -10,23 +10,22 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import CustomDatePicker from "../components/booking/CustomDatePicker";
+import CustomDatePicker from "@components/booking/CustomDatePicker";
 import { useEffect, useState } from "react";
-import NumberField from "../components/booking/NumberField";
-import { formatAccountNumber, isValidThaiPhoneNumber } from "../utils/input";
+import NumberField from "@components/booking/NumberField";
+import { formatAccountNumber, isValidThaiPhoneNumber } from "@utils/input";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import CheckIcon from "@mui/icons-material/Check";
 import { addDays, format } from "date-fns";
-import { FormatDate } from "../utils/date";
-import AuthAPI from "../apis/auth";
-import BookingAPI, { BookingInterface } from "../apis/booking";
-import Loading from "../components/Loading";
+import { FormatDate } from "@utils/date";
+import BookingAPI, { BookingInterface } from "@apis/booking";
+import Loading from "@components/Loading";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useClipboard } from 'use-clipboard-copy';
-import QRPayment from "../components/booking/QRPayment";
-import MultiImageUpload from "../components/MultiImageUpload";
+import QRPayment from "@components/booking/QRPayment";
+import MultiImageUpload from "@components/MultiImageUpload";
 import { useSearchParams } from "react-router-dom";
 
 type Props = {
@@ -41,6 +40,7 @@ const additionTowelPrice = 100
 const depositPrice = 2000
 const bankName = 'กรุงไทย'
 const bankAccount = '7790516787'
+const roomId = import.meta.env.VITE_ROOM_ID
 
 function Booking(props: Props) {
   const isMobile = useMediaQuery("(max-width:800px)");
@@ -130,7 +130,7 @@ function Booking(props: Props) {
       name: name,
       phoneNumber: phoneNumber,
       totalPrice: totalPrice,
-      roomId: 'e81b34e9-394d-41d4-84c8-c2cc9c71e6d6'
+      roomId: roomId
     };
     try {
       setLoading(true);
