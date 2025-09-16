@@ -32,6 +32,8 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/aunya-fe:latest
+          build-args: |
+            VITE_ROOM_ID=${{ secrets.VITE_ROOM_ID }}
 
       # Step 6: Deploy to Server via SSH
       - name: Deploy to Server
