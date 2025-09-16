@@ -40,6 +40,7 @@ const additionTowelPrice = 100
 const depositPrice = 2000
 const bankName = 'กรุงไทย'
 const bankAccount = '7790516787'
+const roomId = import.meta.env.VITE_ROOM_ID
 
 function Booking(props: Props) {
   const isMobile = useMediaQuery("(max-width:800px)");
@@ -129,7 +130,7 @@ function Booking(props: Props) {
       name: name,
       phoneNumber: phoneNumber,
       totalPrice: totalPrice,
-      roomId: 'e81b34e9-394d-41d4-84c8-c2cc9c71e6d6'
+      roomId: roomId
     };
     try {
       setLoading(true);

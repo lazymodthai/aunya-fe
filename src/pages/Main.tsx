@@ -31,7 +31,7 @@ import NopetIcon from "@assets/icons/nopet.png"
 import PricesAPI from "@apis/prices"
 import { useEffect, useState } from "react"
 
-
+const roomId = import.meta.env.VITE_ROOM_ID
 
 const info = [
   { key: 'room', text: "3 ห้องนอน", icon: <Box component={'img'} src={BedIcon} width={24} />},
@@ -80,7 +80,7 @@ function Main() {
       const { data } = await PricesAPI.getPrices({
         month: month + 1,
         year: new Date().getFullYear(),
-        roomId: "e81b34e9-394d-41d4-84c8-c2cc9c71e6d6",
+        roomId: roomId
       });
       setBookingData(data.prices);
     } catch (error) {
