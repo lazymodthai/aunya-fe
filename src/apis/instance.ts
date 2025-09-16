@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 const instanceAuth = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL || 'http://localhost:3005/',
+  baseURL: import.meta.env.VITE_BASE_URL || 'https://api.aunyapoolvilla.com/',
   timeout: 10000,
   headers: {
     Accept: "application/json",
@@ -10,15 +10,15 @@ const instanceAuth = axios.create({
 });
 
 const instanceBooking = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL || 'http://localhost:3005/',
+  baseURL: import.meta.env.VITE_BASE_URL || 'https://api.aunyapoolvilla.com/',
   timeout: 10000,
   headers: {
     Accept: "application/json",
   }
 });
 
-const instacePrices = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL || 'http://localhost:3005/',
+const instancePrices = axios.create({
+  baseURL: import.meta.env.VITE_BASE_URL || 'https://api.aunyapoolvilla.com/',
   timeout: 10000,
   headers: {
     Accept: "application/json",
@@ -27,4 +27,4 @@ const instacePrices = axios.create({
 
 export class InstanceAuthAPI { static api = instanceAuth }
 export class InstanceBookingAPI { static api = instanceBooking }
-export class InstancePricesAPI { static api = instacePrices }
+export class InstancePricesAPI { static api = instancePrices }
