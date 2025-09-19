@@ -11,36 +11,32 @@ jobs:
   build-push-deploy:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      # Step 3: Login to Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      # Step 4: Build and Push Docker Image with Secure Secrets
-      - name: Build and Push Docker Image
+      # --- ส่วนที่แก้ไขสำคัญ ---
+      - name: Build and Push Docker Image with Secure Secrets
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
           tags: ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-          # --- ส่วนที่แก้ไข: ใช้ secrets แทน build-args ---
+          # ใช้ secrets แทน build-args เพื่อความปลอดภัยและแก้ปัญหา warning
           secrets: |
             "vite_env_secret=VITE_BASE_URL=${{ secrets.VITE_BASE_URL }}
             VITE_ROOM_ID=${{ secrets.VITE_ROOM_ID }}
             VITE_JWT_SECRET=${{ secrets.VITE_JWT_SECRET }}"
 
-      # Step 5: Deploy to Server via SSH (ยังคงเหมือนเดิม)
-      - name: Deploy to Server
+      - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SERVER_ADDRESS }}
@@ -52,7 +48,6 @@ jobs:
             docker compose down
             docker compose up -d
 
-      # Step 6: Clean up (ยังคงเหมือนเดิม)
       - name: Clean up
         if: always()
         run: rm -rf ~/.docker
