@@ -35,6 +35,7 @@ jobs:
           build-args: |
             VITE_BASE_URL=${{ secrets.VITE_BASE_URL }}
             VITE_ROOM_ID=${{ secrets.VITE_ROOM_ID }}
+            VITE_JWT_SECRET=${{ secrets.VITE_JWT_SECRET }}
 
 
       # Step 6: Deploy to Server via SSH
@@ -45,6 +46,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
+            echo "VITE_BASE_URL=${{ secrets.VITE_BASE_URL }}" >> .env
+            echo "VITE_ROOM_ID=${{ secrets.VITE_ROOM_ID }}" >> .env
+            echo "VITE_JWT_SECRET=${{ secrets.VITE_JWT_SECRET }}" >> .env
+
             docker compose pull
             docker compose up -d
 
