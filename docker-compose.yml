@@ -2,19 +2,12 @@ version: '3.8'
 
 services:
   vite-react-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # ใช้ image จาก Docker Hub ที่ระบุผ่าน environment variable
+    image: ${DOCKER_IMAGE}
+    restart: always
     ports:
-      - "5173:5173"
-    volumes:
-      - .:/app
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
-    stdin_open: true
-    tty: true
+      # จับคู่พอร์ต 8080 ของเครื่องเซิร์ฟเวอร์ เข้ากับพอร์ต 8080 ของ container (ที่รัน serve)
+      - "8080:8080"
     networks:
       - vite-network
 
