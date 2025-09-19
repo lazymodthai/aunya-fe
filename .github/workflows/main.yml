@@ -11,7 +11,7 @@ jobs:
   build-push-deploy:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout code (รวมถึงไฟล์ nginx.conf ใหม่)
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -26,20 +26,20 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      # Step 4: Build and Push Docker Image with Build-time Variables
+      # Step 4: Build and Push Docker Image with Secure Secrets
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
           tags: ${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-          # ส่ง secrets เข้าไปเป็น build arguments ให้กับ Dockerfile
-          build-args: |
-            VITE_BASE_URL=${{ secrets.VITE_BASE_URL }}
+          # --- ส่วนที่แก้ไข: ใช้ secrets แทน build-args ---
+          secrets: |
+            "vite_env_secret=VITE_BASE_URL=${{ secrets.VITE_BASE_URL }}
             VITE_ROOM_ID=${{ secrets.VITE_ROOM_ID }}
-            VITE_JWT_SECRET=${{ secrets.VITE_JWT_SECRET }}
+            VITE_JWT_SECRET=${{ secrets.VITE_JWT_SECRET }}"
 
-      # Step 5: Deploy to Server via SSH
+      # Step 5: Deploy to Server via SSH (ยังคงเหมือนเดิม)
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -47,18 +47,12 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            # กำหนดชื่ออิมเมจ Docker ให้ docker-compose รู้จัก
             export DOCKER_IMAGE=${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-            
-            # ดึงอิมเมจเวอร์ชันล่าสุดจาก Docker Hub
             docker pull $DOCKER_IMAGE
-
-            # หยุดและลบคอนเทนเนอร์เก่า (ถ้ามี) และเริ่มคอนเทนเนอร์ใหม่ด้วยอิมเมจล่าสุด
-            # docker-compose จะอ่านไฟล์ docker-compose.yml ที่อยู่ใน repository ของคุณ
             docker compose down
             docker compose up -d
 
-      # Step 6: Clean up (optional but good practice)
+      # Step 6: Clean up (ยังคงเหมือนเดิม)
       - name: Clean up
         if: always()
         run: rm -rf ~/.docker
