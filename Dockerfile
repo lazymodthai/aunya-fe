@@ -14,7 +14,8 @@ ENV VITE_JWT_SECRET=$VITE_JWT_SECRET
 WORKDIR /app
 
 # Enable corepack for Yarn 4
-RUN corepack enable
+RUN corepack enable && \
+    corepack prepare yarn@4.8.1 --activate
 
 COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn .yarn
@@ -34,7 +35,8 @@ FROM node:22-alpine
 WORKDIR /app
 
 # Enable corepack for Yarn 4
-RUN corepack enable
+RUN corepack enable && \
+    corepack prepare yarn@4.8.1 --activate
 
 # --- ส่วนที่แก้ไข ---
 # ไม่ต้องรัน yarn install อีก
