@@ -13,29 +13,37 @@ ENV VITE_JWT_SECRET=$VITE_JWT_SECRET
 
 WORKDIR /app
 
-# CHANGED: คัดลอก package.json และ package-lock.json
-COPY package.json package-lock.json* ./
+# Enable corepack for Yarn 4
+RUN corepack enable && \
+    corepack prepare yarn@4.8.1 --activate
 
-# CHANGED: ใช้ npm ci เพื่อติดตั้ง dependencies ทั้งหมดจาก package-lock.json
-# `npm ci` เร็วกว่าและปลอดภัยกว่า `npm install` ใน CI/CD
-RUN npm ci
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn .yarn
+
+# Install ALL dependencies (including devDependencies like vite) to build
+RUN yarn install
 
 # Copy source code
 COPY . .
 
-# CHANGED: ใช้ npm run build
-RUN npm run build
+# Build the application
+RUN yarn build
 
 # ----- Stage 2: Create the final production image -----
 FROM node:22-alpine
 
 WORKDIR /app
 
-# CHANGED: คัดลอก package.json และ package-lock.json
-COPY package.json package-lock.json* ./
+# Enable corepack for Yarn 4
+RUN corepack enable && \
+    corepack prepare yarn@4.8.1 --activate
 
-# CHANGED: ติดตั้งเฉพาะ production dependencies โดยใช้ --omit=dev
-RUN npm ci --omit=dev
+# คัดลอกเฉพาะไฟล์ที่จำเป็นสำหรับการรัน production server
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn .yarn
+
+# ติดตั้งเฉพาะ production dependencies (เช่น serve) จะไม่ติดตั้ง devDependencies
+RUN yarn install --production
 
 # คัดลอกโฟลเดอร์ build จาก Stage 1
 COPY --from=builder /app/dist ./dist
@@ -46,5 +54,5 @@ EXPOSE 8080
 # User ที่ไม่มีสิทธิ์ root เพื่อความปลอดภัย
 USER node
 
-# CHANGED: คำสั่งสำหรับเริ่มการทำงานของ production server ด้วย npm
-CMD ["npm", "start"]
+# คำสั่งสำหรับเริ่มการทำงานของ production server
+CMD ["yarn", "start"]
