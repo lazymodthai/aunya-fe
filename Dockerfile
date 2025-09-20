@@ -29,6 +29,8 @@ USER node
 COPY --chown=node:node --from=builder /app/package.json /app/yarn.lock /app/.yarnrc.yml ./
 COPY --chown=node:node --from=builder /app/.yarn ./.yarn
 
+RUN yarn workspaces focus --all --production
+
 COPY --chown=node:node --from=builder /app/dist ./dist
 EXPOSE 8080
 CMD ["yarn", "start"]
