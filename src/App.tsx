@@ -20,6 +20,7 @@ import PoolIcon from './assets/icons/pool.svg'
 import KaraokeIcon from './assets/icons/karaoke.svg'
 import TreesIcon from './assets/icons/trees.svg'
 import BilliardIcon from './assets/icons/billiard.svg'
+import UnderConstruction from '@pages/UnderConstruction'
 
 const bookingData = [
   {m: 4, d: 1, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
@@ -106,13 +107,17 @@ function App() {
           }}>
             <Routes>
               <Route path="/" element={<Main />} />
-              <Route path="/room" element={<Room />} />
+              {/* <Route path="/room" element={<Room />} /> */}
+              <Route path="/room" element={<UnderConstruction />} />
               <Route path="/map" element={<Map />} />
-              <Route path="/booking" element={<Booking bookingData={bookingData}/>} />
+              {/* <Route path="/booking" element={<Booking bookingData={bookingData}/>} /> */}
+              <Route path="/booking" element={<UnderConstruction />} />
               <Route path="*" element={<Navigate to="/" replace />} />
               {/* Member system */}
-              <Route path="/member/login" element={<Login />} />
-              <Route path="/member/register" element={<Register />} />
+              {/* <Route path="/member/login" element={<Login />} /> */}
+              <Route path="/member/login" element={<UnderConstruction />} />
+              {/* <Route path="/member/register" element={<Register />} /> */}
+              <Route path="/member/register" element={<UnderConstruction />} />
 
             </Routes>
           </Box>
