@@ -18,12 +18,14 @@ import BedroomParentIcon from '@mui/icons-material/BedroomParent';
 import MapIcon from '@mui/icons-material/Map';
 import BookOnlineIcon from '../../assets/icons/booking.png';
 import PersonIcon from '@mui/icons-material/Person';
+import { routes } from '../../config/route-config';
 
 const menuItems = [
-  { label: "หน้าหลัก", icon: <HomeIcon />, path: "/" },
-  { label: "ห้อง", icon: <BedroomParentIcon />, path: "/room" },
+  { label: "หน้าหลัก", icon: <HomeIcon />, path: routes.main },
+  { label: "ห้อง", icon: <BedroomParentIcon />, path: routes.room },
   { label: "แผนที่", icon: <MapIcon />, path: "/map" },
   { label: "สมาชิก", icon: <PersonIcon />, path: "/member/login" },
+  { label: "จัดการ", icon: <PersonIcon />, path: routes.manage},
 ];
 
 const Navbar = () => {
@@ -33,10 +35,11 @@ const Navbar = () => {
 
   const getTabValue = () => {
     const path = location.pathname;
-    if (path === "/") return 0;
-    if (path === "/room") return 1;
-    if (path === "/map") return 2;
+    if (path === routes.main) return 0;
+    if (path === routes.room) return 1;
+    if (path === routes.map) return 2;
     if (path.startsWith("/member")) return 3;
+    if (path.startsWith("/manage")) return 4;
     return 0;
   };
 

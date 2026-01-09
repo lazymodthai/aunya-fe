@@ -5,6 +5,7 @@ import { validateEmailRFC } from '@utils/validation';
 import Noti from '@components/Noti';
 import Loading from "@components/Loading";
 import { useNavigate } from 'react-router-dom';
+import { routes } from 'src/config/route-config';
 
 const textFieldStyle: SxProps = {
   borderRadius: 2
@@ -27,11 +28,14 @@ function Login() {
     if(email === '' || password === '') return;
     try {
       const { data } = await AuthAPI.login({ email, password })
+      console.log('data',data)
       if(data){
+        localStorage.setItem('access_token', data.access_token)
         setError(false)
         setSuccess(true)
         setLoading(true)
         setTimeout(()=>setLoading(false), 1000)
+        window.location.href = '/'
       }
     } catch (error:any) {
       if(error.status === 400) {

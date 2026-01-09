@@ -1,10 +1,12 @@
 import { Button, Grid, SxProps, TextField, Typography, useMediaQuery } from '@mui/material'
 import { useState } from 'react'
-import AuthAPI from '@apis/auth';
+import AuthAPI, { RegisterPayload } from '@apis/auth';
 import { validateEmailRFC } from '@utils/validation';
 import Noti from '@components/Noti';
 import Loading from "@components/Loading";
 import { useNavigate } from 'react-router-dom';
+import { routes } from 'src/config/route-config';
+import { WindowOutlined } from '@mui/icons-material';
 
 const textFieldStyle: SxProps = {
   borderRadius: 2
@@ -29,21 +31,25 @@ function Register() {
   const navigate = useNavigate()
 
   const handleRegister = async () => {
-    if(email === '' || password === '') return;
+    const payload: RegisterPayload = {
+      email: email,
+      password: password,
+      firstName: firstName,
+      lastName: lastName,
+      phoneNumber: phoneNumber
+    }
     try {
-      const { data } = await AuthAPI.login({ email, password })
-      if(data){
-        setError(false)
-        setSuccess(true)
-        setLoading(true)
-        setTimeout(()=>setLoading(false), 1000)
-      }
-    } catch (error:any) {
-      if(error.status === 400) {
+      await AuthAPI.register(payload)
+      setSuccess(true)
+      setLoading(true)
+      setTimeout(() => setLoading(false), 1000)
+      window.location.href = '/member/login'
+    } catch (error: any) {
+      if (error.status === 400) {
         setError(true)
-        if(error.response.data.message[0] === 'email must be an email') return setErrorMessage('รูปแบบอีเมลไม่ถูกต้อง')
+        if (error.response.data.message[0] === 'email must be an email') return setErrorMessage('รูปแบบอีเมลไม่ถูกต้อง')
       }
-      if(error.status === 401) {
+      if (error.status === 401) {
         setError(true)
         return setErrorMessage('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
       }
@@ -82,7 +88,7 @@ function Register() {
         <TextField
           value={email}
           onChange={(e) => {
-            if(e.target.value === '') {
+            if (e.target.value === '') {
               setIsVaildEmail(true)
             } else {
               setIsVaildEmail(validateEmailRFC(e.target.value))
@@ -149,7 +155,7 @@ function Register() {
           fullWidth
           variant="text"
           sx={{ mt: -2, borderRadius: 2, height: 48 }}
-          onClick={()=>navigate('/member/login')}
+          onClick={() => navigate('/member/login')}
         >
           ย้อนกลับ
         </Button>

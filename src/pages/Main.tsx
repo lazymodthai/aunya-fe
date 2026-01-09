@@ -75,7 +75,7 @@ function Main() {
 
 
   const getPriceByMonth = async (month: number) => {
-    if (month < 1 || month > 12) return;
+    if (month < 0 || month > 11) return;
     try {
       const { data } = await PricesAPI.getPrices({
         month: month + 1,
