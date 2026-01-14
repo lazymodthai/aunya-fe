@@ -23,12 +23,12 @@ import BilliardIcon from './assets/icons/billiard.svg'
 import UnderConstruction from '@pages/UnderConstruction'
 
 const bookingData = [
-  {m: 4, d: 1, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
-  {m: 4, d: 2, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
-  {m: 4, d: 3, price: 6000, promotion: 'no', reserved: 'no', maintenance: 'no' },
-  {m: 4, d: 4, price: 6000, promotion: 'no', reserved: 'no', maintenance: 'no' },
-  {m: 4, d: 5, price: 5500, promotion: 'no', reserved: 'no', maintenance: 'no' },
-  {m: 4, d: 6, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
+  { m: 4, d: 1, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
+  { m: 4, d: 2, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
+  { m: 4, d: 3, price: 6000, promotion: 'no', reserved: 'no', maintenance: 'no' },
+  { m: 4, d: 4, price: 6000, promotion: 'no', reserved: 'no', maintenance: 'no' },
+  { m: 4, d: 5, price: 5500, promotion: 'no', reserved: 'no', maintenance: 'no' },
+  { m: 4, d: 6, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
 ];
 
 // สร้าง theme สำหรับ MUI
@@ -40,7 +40,7 @@ const theme = createTheme({
     secondary: {
       main: '#E8A87C',
     },
-    background: {  
+    background: {
       default: '#e3e3e3',
       paper: '#fff',
     },
@@ -72,56 +72,56 @@ const theme = createTheme({
 
 function App() {
   const isMobile = useMediaQuery("(max-width:800px)");
-  
+
   // นำค่า padding มาสร้างเป็นตัวแปรเพื่อใช้กำหนดให้สอดคล้องกับการแสดงผลบนมือถือหรือเดสก์ท็อป
   const padding = isMobile ? '8px' : '12px';
   const paddingTop = isMobile ? 10 : 12;
   const paddingBottom = isMobile ? 10 : 12;
-  
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-        <Box sx={{ 
-          width: '100vw', 
-          minWidth: '390px',
-          minHeight: '100vh', 
-          bgcolor: 'rgba(255, 255, 255, 0.87)' 
+      <Box sx={{
+        width: '100vw',
+        minWidth: '390px',
+        minHeight: '100vh',
+        bgcolor: 'rgba(255, 255, 255, 0.87)'
+      }}>
+        <Box sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1100,
+          minWidth: '390px'
         }}>
-          <Box sx={{ 
-            position: 'fixed', 
-            top: 0, 
-            left: 0, 
-            right: 0, 
-            zIndex: 1100,
-            minWidth: '390px'
-          }}>
-            <Navbar />
-          </Box>
-          <Box sx={{ 
-            padding: padding, 
-            display: 'flex', 
-            justifyContent: 'center', 
-            pt: paddingTop,
-            pb: paddingBottom,
-            minWidth: `calc(390px - ${padding} * 2)`
-          }}>
-            <Routes>
-              <Route path="/" element={<Main />} />
-              {/* <Route path="/room" element={<Room />} /> */}
-              <Route path="/room" element={<UnderConstruction />} />
-              <Route path="/map" element={<Map />} />
-              {/* <Route path="/booking" element={<Booking bookingData={bookingData}/>} /> */}
-              <Route path="/booking" element={<UnderConstruction />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-              {/* Member system */}
-              {/* <Route path="/member/login" element={<Login />} /> */}
-              <Route path="/member/login" element={<UnderConstruction />} />
-              {/* <Route path="/member/register" element={<Register />} /> */}
-              <Route path="/member/register" element={<UnderConstruction />} />
+          <Navbar />
+        </Box>
+        <Box sx={{
+          padding: padding,
+          display: 'flex',
+          justifyContent: 'center',
+          pt: paddingTop,
+          pb: paddingBottom,
+          minWidth: `calc(390px - ${padding} * 2)`
+        }}>
+          <Routes>
+            <Route path="/" element={<Main />} />
+            {/* <Route path="/room" element={<Room />} /> */}
+            <Route path="/room" element={<UnderConstruction />} />
+            <Route path="/map" element={<Map />} />
+            {/* <Route path="/booking" element={<Booking bookingData={bookingData}/>} /> */}
+            <Route path="/booking" element={<UnderConstruction />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Member system */}
+            <Route path="/member/login" element={<Login />} />
+            {/* <Route path="/member/login" element={<UnderConstruction />} /> */}
+            <Route path="/member/register" element={<Register />} />
+            {/* <Route path="/member/register" element={<UnderConstruction />} /> */}
 
-            </Routes>
-          </Box>
-          {!isMobile && (
+          </Routes>
+        </Box>
+        {!isMobile && (
           <Box
             sx={{
               width: '100vw',
@@ -141,7 +141,7 @@ function App() {
                     Aunya Pool Villa Nakhon Si Thammarat
                   </Typography>
                   <Typography variant="body2" sx={{ lineHeight: 1.6, opacity: 0.9 }}>
-                    บ้านพักตากอากาศที่มาพร้อมกับสิ่งอำนวยความสะดวกครบครัน 
+                    บ้านพักตากอากาศที่มาพร้อมกับสิ่งอำนวยความสะดวกครบครัน
                     เหมาะสำหรับการพักผ่อนกับครอบครัวและเพื่อนฝูง
                   </Typography>
                 </Grid>
@@ -196,7 +196,7 @@ function App() {
             </Box>
           </Box>
         )}
-        </Box>
+      </Box>
     </ThemeProvider>
   )
 }

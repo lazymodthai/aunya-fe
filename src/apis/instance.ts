@@ -2,6 +2,7 @@ import axios from "axios";
 
 
 const instanceAuth = axios.create({
+  withCredentials: true,
   baseURL: import.meta.env.VITE_BASE_URL || 'https://api.aunyapoolvilla.com/',
   timeout: 10000,
   headers: {
@@ -10,6 +11,7 @@ const instanceAuth = axios.create({
 });
 
 const instanceBooking = axios.create({
+  withCredentials: true,
   baseURL: import.meta.env.VITE_BASE_URL || 'https://api.aunyapoolvilla.com/',
   timeout: 10000,
   headers: {
@@ -18,6 +20,7 @@ const instanceBooking = axios.create({
 });
 
 const instancePrices = axios.create({
+  withCredentials: true,
   baseURL: import.meta.env.VITE_BASE_URL || 'https://api.aunyapoolvilla.com/',
   timeout: 10000,
   headers: {

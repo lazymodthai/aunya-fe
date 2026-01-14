@@ -23,29 +23,44 @@ function Register() {
   const [isValidEmail, setIsVaildEmail] = useState<boolean>(true)
   const [success, setSuccess] = useState<boolean>(false)
   const [error, setError] = useState<boolean>(false)
+  const [errorType, setErrorType] = useState<string>('')
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
+
 
   const navigate = useNavigate()
 
   const handleRegister = async () => {
-    if(email === '' || password === '') return;
+    if (!email || !password || !verifyPassword || !firstName || !lastName || !phoneNumber) {
+      setError(true)
+      setErrorType('empty')
+      return setErrorMessage('กรุณากรอกข้อมูลให้ครบถ้วน')
+    }
+    if (!isValidEmail) {
+      setError(true)
+      setErrorType('email')
+      return setErrorMessage('รูปแบบอีเมลไม่ถูกต้อง')
+    }
+    if (password !== verifyPassword) {
+      setError(true)
+      setErrorType('password')
+      return setErrorMessage('รหัสผ่านไม่ตรงกัน')
+    }
+    if (email === '' || password === '') return;
     try {
-      const { data } = await AuthAPI.login({ email, password })
-      if(data){
+      const { data } = await AuthAPI.register({ email, password, firstName, lastName, phoneNumber })
+      if (data) {
         setError(false)
         setSuccess(true)
         setLoading(true)
-        setTimeout(()=>setLoading(false), 1000)
+        setTimeout(() => setLoading(false), 1000)
       }
-    } catch (error:any) {
-      if(error.status === 400) {
+    } catch (error: any) {
+      console.log(error)
+      if (error.status === 409) {
         setError(true)
-        if(error.response.data.message[0] === 'email must be an email') return setErrorMessage('รูปแบบอีเมลไม่ถูกต้อง')
-      }
-      if(error.status === 401) {
-        setError(true)
-        return setErrorMessage('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
+        setErrorType('email')
+        if (error.response.data.message === 'Email already exists') return setErrorMessage('อีเมลถูกใช้แล้ว')
       }
     }
   }
@@ -82,7 +97,7 @@ function Register() {
         <TextField
           value={email}
           onChange={(e) => {
-            if(e.target.value === '') {
+            if (e.target.value === '') {
               setIsVaildEmail(true)
             } else {
               setIsVaildEmail(validateEmailRFC(e.target.value))
@@ -93,8 +108,8 @@ function Register() {
           type="email"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
-          error={!isValidEmail}
-          helperText={!isValidEmail ? "รูปแบบอีเมลไม่ถูกต้อง" : ""}
+          error={errorType === 'email' || (errorType === 'empty' && !email)}
+          helperText={error ? errorMessage : ""}
         />
         <TextField
           value={password}
@@ -103,6 +118,8 @@ function Register() {
           type="password"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
+          error={errorType === 'password' || (errorType === 'empty' && !password)}
+          helperText={error ? errorMessage : ""}
         />
         <TextField
           value={verifyPassword}
@@ -111,6 +128,8 @@ function Register() {
           type="password"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
+          error={errorType === 'password' || (errorType === 'empty' && !verifyPassword)}
+          helperText={error ? errorMessage : ""}
         />
         <TextField
           value={firstName}
@@ -119,6 +138,8 @@ function Register() {
           type="text"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
+          error={errorType === 'empty' && !firstName}
+          helperText={error ? errorMessage : ""}
         />
         <TextField
           value={lastName}
@@ -127,6 +148,8 @@ function Register() {
           type="text"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
+          error={errorType === 'empty' && !lastName}
+          helperText={error ? errorMessage : ""}
         />
         <TextField
           value={phoneNumber}
@@ -135,6 +158,8 @@ function Register() {
           type="text"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
+          error={errorType === 'empty' && !phoneNumber}
+          helperText={error ? errorMessage : ""}
         />
         <Button
           fullWidth
@@ -149,7 +174,7 @@ function Register() {
           fullWidth
           variant="text"
           sx={{ mt: -2, borderRadius: 2, height: 48 }}
-          onClick={()=>navigate('/member/login')}
+          onClick={() => navigate('/member/login')}
         >
           ย้อนกลับ
         </Button>
