@@ -160,11 +160,11 @@ function Booking(props: Props) {
     formData.append('typeslip', "slip");
 
     try {
-      // const { data } = await UploadfileAPI.uploadFile(formData);
-      // console.log('data', data.slipVerification?.code === "200000");
-      // if (data.slipVerification.code === "200000") {
+      const { data } = await UploadfileAPI.uploadFile(formData);
+      console.log('data', data.slipVerification?.code === "200000");
+      if (data.slipVerification.code === "200000") {
         setStep(4);
-      // }
+      }
     } catch (e: any) {
       console.log(e.response.data.message);
       if (e.response.data.message === "notfound  QR Code in file should upload picture is correct") {
