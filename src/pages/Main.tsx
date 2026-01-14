@@ -34,38 +34,39 @@ import { useEffect, useState } from "react"
 const roomId = import.meta.env.VITE_ROOM_ID
 
 const info = [
-  { key: 'room', text: "3 ห้องนอน", icon: <Box component={'img'} src={BedIcon} width={24} />},
-  { key: 'bath', text: "3 ห้องน้ำ", icon: <Box component={'img'} src={ShowerIcon} width={24} />},
-  { key: 'people', text: "รองรับ 8 - 10 คน", icon: <Box component={'img'} src={PeopleIcon} width={24} />},
-  { key: 'plus', text: "ที่นอนเสริม 2 ชุด", icon: <Box component={'img'} src={AddUserIcon} width={24} />},
-  { key: 'car', text: "ที่จอดรถมากกว่า 4 คัน", icon: <Box component={'img'} src={CarIcon} width={24} />},
+  { key: 'room', text: "3 ห้องนอน", icon: <Box component={'img'} src={BedIcon} width={24} /> },
+  { key: 'bath', text: "3 ห้องน้ำ", icon: <Box component={'img'} src={ShowerIcon} width={24} /> },
+  { key: 'people', text: "รองรับ 8 - 10 คน", icon: <Box component={'img'} src={PeopleIcon} width={24} /> },
+  { key: 'plus', text: "ที่นอนเสริม 2 ชุด", icon: <Box component={'img'} src={AddUserIcon} width={24} /> },
+  { key: 'car', text: "ที่จอดรถมากกว่า 4 คัน", icon: <Box component={'img'} src={CarIcon} width={24} /> },
 ]
 
 const facilities = [
-  { key: 'pool', text: "สระว่ายน้ำระบบเกลือ ลึก 1.2 เมตร", icon: <Box component={'img'} src={PoolIcon} width={24} />},
-  { key: 'bathtub', text: "อ่างอาบน้ำ เครื่องทำน้ำอุ่น", icon: <Box component={'img'} src={BathtubIcon} width={24} />},
-  { key: 'hall', text: "ห้องโถงกว้าง สูงโปร่งสบาย", icon: <Box component={'img'} src={SofaIcon} width={24} />},
-  { key: 'karaoke', text: "ลำโพง JBL Partybox พร้อมไมค์", icon: <Box component={'img'} src={KaraokeIcon} width={24} />},
-  { key: 'tv', text: "Smart TV", icon: <Box component={'img'} src={TvIcon} width={24} />},
-  { key: 'wifi', text: "Free Wifi", icon: <Box component={'img'} src={WifiIcon} width={24} />},
-  { key: 'bunkbed', text: "เตียง 2 ชั้นพร้อมสไลด์เดอร์", icon: <Box component={'img'} src={BunkBedIcon} width={24} />},
-  { key: 'rubber-duck', text: "ห่วงยางสำหรับเด็ก", icon: <Box component={'img'} src={RubberDuckIcon} width={24} />},
-  { key: 'rooftop', text: "ชั้นดาดฟ้ารับลมชมวิว 360 องศา", icon: <Box component={'img'} src={TreesIcon} width={24} />},
-  { key: 'pool-table', text: "โต๊ะพูลขนาด 7 ฟุต", icon: <Box component={'img'} src={BilliardIcon} width={24} />},
-  { key: 'grill', text: "เตาปิ้งย่าง", icon: <Box component={'img'} src={BbqIcon} width={24} />},
-  { key: 'kitchen', text: "เครื่องใช้ไฟฟ้าในครัว", icon: <Box component={'img'} src={MicrowaveIcon} width={24} />},
-  { key: 'water', text: "ฟรีน้ำดื่ม 1 แพ็ค", icon: <Box component={'img'} src={WaterIcon} width={24} />},
+  { key: 'pool', text: "สระว่ายน้ำระบบเกลือ ลึก 1.2 เมตร", icon: <Box component={'img'} src={PoolIcon} width={24} /> },
+  { key: 'bathtub', text: "อ่างอาบน้ำ เครื่องทำน้ำอุ่น", icon: <Box component={'img'} src={BathtubIcon} width={24} /> },
+  { key: 'hall', text: "ห้องโถงกว้าง สูงโปร่งสบาย", icon: <Box component={'img'} src={SofaIcon} width={24} /> },
+  { key: 'karaoke', text: "ลำโพง JBL Partybox พร้อมไมค์", icon: <Box component={'img'} src={KaraokeIcon} width={24} /> },
+  { key: 'tv', text: "Smart TV", icon: <Box component={'img'} src={TvIcon} width={24} /> },
+  { key: 'wifi', text: "Free Wifi", icon: <Box component={'img'} src={WifiIcon} width={24} /> },
+  { key: 'bunkbed', text: "เตียง 2 ชั้นพร้อมสไลด์เดอร์", icon: <Box component={'img'} src={BunkBedIcon} width={24} /> },
+  { key: 'rubber-duck', text: "ห่วงยางสำหรับเด็ก", icon: <Box component={'img'} src={RubberDuckIcon} width={24} /> },
+  { key: 'rooftop', text: "ชั้นดาดฟ้ารับลมชมวิว 360 องศา", icon: <Box component={'img'} src={TreesIcon} width={24} /> },
+  { key: 'pool-table', text: "โต๊ะพูลขนาด 7 ฟุต", icon: <Box component={'img'} src={BilliardIcon} width={24} /> },
+  { key: 'grill', text: "เตาปิ้งย่าง", icon: <Box component={'img'} src={BbqIcon} width={24} /> },
+  { key: 'kitchen', text: "เครื่องใช้ไฟฟ้าในครัว", icon: <Box component={'img'} src={MicrowaveIcon} width={24} /> },
+  { key: 'water', text: "ฟรีน้ำดื่ม 1 แพ็ค", icon: <Box component={'img'} src={WaterIcon} width={24} /> },
 ]
 
 const policy = [
-  { key: 'lound', text: "ใช้เสียงดังได้ถึงเที่ยงคืน", icon: <Box component={'img'} src={SpeakerIcon} width={24} />},
-  { key: 'pet', text: "ห้ามนำสัตว์เลี้ยงเข้าพัก", icon: <Box component={'img'} src={NopetIcon} width={24} />},
+  { key: 'lound', text: "ใช้เสียงดังได้ถึงเที่ยงคืน", icon: <Box component={'img'} src={SpeakerIcon} width={24} /> },
+  { key: 'pet', text: "ห้ามนำสัตว์เลี้ยงเข้าพัก", icon: <Box component={'img'} src={NopetIcon} width={24} /> },
 ]
 
 interface BookingData {
   date: string;
   price: number;
   status: 'Available' | 'Unavailable' | 'Maintenance';
+  isMaintenance: boolean;
   [key: string]: any;
 }
 
@@ -88,10 +89,10 @@ function Main() {
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     getPriceByMonth(new Date().getMonth())
-  },[])
-  
+  }, [])
+
   return (
     <>
       <Grid

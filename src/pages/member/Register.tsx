@@ -1,12 +1,10 @@
-import { Button, Grid, SxProps, TextField, Typography, useMediaQuery } from '@mui/material'
-import { useState } from 'react'
-import AuthAPI, { RegisterPayload } from '@apis/auth';
+import { Button, Grid, SxProps, TextField, Typography, useMediaQuery } from '@mui/material';
+import { useState } from 'react';
+import AuthAPI from '@apis/auth';
 import { validateEmailRFC } from '@utils/validation';
 import Noti from '@components/Noti';
 import Loading from "@components/Loading";
 import { useNavigate } from 'react-router-dom';
-import { routes } from 'src/config/route-config';
-import { WindowOutlined } from '@mui/icons-material';
 
 const textFieldStyle: SxProps = {
   borderRadius: 2
@@ -25,33 +23,44 @@ function Register() {
   const [isValidEmail, setIsVaildEmail] = useState<boolean>(true)
   const [success, setSuccess] = useState<boolean>(false)
   const [error, setError] = useState<boolean>(false)
+  const [errorType, setErrorType] = useState<string>('')
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
+
 
   const navigate = useNavigate()
 
   const handleRegister = async () => {
-    const payload: RegisterPayload = {
-      email: email,
-      password: password,
-      firstName: firstName,
-      lastName: lastName,
-      phoneNumber: phoneNumber
+    if (!email || !password || !verifyPassword || !firstName || !lastName || !phoneNumber) {
+      setError(true)
+      setErrorType('empty')
+      return setErrorMessage('กรุณากรอกข้อมูลให้ครบถ้วน')
     }
+    if (!isValidEmail) {
+      setError(true)
+      setErrorType('email')
+      return setErrorMessage('รูปแบบอีเมลไม่ถูกต้อง')
+    }
+    if (password !== verifyPassword) {
+      setError(true)
+      setErrorType('password')
+      return setErrorMessage('รหัสผ่านไม่ตรงกัน')
+    }
+    if (email === '' || password === '') return;
     try {
-      await AuthAPI.register(payload)
-      setSuccess(true)
-      setLoading(true)
-      setTimeout(() => setLoading(false), 1000)
-      window.location.href = '/member/login'
-    } catch (error: any) {
-      if (error.status === 400) {
-        setError(true)
-        if (error.response.data.message[0] === 'email must be an email') return setErrorMessage('รูปแบบอีเมลไม่ถูกต้อง')
+      const { data } = await AuthAPI.register({ email, password, firstName, lastName, phoneNumber })
+      if (data) {
+        setError(false)
+        setSuccess(true)
+        setLoading(true)
+        setTimeout(() => setLoading(false), 1000)
       }
-      if (error.status === 401) {
+    } catch (error: any) {
+      console.log(error)
+      if (error.status === 409) {
         setError(true)
-        return setErrorMessage('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
+        setErrorType('email')
+        if (error.response.data.message === 'Email already exists') return setErrorMessage('อีเมลถูกใช้แล้ว')
       }
     }
   }
@@ -99,8 +108,8 @@ function Register() {
           type="email"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
-          error={!isValidEmail}
-          helperText={!isValidEmail ? "รูปแบบอีเมลไม่ถูกต้อง" : ""}
+          error={errorType === 'email' || (errorType === 'empty' && !email)}
+          helperText={error ? errorMessage : ""}
         />
         <TextField
           value={password}
@@ -109,6 +118,8 @@ function Register() {
           type="password"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
+          error={errorType === 'password' || (errorType === 'empty' && !password)}
+          helperText={error ? errorMessage : ""}
         />
         <TextField
           value={verifyPassword}
@@ -117,6 +128,8 @@ function Register() {
           type="password"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
+          error={errorType === 'password' || (errorType === 'empty' && !verifyPassword)}
+          helperText={error ? errorMessage : ""}
         />
         <TextField
           value={firstName}
@@ -125,6 +138,8 @@ function Register() {
           type="text"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
+          error={errorType === 'empty' && !firstName}
+          helperText={error ? errorMessage : ""}
         />
         <TextField
           value={lastName}
@@ -133,6 +148,8 @@ function Register() {
           type="text"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
+          error={errorType === 'empty' && !lastName}
+          helperText={error ? errorMessage : ""}
         />
         <TextField
           value={phoneNumber}
@@ -141,6 +158,8 @@ function Register() {
           type="text"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
+          error={errorType === 'empty' && !phoneNumber}
+          helperText={error ? errorMessage : ""}
         />
         <Button
           fullWidth

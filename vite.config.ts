@@ -23,6 +23,7 @@ export default defineConfig({
   // }
   server: {
     host: true,
+    port: 8022,
     allowedHosts: [
       'www.aunyapoolvilla.com',
       'aunyapoolvilla.com'

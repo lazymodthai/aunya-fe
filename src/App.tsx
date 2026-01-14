@@ -127,11 +127,11 @@ function App() {
         }}>
           <Routes>
             <Route path="/" element={<Main />} />
-            <Route path="/room" element={<Room />} />
-            {/* <Route path="/room" element={<UnderConstruction />} /> */}
+            {/* <Route path="/room" element={<Room />} /> */}
+            <Route path="/room" element={<UnderConstruction />} />
             <Route path="/map" element={<Map />} />
-            <Route path="/booking" element={<Booking bookingData={bookingData} />} />
-            {/* <Route path="/booking" element={<UnderConstruction />} /> */}
+            {/* <Route path="/booking" element={<Booking bookingData={bookingData}/>} /> */}
+            <Route path="/booking" element={<UnderConstruction />} />
             <Route path="*" element={<Navigate to="/" replace />} />
             {/* Member system */}
             <Route path="/member/login" element={<Login />} />

@@ -24,6 +24,7 @@ interface BookingData {
   date: string; // Format: "YYYY-MM-DD"
   price: number;
   status: 'Available' | 'Unavailable' | 'Maintenance';
+  isMaintenance: boolean;
 }
 
 // Props for the BookingCalendar component
@@ -152,7 +153,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
     const startOfThisActualMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     return startOfCurrentDisplayMonth > startOfThisActualMonth;
   };
-  
+
   const canGoToNextMonth = () => {
     const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
     // Month is 0-indexed, so +3 gives you 3 months in the future.
@@ -160,20 +161,20 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
     const limitMonth = new Date(today.getFullYear(), today.getMonth() + 4, 1);
     return nextMonth < limitMonth;
   };
-  
+
   // Handle month navigation
   const handlePreviousMonth = () => {
     onChangeMonth(currentDate.getMonth() - 1);
     if (canGoToPreviousMonth()) {
-        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
     }
   };
-  
+
   const handleNextMonth = () => {
-      onChangeMonth(currentDate.getMonth() + 1);
-      if (canGoToNextMonth()) {
-        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-      }
+    onChangeMonth(currentDate.getMonth() + 1);
+    if (canGoToNextMonth()) {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    }
   };
 
   // Create calendar data
@@ -197,7 +198,8 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
         calendarData.push({
           date: dateString,
           price: 0,
-          status: 'Available'
+          status: 'Available',
+          isMaintenance: false
         });
       }
     }
@@ -226,7 +228,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
   };
 
   const handleDayClick = (dayData: BookingData) => {
-    if (dayData.status === 'Available') {
+    if (dayData.status === 'Available' && !dayData.isMaintenance) {
       setSelectedDay(dayData);
       setIsDrawerOpen(true);
     }
@@ -245,7 +247,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
   };
 
   const getStatusText = (dayData: BookingData): string => {
-    if (dayData.status === 'Maintenance') return 'ปิดปรับปรุง';
+    if (dayData.isMaintenance) return 'ปิดปรับปรุง';
     if (dayData.status === 'Unavailable') return 'ไม่ว่าง';
     return 'ว่าง';
   };
@@ -255,7 +257,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
   };
 
   const getStatusColor = (dayData: BookingData): string => {
-    if (dayData.status === 'Maintenance') return theme.palette.warning.main;
+    if (dayData.isMaintenance) return theme.palette.warning.main;
     if (dayData.status === 'Unavailable') return theme.palette.error.main;
     return theme.palette.success.main;
   };
@@ -287,7 +289,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
       {/* Day names row - CORRECTED GRID */}
       <Grid container spacing={1} sx={{ mb: 1 }}>
         {dayNames.map((day, index) => (
-          <Grid size={12/7} key={index}>
+          <Grid size={12 / 7} key={index}>
             <Typography
               align="center"
               sx={{
@@ -309,11 +311,11 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
           const year = dayData ? parseInt(dayData.date.split('-')[0]) : 0;
 
           return (
-            <Grid size={12/7} key={index}>
+            <Grid size={12 / 7} key={index}>
               {dayData ? (
                 <DayCell
                   isUnavailable={dayData.status === "Unavailable"}
-                  isMaintenance={dayData.status === "Maintenance"}
+                  isMaintenance={dayData.isMaintenance}
                   isToday={isTodayCheck(day, month, year)}
                   isCurrentMonth={true}
                   elevation={0}
@@ -321,20 +323,18 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
                 >
                   <DayNumber>{day}</DayNumber>
 
-                  {dayData.price > 0 && (
+                  {dayData.price > 0 && !dayData.isMaintenance && (
                     <Price>{formatPrice(dayData.price)}</Price>
                   )}
 
                   {(dayData.status === "Unavailable" ||
-                    dayData.status === "Maintenance") && (
+                    dayData.isMaintenance) && (
                       <StatusIndicator
-                        isMaintenance={dayData.status === "Maintenance"}
+                        isMaintenance={dayData.isMaintenance}
                       >
-                        {dayData.status === "Maintenance"
+                        {dayData.isMaintenance
                           ? "ปิดปรับปรุง"
-                          : isMobile
-                            ? "จอง"
-                            : "ติดจอง"}
+                          : "ไม่ว่าง"}
                       </StatusIndicator>
                     )}
                 </DayCell>

@@ -7,8 +7,8 @@ const user = "users"
 
 
 export default class AuthAPI extends InstanceAuthAPI {
-  static login(payload:{email: string, password: string}): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
-    return this.api.post(`${path}/login/`, payload);
+  static login(payload: { email: string, password: string }): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
+    return this.api.post(`${path}/login`, payload);
   }
 
   static register(payload:RegisterPayload): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
@@ -20,7 +20,7 @@ export default class AuthAPI extends InstanceAuthAPI {
   }
 
   static logout(): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
-    return this.api.post(`${path}/logout/`);
+    return this.api.post(`${path}/logout`);
   }
 }
 
@@ -31,6 +31,3 @@ interface RegisterPayload {
   lastName: string;
   phoneNumber: string;
 }
-
-export type { RegisterPayload }
-
