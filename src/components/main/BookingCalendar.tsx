@@ -20,7 +20,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 // Define the type for the booking data
-interface BookingData {
+export interface BookingData {
   date: string; // Format: "YYYY-MM-DD"
   price: number;
   status: 'Available' | 'Unavailable' | 'Maintenance';
@@ -31,6 +31,24 @@ interface BookingData {
 interface BookingCalendarProps {
   bookingData: BookingData[];
   onChangeMonth: (val: number) => void;
+  /** Initial month to display (0-11), defaults to current month */
+  startMonth?: number;
+  /** Initial year to display, defaults to current year */
+  startYear?: number;
+  /** Disable navigation to past months, defaults to true */
+  disablePast?: boolean;
+  /** Disable navigation to future months, defaults to false */
+  disableFuture?: boolean;
+  /** Number of months allowed to navigate into the future, defaults to 3 */
+  futureMonthRange?: number;
+  /** Number of months allowed to navigate into the past, defaults to 0 */
+  pastMonthRange?: number;
+  /** Hide all prices on the calendar, defaults to false */
+  hidePrice?: boolean;
+  /** Show the legend below the calendar, defaults to true */
+  showLegend?: boolean;
+  /** Custom callback when a day is clicked */
+  onDayClick?: (dayData: BookingData) => void;
 }
 
 // Styled components
@@ -124,17 +142,37 @@ const DrawerContent = styled(Box)(({ theme }) => ({
 }));
 
 // Main component
-const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChangeMonth }) => {
+const BookingCalendar: React.FC<BookingCalendarProps> = ({
+  bookingData,
+  onChangeMonth,
+  startMonth,
+  startYear,
+  disablePast = true,
+  disableFuture = false,
+  futureMonthRange = 3,
+  pastMonthRange = 0,
+  hidePrice = false,
+  showLegend = true,
+  onDayClick,
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery("(max-width:940px)");
   const navigate = useNavigate()
 
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const today = new Date();
+
+  // Initialize with startMonth/startYear or current date
+  const getInitialDate = () => {
+    const year = startYear ?? today.getFullYear();
+    const month = startMonth ?? today.getMonth();
+    return new Date(year, month, 1);
+  };
+
+  const [currentDate, setCurrentDate] = useState<Date>(getInitialDate);
   const [currentMonthData, setCurrentMonthData] = useState<(BookingData | null)[]>([]);
   const [selectedDay, setSelectedDay] = useState<BookingData | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
-  const today = new Date();
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
   const daysInMonth = lastDayOfMonth.getDate();
@@ -149,16 +187,26 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
   };
 
   const canGoToPreviousMonth = () => {
-    const startOfCurrentDisplayMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const startOfThisActualMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    return startOfCurrentDisplayMonth > startOfThisActualMonth;
+    if (disablePast) {
+      const startOfCurrentDisplayMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      const startOfThisActualMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      return startOfCurrentDisplayMonth > startOfThisActualMonth;
+    }
+    // Check pastMonthRange limit
+    const previousMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+    const limitMonth = new Date(today.getFullYear(), today.getMonth() - pastMonthRange, 1);
+    return previousMonth >= limitMonth;
   };
 
   const canGoToNextMonth = () => {
+    if (disableFuture) {
+      const startOfCurrentDisplayMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      const startOfThisActualMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      return startOfCurrentDisplayMonth < startOfThisActualMonth;
+    }
+    // Check futureMonthRange limit
     const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-    // Month is 0-indexed, so +3 gives you 3 months in the future.
-    // We want to be able to navigate TO the 3rd month, so the limit is the start of the 4th month.
-    const limitMonth = new Date(today.getFullYear(), today.getMonth() + 4, 1);
+    const limitMonth = new Date(today.getFullYear(), today.getMonth() + futureMonthRange + 1, 1);
     return nextMonth < limitMonth;
   };
 
@@ -229,8 +277,12 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
 
   const handleDayClick = (dayData: BookingData) => {
     if (dayData.status === 'Available' && !dayData.isMaintenance) {
-      setSelectedDay(dayData);
-      setIsDrawerOpen(true);
+      if (onDayClick) {
+        onDayClick(dayData);
+      } else {
+        setSelectedDay(dayData);
+        setIsDrawerOpen(true);
+      }
     }
   };
 
@@ -323,7 +375,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
                 >
                   <DayNumber>{day}</DayNumber>
 
-                  {dayData.price > 0 && !dayData.isMaintenance && dayData.status === 'Available' && (
+                  {!hidePrice && dayData.price > 0 && !dayData.isMaintenance && dayData.status === 'Available' && (
                     <Price>{formatPrice(dayData.price)}</Price>
                   )}
 
@@ -346,53 +398,55 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
         })}
       </Grid>
 
-      <Box
-        sx={{
-          mt: 2,
-          display: "flex",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", mr: 2, mb: 1 }}>
-          <Box
-            sx={{
-              width: 16,
-              height: 16,
-              backgroundColor: "rgba(255, 0, 0, 0.1)",
-              mr: 1,
-              border: "1px solid #ddd",
-            }}
-          />
-          <Typography variant="caption">ไม่ว่าง</Typography>
-        </Box>
+      {showLegend && (
+        <Box
+          sx={{
+            mt: 2,
+            display: "flex",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", mr: 2, mb: 1 }}>
+            <Box
+              sx={{
+                width: 16,
+                height: 16,
+                backgroundColor: "rgba(255, 0, 0, 0.1)",
+                mr: 1,
+                border: "1px solid #ddd",
+              }}
+            />
+            <Typography variant="caption">ไม่ว่าง</Typography>
+          </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", mr: 2, mb: 1 }}>
-          <Box
-            sx={{
-              width: 16,
-              height: 16,
-              backgroundColor: "rgba(255, 165, 0, 0.1)",
-              mr: 1,
-              border: "1px solid #ddd",
-            }}
-          />
-          <Typography variant="caption">ปิดปรับปรุง</Typography>
-        </Box>
+          <Box sx={{ display: "flex", alignItems: "center", mr: 2, mb: 1 }}>
+            <Box
+              sx={{
+                width: 16,
+                height: 16,
+                backgroundColor: "rgba(255, 165, 0, 0.1)",
+                mr: 1,
+                border: "1px solid #ddd",
+              }}
+            />
+            <Typography variant="caption">ปิดปรับปรุง</Typography>
+          </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", mr: 2, mb: 1 }}>
-          <Box
-            sx={{
-              width: 16,
-              height: 16,
-              backgroundColor: "rgba(66, 165, 245, 0.1)",
-              mr: 1,
-              border: `1px solid ${theme.palette.primary.main}`,
-            }}
-          />
-          <Typography variant="caption">วันนี้</Typography>
+          <Box sx={{ display: "flex", alignItems: "center", mr: 2, mb: 1 }}>
+            <Box
+              sx={{
+                width: 16,
+                height: 16,
+                backgroundColor: "rgba(66, 165, 245, 0.1)",
+                mr: 1,
+                border: `1px solid ${theme.palette.primary.main}`,
+              }}
+            />
+            <Typography variant="caption">วันนี้</Typography>
+          </Box>
         </Box>
-      </Box>
+      )}
 
       {isMobile && (
         <Drawer
