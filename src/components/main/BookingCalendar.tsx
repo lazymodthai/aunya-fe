@@ -375,8 +375,8 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                 >
                   <DayNumber>{day}</DayNumber>
 
-                  {!hidePrice && dayData.price > 0 && !dayData.isMaintenance && dayData.status === 'Available' && (
-                    <Price>{formatPrice(dayData.price)}</Price>
+                  {!hidePrice && !dayData.isMaintenance && dayData.status === 'Available' && (
+                    <Price>{dayData.price > 0 ? formatPrice(dayData.price) : 'สอบถาม'}</Price>
                   )}
 
                   {(dayData.status === "Unavailable" ||
@@ -504,7 +504,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                       color: "#000",
                     }}
                   >
-                    {getPrice(selectedDay).toLocaleString("th-TH")}
+                    {getPrice(selectedDay) === 0 ? 'สอบถาม' : getPrice(selectedDay).toLocaleString("th-TH")}
                   </Typography>
                 </Box>
 
