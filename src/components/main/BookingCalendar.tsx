@@ -323,7 +323,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookingData, onChange
                 >
                   <DayNumber>{day}</DayNumber>
 
-                  {dayData.price > 0 && !dayData.isMaintenance && (
+                  {dayData.price > 0 && !dayData.isMaintenance && dayData.status === 'Available' && (
                     <Price>{formatPrice(dayData.price)}</Price>
                   )}
 
