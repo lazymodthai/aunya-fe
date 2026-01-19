@@ -5,10 +5,11 @@ import { clearUser, setUser, userSelector } from '@store/slices/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
-function AdminPage() {
+function UserPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { userData } = useSelector(userSelector);
+
 
   const handleLogout = async () => {
     try {
@@ -25,12 +26,12 @@ function AdminPage() {
     try {
       const { data } = await AuthAPI.getProfile()
       if (data.user.isAdmin) {
-        dispatch(setUser(data.user));
+        navigate('/member/admin')
       } else if (!data.user.isActive) {
         dispatch(clearUser());
         navigate('/member/login');
       } else {
-        navigate('/member/user')
+        dispatch(setUser(data.user));
       }
     } catch (error) {
       dispatch(clearUser());
@@ -50,7 +51,7 @@ function AdminPage() {
       justifyContent="center"
       sx={{ minHeight: '100vh', gap: 2 }}
     >
-      <Typography variant="h4">Admin Page</Typography>
+      <Typography variant="h4">User Page</Typography>
       <Button
         variant="contained"
         color="error"
@@ -62,4 +63,4 @@ function AdminPage() {
   );
 }
 
-export default AdminPage;
+export default UserPage;

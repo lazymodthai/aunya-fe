@@ -2,14 +2,28 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 
 export type UserInfoType = {
+  id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  isActive: boolean;
+  isAdmin: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 const initialState = {
-  userInfo: {
+  userData: {
+    id: "",
     email: "",
-    name: "",
+    firstName: "",
+    lastName: "",
+    phoneNumber: "",
+    isActive: false,
+    isAdmin: false,
+    createdAt: "",
+    updatedAt: ""
   }
 };
 
@@ -17,17 +31,17 @@ const userSlice = createSlice({
   name: "user",
   initialState: initialState,
   reducers: {
-    setUserInfo: (state, actions: PayloadAction<UserInfoType>) => {
-      state.userInfo = actions.payload
+    setUser: (state, actions: PayloadAction<UserInfoType>) => {
+      state.userData = actions.payload
     },
     clearUser: (state) => {
-      state.userInfo = initialState.userInfo
+      state.userData = initialState.userData
     }
-    
+
   },
-  extraReducers: () => {},
+  extraReducers: () => { },
 })
 
-export const { setUserInfo, clearUser } = userSlice.actions
+export const { setUser, clearUser } = userSlice.actions
 export const userSelector = (store: RootState) => store.userReducer
 export default userSlice.reducer

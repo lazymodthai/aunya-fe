@@ -6,10 +6,8 @@ import Box from '@mui/material/Box'
 
 import Navbar from './components/main/Navbar'
 import Main from './pages/Main'
-import Room from './pages/Room'
 import Map from './pages/Map'
 import { Grid, Typography, useMediaQuery } from '@mui/material'
-import Booking from './pages/Booking'
 import Login from './pages/member/Login'
 import Register from './pages/member/Register'
 
@@ -22,17 +20,11 @@ import TreesIcon from './assets/icons/trees.svg'
 import BilliardIcon from './assets/icons/billiard.svg'
 import UnderConstruction from '@pages/UnderConstruction'
 import ManangeBooking from '@pages/ManangeBooking'
-import AuthAPI from '@apis/auth'
-import { useEffect } from 'react'
+import AdminPage from '@pages/member/AdminPage'
+import UserPage from '@pages/member/UserPage'
+import { userSelector } from '@store/slices/userSlice'
+import { useSelector } from 'react-redux'
 import.meta.env.MODE
-const bookingData = [
-  { m: 4, d: 1, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
-  { m: 4, d: 2, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
-  { m: 4, d: 3, price: 6000, promotion: 'no', reserved: 'no', maintenance: 'no' },
-  { m: 4, d: 4, price: 6000, promotion: 'no', reserved: 'no', maintenance: 'no' },
-  { m: 4, d: 5, price: 5500, promotion: 'no', reserved: 'no', maintenance: 'no' },
-  { m: 4, d: 6, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
-];
 
 // สร้าง theme สำหรับ MUI
 const theme = createTheme({
@@ -76,27 +68,13 @@ const theme = createTheme({
 function App() {
   const isMobile = useMediaQuery("(max-width:800px)");
   const isDev = import.meta.env.MODE === 'development';
-  const accessToken = localStorage.getItem('access_token')
 
   // นำค่า padding มาสร้างเป็นตัวแปรเพื่อใช้กำหนดให้สอดคล้องกับการแสดงผลบนมือถือหรือเดสก์ท็อป
   const padding = isMobile ? '8px' : '12px';
   const paddingTop = isMobile ? 10 : 12;
   const paddingBottom = isMobile ? 10 : 12;
-  const fetchProfile = async () => {
-    if (!accessToken) return
-    try {
-      const { data } = await AuthAPI.getProfile()
-      console.log('data', data);
 
-    } catch (e) {
-      console.log(e)
-    }
-
-  }
-
-  useEffect(() => {
-    fetchProfile()
-  }, [])
+  const { userData } = useSelector(userSelector)
 
   return (
     <ThemeProvider theme={theme}>
@@ -134,8 +112,11 @@ function App() {
             <Route path="/booking" element={<UnderConstruction />} />
             <Route path="*" element={<Navigate to="/" replace />} />
             {/* Member system */}
-            <Route path="/member/login" element={<Login />} />
+            <Route path="/member/login" element={userData.isAdmin ? <Navigate to="/member/admin" /> : userData.isActive ? <Navigate to="/member/user" /> : <Login />} />
             {/* <Route path="/member/login" element={<UnderConstruction />} /> */}
+            <Route path="/member/admin" element={<AdminPage />} />
+            <Route path="/member/user" element={<UserPage />} />
+
             <Route path="/member/register" element={<Register />} />
             {isDev ? (
               <Route path="/manage" element={<ManangeBooking />} />
