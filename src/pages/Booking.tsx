@@ -28,6 +28,8 @@ import QRPayment from "@components/booking/QRPayment";
 import MultiImageUpload from "@components/MultiImageUpload";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { UploadfileAPI } from "@apis/upload";
+import { userSelector } from "@store/slices/userSlice";
+import { useSelector } from "react-redux";
 
 type Props = {
   bookingData: any;
@@ -73,6 +75,8 @@ function Booking(props: Props) {
   const [slipImages, setSlipImages] = useState<File[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
+  const { userData } = useSelector(userSelector)
+
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
@@ -91,6 +95,13 @@ function Booking(props: Props) {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (userData.id) {
+      setName(userData.firstName + ' ' + userData.lastName)
+      setPhoneNumber(userData.phoneNumber)
+    }
+  }, [userData])
 
   useEffect(() => {
     if (step === 0) getDate()
@@ -185,7 +196,7 @@ function Booking(props: Props) {
       return;
     }
 
-    if (step ===4) {
+    if (step === 4) {
       navigate("/")
       return;
     }
@@ -298,13 +309,14 @@ function Booking(props: Props) {
                 },
               }}
               sx={{ width: "100%" }}
+              disabled={!!userData.firstName}
             />
             <TextField
               label="เบอร์โทรศัพท์มือถือ"
               variant="outlined"
               onChange={(e) => {
                 setIsInvalidPhoneNumber(
-                  !isValidThaiPhoneNumber(e.target.value)
+                  !!userData.phoneNumber ? false : !isValidThaiPhoneNumber(e.target.value)
                 );
                 setPhoneNumber(e.target.value.replace(/\D/g, ""));
               }}
@@ -321,6 +333,7 @@ function Booking(props: Props) {
               }}
               error={isInvalidPhoneNumber}
               helperText={isInvalidPhoneNumber ? "เบอร์โทรศัพท์ไม่ถูกต้อง" : ""}
+              disabled={!!userData.phoneNumber}
             />
           </>
         );
@@ -531,20 +544,20 @@ function Booking(props: Props) {
 
       case 4:
         return <>
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
+          <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             gap: 2,
             textAlign: 'center'
           }}>
             {/* Success Icon */}
             <CheckCircleIcon sx={{ fontSize: 80, color: '#15a13aff' }} />
-            
+
             <Typography sx={{ fontSize: 24, fontWeight: 600, color: '#15a13aff' }}>
               จองห้องพักสำเร็จ!
             </Typography>
-            
+
             <Typography sx={{ fontSize: 14, color: '#7d7d7dff' }}>
               ขอบคุณที่ใช้บริการ ระบบได้รับการชำระเงินของคุณเรียบร้อยแล้ว
             </Typography>
@@ -553,10 +566,10 @@ function Booking(props: Props) {
             <Divider sx={{ width: '100%', my: 1 }} />
 
             {/* Reference Code */}
-            <Box sx={{ 
-              width: '100%', 
-              bgcolor: '#f5f5f5', 
-              p: 2, 
+            <Box sx={{
+              width: '100%',
+              bgcolor: '#f5f5f5',
+              p: 2,
               borderRadius: 2,
               border: '2px dashed #0b538eff'
             }}>
@@ -573,7 +586,7 @@ function Booking(props: Props) {
               <Typography sx={{ fontSize: 16, fontWeight: 600, mb: 1.5 }}>
                 รายละเอียดการจอง
               </Typography>
-              
+
               <Grid container spacing={1}>
                 <Grid size={6}>
                   <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>
@@ -633,14 +646,14 @@ function Booking(props: Props) {
               <Typography sx={{ fontSize: 16, fontWeight: 600, mb: 1.5 }}>
                 สรุปค่าใช้จ่าย
               </Typography>
-              
+
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                 <Typography sx={{ fontSize: 14 }}>ค่าห้องพัก</Typography>
                 <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
                   {totalRoomPrice.toLocaleString('th-TH')} บาท
                 </Typography>
               </Box>
-              
+
               {!!additionGuestNumber && (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                   <Typography sx={{ fontSize: 14 }}>ที่นอนเสริม ({additionGuestNumber} ชุด)</Typography>
@@ -649,7 +662,7 @@ function Booking(props: Props) {
                   </Typography>
                 </Box>
               )}
-              
+
               {!!additionTowel && (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                   <Typography sx={{ fontSize: 14 }}>ผ้าขนหนู+ผ้าเช็ดผม ({additionTowel} ชุด)</Typography>
@@ -658,7 +671,7 @@ function Booking(props: Props) {
                   </Typography>
                 </Box>
               )}
-              
+
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                 <Typography sx={{ fontSize: 14 }}>
                   ค่ามัดจำ <span style={{ fontSize: 12, color: '#7d7d7dff' }}>(คืนหลัง Check-out)</span>
@@ -686,15 +699,15 @@ function Booking(props: Props) {
             <Divider sx={{ width: '100%', my: 1 }} />
 
             {/* Additional Info */}
-            <Box sx={{ 
-              width: '100%', 
-              bgcolor: '#f9f9f9', 
-              p: 2, 
+            <Box sx={{
+              width: '100%',
+              bgcolor: '#f9f9f9',
+              p: 2,
               borderRadius: 2,
               textAlign: 'left'
             }}>
               <Typography sx={{ fontSize: 13, color: '#7d7d7dff', lineHeight: 1.6 }}>
-                📌 กรุณาเก็บรหัสอ้างอิงนี้ไว้เพื่อใช้สำหรับการติดต่อหรือสอบถามข้อมูล<br/>
+                📌 กรุณาเก็บรหัสอ้างอิงนี้ไว้เพื่อใช้สำหรับการติดต่อหรือสอบถามข้อมูล<br />
                 📞 หากมีข้อสงสัย กรุณาติดต่อ: โจ
               </Typography>
             </Box>

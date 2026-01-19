@@ -24,7 +24,18 @@ import AdminPage from '@pages/member/AdminPage'
 import UserPage from '@pages/member/UserPage'
 import { userSelector } from '@store/slices/userSlice'
 import { useSelector } from 'react-redux'
+import Booking from '@pages/Booking'
 import.meta.env.MODE
+
+const bookingData = [
+  { m: 4, d: 1, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
+  { m: 4, d: 2, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
+  { m: 4, d: 3, price: 6000, promotion: 'no', reserved: 'no', maintenance: 'no' },
+  { m: 4, d: 4, price: 6000, promotion: 'no', reserved: 'no', maintenance: 'no' },
+  { m: 4, d: 5, price: 5500, promotion: 'no', reserved: 'no', maintenance: 'no' },
+  { m: 4, d: 6, price: 5500, promotion: 'no', reserved: 'yes', maintenance: 'no' },
+];
+
 
 // สร้าง theme สำหรับ MUI
 const theme = createTheme({
@@ -108,8 +119,8 @@ function App() {
             {/* <Route path="/room" element={<Room />} /> */}
             <Route path="/room" element={<UnderConstruction />} />
             <Route path="/map" element={<Map />} />
-            {/* <Route path="/booking" element={<Booking bookingData={bookingData}/>} /> */}
-            <Route path="/booking" element={<UnderConstruction />} />
+            <Route path="/booking" element={<Booking bookingData={bookingData} />} />
+            {/* <Route path="/booking" element={<UnderConstruction />} /> */}
             <Route path="*" element={<Navigate to="/" replace />} />
             {/* Member system */}
             <Route path="/member/login" element={userData.isAdmin ? <Navigate to="/member/admin" /> : userData.isActive ? <Navigate to="/member/user" /> : <Login />} />

@@ -25,7 +25,7 @@ const menuItems = [
   { label: "ห้อง", icon: <BedroomParentIcon />, path: routes.room },
   { label: "แผนที่", icon: <MapIcon />, path: "/map" },
   { label: "สมาชิก", icon: <PersonIcon />, path: "/member/login" },
-  { label: "จัดการ", icon: <PersonIcon />, path: routes.manage},
+  // { label: "จัดการ", icon: <PersonIcon />, path: routes.manage},
 ];
 
 const Navbar = () => {
@@ -49,11 +49,11 @@ const Navbar = () => {
     setValue(getTabValue());
   }, [location]);
 
-  const handleChange = (event:any, newValue:any) => {
+  const handleChange = (event: any, newValue: any) => {
     setValue(newValue);
   };
 
-  const handleBottomNavChange = (event:any, newValue:any) => {
+  const handleBottomNavChange = (event: any, newValue: any) => {
     // If the booking button is clicked (index 3)
     if (newValue === 3) {
       // Handle booking action here
@@ -126,7 +126,7 @@ const Navbar = () => {
                   padding: "0 24px",
                   borderRadius: 3,
                 }}
-                onClick={()=>navigate('/booking')}
+                onClick={() => navigate('/booking')}
               >
                 จองเลย!
               </Button>
@@ -160,7 +160,7 @@ const Navbar = () => {
                 icon={item.icon}
                 component={Link}
                 to={item.path}
-                sx={{ 
+                sx={{
                   color: value === index ? "#fff" : "rgba(255, 255, 255, 0.7)",
                   "&.Mui-selected": {
                     color: "#fff",
@@ -170,7 +170,7 @@ const Navbar = () => {
             ))}
             <BottomNavigationAction
               label="จองเลย!"
-              onClick={()=>navigate('/booking')}
+              onClick={() => navigate('/booking')}
               icon={<Box component={'img'} src={BookOnlineIcon} width={24} />}
               sx={{
                 bgcolor: "#FFF2F2",
