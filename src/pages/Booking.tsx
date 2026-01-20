@@ -19,7 +19,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import CheckIcon from "@mui/icons-material/Check";
 import { addDays, format } from "date-fns";
 import { FormatDate } from "@utils/date";
-import BookingAPI, { BookingInterface } from "@apis/booking";
+import BookingAPI, { BookingPayload } from "@apis/booking";
 import Loading from "@components/Loading";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -138,7 +138,7 @@ function Booking(props: Props) {
 
   const handleBook = async () => {
     if (isInvalidPhoneNumber || !checkinDate || !checkoutDate || !guestNumber || !name || !phoneNumber) return;
-    const payload: BookingInterface = {
+    const payload: BookingPayload = {
       checkinDate: format(checkinDate, 'yyyy-MM-dd'),
       checkoutDate: format(checkoutDate, 'yyyy-MM-dd'),
       guestNumber: guestNumber,
@@ -146,7 +146,8 @@ function Booking(props: Props) {
       name: name,
       phoneNumber: phoneNumber,
       totalPrice: totalPrice,
-      roomId: roomId
+      roomId: roomId,
+      customerId: userData.id
     };
     try {
       setLoading(true);
