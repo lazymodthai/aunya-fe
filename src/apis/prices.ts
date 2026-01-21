@@ -42,7 +42,7 @@ export default class PricesAPI extends InstancePricesAPI {
   }
 
   static priceCalculate(payload: PriceCalculatePayload): Promise<{ data: PriceCalculateResponse; headers: RawAxiosResponseHeaders; }> {
-    return this.api.post(`${path}/price-calculate`, payload);
+    return this.api.post(`${path}/calculate`, payload);
   }
 }
 
