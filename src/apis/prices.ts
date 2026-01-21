@@ -12,10 +12,6 @@ export default class PricesAPI extends InstancePricesAPI {
     return this.api.post(`${path}/generate`, payload);
   }
 
-  static generateDiscountCode(payload: GenerateDiscountCodePayload): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
-    return this.api.post(`${path}/generate-discount-code`, payload);
-  }
-
   static updatePriceById(id: string, payload: { price: number }): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
     return this.api.patch(`${path}/${id}/price`, payload);
   }
@@ -26,6 +22,27 @@ export default class PricesAPI extends InstancePricesAPI {
 
   static resetPrices(payload: { year: number, roomId: string }): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
     return this.api.post(`${path}/reset`, payload);
+  }
+
+  //Discount code
+  static generateDiscountCode(payload: GenerateDiscountCodePayload): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
+    return this.api.post(`${path}/generate-discount-code`, payload);
+  }
+
+  static getAllDiscountCode(): Promise<{ data: DiscountCodeResponse; headers: RawAxiosResponseHeaders; }> {
+    return this.api.get(`${path}/discount-codes`);
+  }
+
+  static getDiscountDataByCode(code: string): Promise<{ data: DiscountCode; headers: RawAxiosResponseHeaders; }> {
+    return this.api.get(`${path}/discount-codes/${code}`);
+  }
+
+  static useDiscountCode(code: string): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
+    return this.api.post(`${path}/discount-codes/${code}/use`);
+  }
+
+  static priceCalculate(payload: PriceCalculatePayload): Promise<{ data: PriceCalculateResponse; headers: RawAxiosResponseHeaders; }> {
+    return this.api.post(`${path}/price-calculate`, payload);
   }
 }
 
@@ -46,7 +63,42 @@ interface GeneratePricesPayload {
 
 interface GenerateDiscountCodePayload {
   code: string; // โค้ดส่วนลด
-  discount: number; // ส่วนลด (บาท)
-  discountPercentage: number; // ส่วนลด (เปอร์เซนต์)
-  count: number; // จำนวนครั้ง
+  discount?: number; // ส่วนลด (บาท)
+  discountPercentage?: number; // ส่วนลด (เปอร์เซนต์)
+  count: number; // จำนวนโค้ด
 }
+
+export interface DiscountCodeResponse {
+  message: string
+  discountCodes: DiscountCode[]
+}
+
+export interface DiscountCode {
+  id: string
+  code: string
+  discount: string
+  discountPercentage: string
+  count: number
+  usedAt: any
+  createdAt: string
+  updatedAt: any
+}
+
+interface PriceCalculatePayload {
+  roomId: string
+  checkinDate: string
+  checkoutDate: string
+}
+
+interface PriceCalculateResponse {
+  message: string
+  totalPrice: number
+  nights: number
+  priceDetails: PriceDetail[]
+}
+
+export interface PriceDetail {
+  date: string
+  price: number
+}
+
