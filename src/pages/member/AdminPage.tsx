@@ -112,15 +112,8 @@ function AdminPage() {
         roomId: ROOM_ID,
       });
 
-      if (data.data) {
-        const formattedData: BookingData[] = data.data.map((item: any) => ({
-          id: item.id,
-          date: item.date,
-          price: item.price,
-          status: item.status,
-          isMaintenance: item.isMaintenance || false,
-        }));
-        setCalendarData(formattedData);
+      if (data) {
+        setCalendarData(data.prices);
       }
     } catch (error) {
       console.error('Error fetching calendar data:', error);

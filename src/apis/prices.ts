@@ -21,7 +21,7 @@ export default class PricesAPI extends InstancePricesAPI {
   }
 
   static updateRoomStatusById(id: string, payload: { isMaintenance: boolean }): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
-    return this.api.patch(`${path}/${id}/status`, payload);
+    return this.api.patch(`${path}/${id}/maintenance`, payload);
   }
 
   static resetPrices(payload: { year: number, roomId: string }): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
