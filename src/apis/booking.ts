@@ -1,5 +1,6 @@
 import { RawAxiosResponseHeaders } from "axios";
 import { InstanceBookingAPI } from "./instance";
+import { BookingStatus } from "@constants/booking.enum";
 
 const path = "booking";
 
@@ -28,6 +29,19 @@ export default class BookingAPI extends InstanceBookingAPI {
     return this.api.get(`${path}/my-bookings`);
   }
 
+  // Admin APIs
+  static getAllBookings(): Promise<{ data: MyBookingData[]; headers: RawAxiosResponseHeaders; }> {
+    return this.api.get(`${path}/booked/all`);
+  }
+
+  static getBookingsByDate(payload: { date: string, status?: BookingStatus }): Promise<{ data: { success: boolean; data: MyBookingData[]; message: string }; headers: RawAxiosResponseHeaders; }> {
+    return this.api.get(`${path}/find-by-date`, { params: payload });
+  }
+
+  static updateBookingStatus(id: string, payload: { status: BookingStatus }): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
+    return this.api.patch(`${path}/${id}/status`, payload);
+  }
+
 }
 
 interface MyBookingResponse {
@@ -50,6 +64,7 @@ interface MyBookingData {
   createdAt: string;
   updatedAt: string;
   roomId: string;
+  customerId: string;
 }
 
 export type { MyBookingResponse, MyBookingData };
