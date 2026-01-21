@@ -198,8 +198,8 @@ function DiscountCodeTab({ showNoti }: DiscountCodeTabProps) {
                       <TableCell>{code.count}</TableCell>
                       <TableCell>
                         <Chip
-                          label={code.usedAt ? 'ใช้แล้ว' : 'พร้อมใช้'}
-                          color={code.usedAt ? 'default' : 'success'}
+                          label={code.count <= 0 ? 'หมด' : `เหลือ ${code.count}`}
+                          color={code.count <= 0 ? 'default' : 'success'}
                           size="small"
                         />
                       </TableCell>

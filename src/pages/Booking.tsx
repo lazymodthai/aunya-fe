@@ -217,16 +217,15 @@ function Booking(props: Props) {
     calculatedTotalPrice: number,
     calculatedRoomPrices: PriceDetail[],
     discount: number,
-    discountType: 'amount' | 'percentage' | null
+    discountData: DiscountCode | null,
+    nights: number
   ) => {
     setTotalPrice(calculatedTotalPrice);
     setRoomPrices(calculatedRoomPrices);
     setTotalRoomPrice(calculatedRoomPrices.reduce((acc, curr) => acc + curr.price, 0));
     setDiscountAmount(discount);
-  };
-
-  const handleDiscountCodeValidated = (isValid: boolean, discountData: DiscountCode | null) => {
-    setValidatedDiscountData(isValid ? discountData : null);
+    setValidatedDiscountData(discountData);
+    setTotalDate(nights);
   };
 
   const renderStep = () => {
@@ -264,35 +263,36 @@ function Booking(props: Props) {
           <ConfirmationStep
             checkinDate={checkinDate!}
             checkoutDate={checkoutDate!}
-            totalDate={totalDate}
             guestNumber={guestNumber!}
             additionGuestNumber={additionGuestNumber}
             additionTowel={additionTowel}
             name={name}
             phoneNumber={phoneNumber}
             discountCode={discountCode}
+            roomId={roomId}
+            additionGuestNumberPrice={additionGuestNumberPrice}
+            additionTowelPrice={additionTowelPrice}
+            depositPrice={depositPrice}
             onDiscountCodeChange={setDiscountCode}
+            onPriceCalculated={handlePriceCalculated}
           />
         );
 
       case 2:
         return (
           <PaymentStep
-            checkinDate={checkinDate!}
-            checkoutDate={checkoutDate!}
+            totalRoomPrice={totalRoomPrice}
             additionGuestNumber={additionGuestNumber}
             additionTowel={additionTowel}
             additionGuestNumberPrice={additionGuestNumberPrice}
             additionTowelPrice={additionTowelPrice}
             depositPrice={depositPrice}
-            discountCode={discountCode}
-            roomId={roomId}
+            discountAmount={discountAmount}
+            totalPrice={totalPrice}
             QRcode={QRcode}
             QRname={QRname}
             bankName={bankName}
             bankAccount={bankAccount}
-            onPriceCalculated={handlePriceCalculated}
-            onDiscountCodeValidated={handleDiscountCodeValidated}
           />
         );
 
