@@ -315,6 +315,8 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
   const handleSavePrice = async () => {
     if (selectedDay && selectedDay.id && onUpdatePrice) {
       await onUpdatePrice(selectedDay.id, editPrice);
+      // Update selectedDay with new price so the displayed value updates
+      setSelectedDay({ ...selectedDay, price: editPrice });
       setIsEditingPrice(false);
     }
   };

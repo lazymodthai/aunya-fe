@@ -1,4 +1,7 @@
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
   Card,
@@ -16,13 +19,14 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import AuthAPI from '@apis/auth';
 import BookingAPI, { MyBookingData } from '@apis/booking';
 import PricesAPI from '@apis/prices';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearUser, setUser, userSelector } from '@store/slices/userSlice';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AdminBookingCalendar, { BookingData } from '@components/main/AdminBookingCalendar';
 import { BookingStatus } from '@constants/booking.enum';
 import Noti from '@components/Noti';
@@ -266,6 +270,40 @@ function AdminPage() {
     });
   };
 
+  const formatDateFull = (dateString: string) => {
+    const date = new Date(dateString);
+    const thaiDays = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+    const thaiMonths = [
+      'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน',
+      'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม',
+      'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+    return `วัน${thaiDays[date.getDay()]}ที่ ${date.getDate()} ${thaiMonths[date.getMonth()]} ${date.getFullYear() + 543}`;
+  };
+
+  // Group bookings by check-in date, sorted by most recent first
+  const groupedBookings = useMemo(() => {
+    const groups: { [date: string]: MyBookingData[] } = {};
+
+    allBookings.forEach((booking) => {
+      const dateKey = booking.checkinDate.split('T')[0]; // Get YYYY-MM-DD
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+      groups[dateKey].push(booking);
+    });
+
+    // Sort dates descending (most recent first)
+    const sortedDates = Object.keys(groups).sort((a, b) =>
+      new Date(b).getTime() - new Date(a).getTime()
+    );
+
+    return sortedDates.map((date) => ({
+      date,
+      bookings: groups[date],
+    }));
+  }, [allBookings]);
+
   const BookingCard = ({ booking, showActions = true }: { booking: MyBookingData; showActions?: boolean }) => (
     <Card sx={{ borderRadius: 2, mb: 2 }}>
       <CardContent>
@@ -425,9 +463,49 @@ function AdminPage() {
                   </CardContent>
                 </Card>
               ) : (
-                <Stack spacing={0}>
-                  {allBookings.map((booking) => (
-                    <BookingCard key={booking.id} booking={booking} />
+                <Stack spacing={1}>
+                  {groupedBookings.map(({ date, bookings }) => (
+                    <Accordion
+                      key={date}
+                      sx={{
+                        borderRadius: '12px !important',
+                        '&:before': { display: 'none' },
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                        '&.Mui-expanded': {
+                          margin: '8px 0 !important',
+                        },
+                      }}
+                    >
+                      <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        sx={{
+                          borderRadius: '12px',
+                          '&.Mui-expanded': {
+                            borderBottomLeftRadius: 0,
+                            borderBottomRightRadius: 0,
+                          },
+                        }}
+                      >
+                        <Stack direction="row" spacing={2} alignItems="center" sx={{ width: '100%', pr: 2 }}>
+                          <Typography fontWeight={600}>
+                            {formatDateFull(date)}
+                          </Typography>
+                          <Chip
+                            label={`${bookings.length} รายการ`}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                          />
+                        </Stack>
+                      </AccordionSummary>
+                      <AccordionDetails sx={{ pt: 0 }}>
+                        <Stack spacing={0}>
+                          {bookings.map((booking) => (
+                            <BookingCard key={booking.id} booking={booking} />
+                          ))}
+                        </Stack>
+                      </AccordionDetails>
+                    </Accordion>
                   ))}
                 </Stack>
               )}
