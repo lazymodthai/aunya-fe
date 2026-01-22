@@ -65,6 +65,10 @@ interface MyBookingData {
   updatedAt: string;
   roomId: string;
   customerId: string;
+  files: {
+    qrCode: any[];
+    slips: any[];
+  }
 }
 
 export type { MyBookingResponse, MyBookingData };
