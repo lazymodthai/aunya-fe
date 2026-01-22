@@ -262,7 +262,7 @@ function AdminPage() {
         <DialogTitle>ยืนยันการดำเนินการ</DialogTitle>
         <DialogContent>
           <Typography>
-            คุณต้องการ{confirmDialog.action === BookingStatus.CONFIRMED ? 'ยืนยัน' : 'ยกเลิก'}การจอง
+            คุณต้องการ{confirmDialog.action === BookingStatus.CONFIRMED ? 'ยืนยันการจอง' : confirmDialog.action === BookingStatus.CHECKED_IN ? 'เช็คอิน' : confirmDialog.action === BookingStatus.CHECKED_OUT ? 'เช็คเอาท์' : 'ยกเลิกการจอง'}
             <strong> {confirmDialog.booking?.refCode}</strong> ใช่หรือไม่?
           </Typography>
         </DialogContent>
