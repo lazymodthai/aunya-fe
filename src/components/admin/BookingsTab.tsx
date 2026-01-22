@@ -7,15 +7,19 @@ import {
   Card,
   CardContent,
   Chip,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   Divider,
   Grid,
+  IconButton,
   Stack,
   Typography,
 } from '@mui/material';
-import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
-import { MyBookingData } from '@apis/booking';
+import { Close as CloseIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
+import booking, { MyBookingData } from '@apis/booking';
 import { BookingStatus } from '@constants/booking.enum';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 interface BookingsTabProps {
   allBookings: MyBookingData[];
@@ -23,6 +27,19 @@ interface BookingsTabProps {
 }
 
 function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
+  const [slipModalOpen, setSlipModalOpen] = useState(false);
+  const [selectedSlips, setSelectedSlips] = useState<{ fileUrl: string }[]>([]);
+
+  const handleOpenSlipModal = (slips: { fileUrl: string }[]) => {
+    setSelectedSlips(slips);
+    setSlipModalOpen(true);
+  };
+
+  const handleCloseSlipModal = () => {
+    setSlipModalOpen(false);
+    setSelectedSlips([]);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Confirmed':
@@ -76,7 +93,7 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
   const groupedBookings = useMemo(() => {
     const groups: { [date: string]: MyBookingData[] } = {};
 
-    allBookings.forEach((booking) => {
+    allBookings?.forEach((booking) => {
       const dateKey = booking.checkinDate.split('T')[0];
       if (!groups[dateKey]) {
         groups[dateKey] = [];
@@ -106,7 +123,18 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
               {booking.refCode}
             </Typography>
           </Box>
-          <Chip label={getStatusText(booking.status)} color={getStatusColor(booking.status) as any} size="small" />
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {booking.files?.slips && booking.files.slips.length > 0 && (
+              <Chip 
+                label={"ดูสลีป"} 
+                color="default" 
+                size="small" 
+                clickable
+                onClick={() => handleOpenSlipModal(booking.files.slips)} 
+              />
+            )}
+            <Chip label={getStatusText(booking.status)} color={getStatusColor(booking.status) as any} size="small" />
+          </Box>
         </Stack>
 
         <Divider sx={{ my: 1.5 }} />
@@ -238,6 +266,39 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
           ))}
         </Stack>
       )}
+
+      {/* Slip Viewer Modal */}
+      <Dialog 
+        open={slipModalOpen} 
+        onClose={handleCloseSlipModal}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6" fontWeight={600}>สลีปการชำระเงิน</Typography>
+          <IconButton onClick={handleCloseSlipModal} size="small">
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ py: 1 }}>
+            {selectedSlips.map((slip, index) => (
+              <Box key={index} sx={{ textAlign: 'center' }}>
+                <img 
+                  src={slip.fileUrl} 
+                  alt={`สลีป ${index + 1}`}
+                  style={{ 
+                    maxWidth: '100%', 
+                    maxHeight: '500px', 
+                    objectFit: 'contain',
+                    borderRadius: '8px'
+                  }} 
+                />
+              </Box>
+            ))}
+          </Stack>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }

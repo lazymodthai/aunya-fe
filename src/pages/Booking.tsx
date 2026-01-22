@@ -158,6 +158,7 @@ function Booking(props: Props) {
     formData.append('roomId', refCode);
     formData.append('userTell', phoneNumber);
     formData.append('typeslip', 'slip');
+    formData.append('type', "upload-slip");
 
     try {
       setLoading(true);
