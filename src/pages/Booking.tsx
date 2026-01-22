@@ -27,6 +27,7 @@ import ConfirmationStep from '@components/booking/steps/ConfirmationStep';
 import PaymentStep from '@components/booking/steps/PaymentStep';
 import SlipUploadStep from '@components/booking/steps/SlipUploadStep';
 import SuccessStep from '@components/booking/steps/SuccessStep';
+import { BookingStatus } from '@constants/booking.enum';
 
 type Props = {
   bookingData: any;
@@ -77,6 +78,7 @@ function Booking(props: Props) {
   const [refCode, setRefCode] = useState<string>('');
   const [slipImages, setSlipImages] = useState<File[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [bookingId, setBookingId] = useState<string>('');
 
   const steps = ['เลือกวันเข้าพัก', 'ยืนยันรายการ', 'ชำระเงิน', 'ใบเสร็จ'];
 
@@ -140,6 +142,7 @@ function Booking(props: Props) {
       setErrorMessage('');
       const { data } = await BookingAPI.book(payload);
       setRefCode(data.refCode);
+      setBookingId(data.id);
       setRoomPrices(data.prices.map((p: any) => ({ date: p.date, price: Number(p.price) })));
       setStep(2);
     } catch (error: any) {
@@ -172,6 +175,7 @@ function Booking(props: Props) {
             console.error('Error using discount code:', error);
           }
         }
+        await BookingAPI.updateBookingStatus(bookingId, { status: BookingStatus.PENDING });
         setStep(4);
       }
     } catch (e: any) {

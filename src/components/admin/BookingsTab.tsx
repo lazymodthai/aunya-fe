@@ -79,14 +79,17 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
   };
 
   const formatDateFull = (dateString: string) => {
-    const date = new Date(dateString);
+    // Parse date string directly to avoid timezone issues
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // Create local date (month is 0-indexed)
+
     const thaiDays = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
     const thaiMonths = [
       'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน',
       'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม',
       'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
     ];
-    return `วัน${thaiDays[date.getDay()]}ที่ ${date.getDate()} ${thaiMonths[date.getMonth()]} ${date.getFullYear() + 543}`;
+    return `วัน${thaiDays[date.getDay()]}ที่ ${day} ${thaiMonths[month - 1]} ${year + 543}`;
   };
 
   // Group bookings by check-in date, sorted by most recent first
@@ -94,7 +97,13 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
     const groups: { [date: string]: MyBookingData[] } = {};
 
     allBookings?.forEach((booking) => {
-      const dateKey = booking.checkinDate.split('T')[0];
+      // Convert to local date to get correct date key (avoid UTC timezone issue)
+      const date = new Date(booking.checkinDate);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const dateKey = `${year}-${month}-${day}`;
+
       if (!groups[dateKey]) {
         groups[dateKey] = [];
       }
@@ -125,12 +134,12 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
             {booking.files?.slips && booking.files.slips.length > 0 && (
-              <Chip 
-                label={"ดูสลีป"} 
-                color="default" 
-                size="small" 
+              <Chip
+                label={"ดูสลิป"}
+                color="default"
+                size="small"
                 clickable
-                onClick={() => handleOpenSlipModal(booking.files.slips)} 
+                onClick={() => handleOpenSlipModal(booking.files.slips)}
               />
             )}
             <Chip label={getStatusText(booking.status)} color={getStatusColor(booking.status) as any} size="small" />
@@ -268,8 +277,8 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
       )}
 
       {/* Slip Viewer Modal */}
-      <Dialog 
-        open={slipModalOpen} 
+      <Dialog
+        open={slipModalOpen}
         onClose={handleCloseSlipModal}
         maxWidth="md"
         fullWidth
@@ -284,15 +293,15 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
           <Stack spacing={2} sx={{ py: 1 }}>
             {selectedSlips.map((slip, index) => (
               <Box key={index} sx={{ textAlign: 'center' }}>
-                <img 
-                  src={slip.fileUrl} 
-                  alt={`สลีป ${index + 1}`}
-                  style={{ 
-                    maxWidth: '100%', 
-                    maxHeight: '500px', 
+                <img
+                  src={slip.fileUrl}
+                  alt={`สลิป ${index + 1}`}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '500px',
                     objectFit: 'contain',
                     borderRadius: '8px'
-                  }} 
+                  }}
                 />
               </Box>
             ))}
