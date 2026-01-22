@@ -30,6 +30,17 @@ const instancePrices = axios.create({
   },
 });
 
+
+
+const instanceSettings = axios.create({
+  withCredentials: true,
+  baseURL: import.meta.env.VITE_BASE_URL || 'https://api.aunyapoolvilla.com/',
+  timeout: 10000,
+  headers: {
+    Accept: "application/json",
+  },
+});
+
 const instanceUpload = axios.create({
   baseURL: "http://localhost:3200/",
   timeout: 10000,
@@ -58,4 +69,8 @@ export class InstanceUploadAPI {
 }
 export class InstanceBookingManageAPI {
   static api = instanceBookingManage;
+}
+
+export class InstanceSettingsAPI {
+  static api = instanceSettings;
 }

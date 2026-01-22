@@ -2,7 +2,6 @@ import { RawAxiosResponseHeaders } from "axios";
 import { InstanceAuthAPI } from "./instance";
 
 const path = "auth";
-const user = "users"
 
 
 
@@ -12,7 +11,7 @@ export default class AuthAPI extends InstanceAuthAPI {
   }
 
   static register(payload: RegisterPayload): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
-    return this.api.post(`${user}/register`, payload);
+    return this.api.post(`${path}/register`, payload);
   }
 
   static getProfile(): Promise<{ data: ProfileResponse; headers: RawAxiosResponseHeaders; }> {

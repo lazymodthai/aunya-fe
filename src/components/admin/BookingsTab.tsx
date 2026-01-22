@@ -11,8 +11,12 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  FormControl,
   Grid,
   IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   Typography,
 } from '@mui/material';
@@ -29,6 +33,30 @@ interface BookingsTabProps {
 function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
   const [slipModalOpen, setSlipModalOpen] = useState(false);
   const [selectedSlips, setSelectedSlips] = useState<{ fileUrl: string }[]>([]);
+
+  // Filter state
+  const currentDate = new Date();
+  const [filterMonth, setFilterMonth] = useState<number | 'all'>(currentDate.getMonth() + 1);
+  const [filterYear, setFilterYear] = useState<number>(currentDate.getFullYear());
+
+  // Thai month names for filter dropdown
+  const thaiMonths = [
+    { value: 1, label: 'มกราคม' },
+    { value: 2, label: 'กุมภาพันธ์' },
+    { value: 3, label: 'มีนาคม' },
+    { value: 4, label: 'เมษายน' },
+    { value: 5, label: 'พฤษภาคม' },
+    { value: 6, label: 'มิถุนายน' },
+    { value: 7, label: 'กรกฎาคม' },
+    { value: 8, label: 'สิงหาคม' },
+    { value: 9, label: 'กันยายน' },
+    { value: 10, label: 'ตุลาคม' },
+    { value: 11, label: 'พฤศจิกายน' },
+    { value: 12, label: 'ธันวาคม' },
+  ];
+
+  // Generate year options (current year ± 2 years)
+  const yearOptions = Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - 2 + i);
 
   const handleOpenSlipModal = (slips: { fileUrl: string }[]) => {
     setSelectedSlips(slips);
@@ -131,7 +159,7 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
   // Check if there's already a checked-in guest (disable check-in for others)
   const hasCheckedInGuest = checkedInBookings.length > 0;
 
-  // Group bookings by check-in date, sorted by most recent first
+  // Group bookings by check-in date, sorted by most recent first (with filter)
   const groupedBookings = useMemo(() => {
     const groups: { [date: string]: MyBookingData[] } = {};
 
@@ -139,9 +167,13 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
       // Convert to local date to get correct date key (avoid UTC timezone issue)
       const date = new Date(booking.checkinDate);
       const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const month = date.getMonth() + 1;
       const day = String(date.getDate()).padStart(2, '0');
-      const dateKey = `${year}-${month}-${day}`;
+      const dateKey = `${year}-${String(month).padStart(2, '0')}-${day}`;
+
+      // Apply filter
+      if (filterYear !== year) return;
+      if (filterMonth !== 'all' && filterMonth !== month) return;
 
       if (!groups[dateKey]) {
         groups[dateKey] = [];
@@ -158,7 +190,12 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
       bookings: groups[date],
       pendingCount: groups[date].filter(b => b.status === 'Pending' || b.status === 'Payment').length,
     }));
-  }, [allBookings]);
+  }, [allBookings, filterMonth, filterYear]);
+
+  // Count filtered bookings
+  const filteredBookingsCount = useMemo(() => {
+    return groupedBookings.reduce((acc, group) => acc + group.bookings.length, 0);
+  }, [groupedBookings]);
 
   const BookingCard = ({ booking }: { booking: MyBookingData }) => (
     <Card sx={{ borderRadius: 2, mb: 2 }}>
@@ -484,10 +521,53 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
         </Card>
       )}
 
-      {allBookings.length === 0 ? (
+      {/* Filter Section */}
+      <Card sx={{ borderRadius: 3, mb: 2 }}>
+        <CardContent sx={{ py: 2 }}>
+          <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>เดือน</InputLabel>
+              <Select
+                value={filterMonth}
+                label="เดือน"
+                onChange={(e) => setFilterMonth(e.target.value as number | 'all')}
+              >
+                <MenuItem value="all">ทั้งหมด</MenuItem>
+                {thaiMonths.map((month) => (
+                  <MenuItem key={month.value} value={month.value}>
+                    {month.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth: 100 }}>
+              <InputLabel>ปี</InputLabel>
+              <Select
+                value={filterYear}
+                label="ปี"
+                onChange={(e) => setFilterYear(e.target.value as number)}
+              >
+                {yearOptions.map((year) => (
+                  <MenuItem key={year} value={year}>
+                    {year + 543}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Chip
+              label={`${filteredBookingsCount} รายการ`}
+              size="small"
+              color="default"
+              variant="outlined"
+            />
+          </Stack>
+        </CardContent>
+      </Card>
+
+      {filteredBookingsCount === 0 ? (
         <Card sx={{ borderRadius: 3 }}>
           <CardContent sx={{ textAlign: 'center', py: 4 }}>
-            <Typography color="text.secondary">ยังไม่มีการจอง</Typography>
+            <Typography color="text.secondary">ไม่มีการจองในช่วงเวลาที่เลือก</Typography>
           </CardContent>
         </Card>
       ) : (
