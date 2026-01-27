@@ -53,14 +53,23 @@ function Register() {
         setError(false)
         setSuccess(true)
         setLoading(true)
-        setTimeout(() => setLoading(false), 1000)
+        setTimeout(() => {
+          setLoading(false)
+          navigate('/member/login')
+        }, 1000)
       }
     } catch (error: any) {
       console.log(error)
       if (error.status === 409) {
         setError(true)
-        setErrorType('email')
-        if (error.response.data.message === 'Email already exists') return setErrorMessage('อีเมลถูกใช้แล้ว')
+        if (error.response.data.message === 'Email already exists') {
+          setErrorType('email')
+          return setErrorMessage('อีเมลถูกใช้แล้ว')
+        }
+        if (error.response.data.message === 'Phone number already exists') {
+          setErrorType('phoneNumber')
+          return setErrorMessage('เบอร์โทรศัพท์ถูกใช้แล้ว')
+        }
       }
     }
   }
@@ -158,7 +167,7 @@ function Register() {
           type="text"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
-          error={errorType === 'empty' && !phoneNumber}
+          error={errorType === 'phoneNumber' || (errorType === 'empty' && !phoneNumber)}
           helperText={error ? errorMessage : ""}
         />
         <Button
