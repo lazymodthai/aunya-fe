@@ -12,6 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import PricesAPI from '@apis/prices';
+import PriceField from '@components/common/PriceField';
 import { useState } from 'react';
 
 interface PriceSettingsTabProps {
@@ -21,7 +22,7 @@ interface PriceSettingsTabProps {
   showNoti: (type: 'success' | 'error', message: string) => void;
 }
 
-const ROOM_ID = 'a20626d8-dd06-45ca-b85d-71032e776543';
+const roomId = import.meta.env.VITE_ROOM_ID;
 
 function PriceSettingsTab({ currentYear, currentMonth, onRefreshCalendar, showNoti }: PriceSettingsTabProps) {
   const [generateDialog, setGenerateDialog] = useState(false);
@@ -42,7 +43,7 @@ function PriceSettingsTab({ currentYear, currentMonth, onRefreshCalendar, showNo
         weekendPrice: generateForm.weekendPrice,
         holidayPrice: generateForm.holidayPrice,
         description: generateForm.description,
-        roomId: ROOM_ID,
+        roomId: roomId,
       });
       showNoti('success', 'สร้างราคาสำเร็จ');
       setGenerateDialog(false);
@@ -57,7 +58,7 @@ function PriceSettingsTab({ currentYear, currentMonth, onRefreshCalendar, showNo
     try {
       await PricesAPI.resetPrices({
         year: currentYear,
-        roomId: ROOM_ID,
+        roomId: roomId,
       });
       showNoti('success', 'รีเซ็ตราคาสำเร็จ');
       setResetDialog(false);
@@ -116,29 +117,23 @@ function PriceSettingsTab({ currentYear, currentMonth, onRefreshCalendar, showNo
               onChange={(e) => setGenerateForm({ ...generateForm, year: Number(e.target.value) })}
               fullWidth
             />
-            <TextField
-              label="ราคาวันธรรมดา (จันทร์-ศุกร์)"
-              type="number"
+            <PriceField
+              label="ราคาวันธรรมดา (จันทร์-พฤหัส)"
               value={generateForm.weekdayPrice}
-              onChange={(e) => setGenerateForm({ ...generateForm, weekdayPrice: Number(e.target.value) })}
+              onChange={(val) => setGenerateForm({ ...generateForm, weekdayPrice: val })}
               fullWidth
-              InputProps={{ startAdornment: <Typography sx={{ mr: 1 }}>฿</Typography> }}
             />
-            <TextField
-              label="ราคาวันหยุด (เสาร์-อาทิตย์)"
-              type="number"
+            <PriceField
+              label="ราคาวันหยุด (ศุกร์-อาทิตย์)"
               value={generateForm.weekendPrice}
-              onChange={(e) => setGenerateForm({ ...generateForm, weekendPrice: Number(e.target.value) })}
+              onChange={(val) => setGenerateForm({ ...generateForm, weekendPrice: val })}
               fullWidth
-              InputProps={{ startAdornment: <Typography sx={{ mr: 1 }}>฿</Typography> }}
             />
-            <TextField
+            <PriceField
               label="ราคาวันหยุดนักขัตฤกษ์"
-              type="number"
               value={generateForm.holidayPrice}
-              onChange={(e) => setGenerateForm({ ...generateForm, holidayPrice: Number(e.target.value) })}
+              onChange={(val) => setGenerateForm({ ...generateForm, holidayPrice: val })}
               fullWidth
-              InputProps={{ startAdornment: <Typography sx={{ mr: 1 }}>฿</Typography> }}
             />
             <TextField
               label="รายละเอียด (ไม่บังคับ)"

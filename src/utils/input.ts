@@ -6,6 +6,16 @@ export const decimalOnly = (value: string) => {
   return value.replace(/[^\d.]/g, '');
 }
 
+export const formatPriceValue = (value: number | string): string => {
+  const num = typeof value === 'string' ? parsePriceValue(value) : value;
+  if (isNaN(num) || num === 0) return '';
+  return num.toLocaleString('th-TH');
+};
+
+export const parsePriceValue = (value: string): number => {
+  return Number(value.replace(/[^0-9]/g, '')) || 0;
+};
+
 export const alphanumericOnly = (value: string) => {
   return value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 }

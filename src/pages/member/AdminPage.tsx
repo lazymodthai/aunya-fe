@@ -27,7 +27,7 @@ import BookingsTab from '@components/admin/BookingsTab';
 import PriceSettingsTab from '@components/admin/PriceSettingsTab';
 import DiscountCodeTab from '@components/admin/DiscountCodeTab';
 
-const ROOM_ID = 'a20626d8-dd06-45ca-b85d-71032e776543';
+const roomId = import.meta.env.VITE_ROOM_ID;
 
 function AdminPage() {
   const dispatch = useDispatch();
@@ -98,7 +98,7 @@ function AdminPage() {
       const { data } = await PricesAPI.getPrices({
         month: adjustedMonth + 1,
         year: adjustedYear,
-        roomId: ROOM_ID,
+        roomId: roomId,
       });
 
       if (data) {

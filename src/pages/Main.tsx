@@ -243,6 +243,7 @@ function Main() {
             <BookingCalendar
               bookingData={bookingData}
               onChangeMonth={(val) => getPriceByMonth(val)}
+              disablePast
             />
           </Grid>
         </Grid>

@@ -32,6 +32,7 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import PricesAPI, { DiscountCode } from '@apis/prices';
+import PriceField from '@components/common/PriceField';
 import { useEffect, useState } from 'react';
 
 interface DiscountCodeTabProps {
@@ -256,13 +257,11 @@ function DiscountCodeTab({ showNoti }: DiscountCodeTabProps) {
             </FormControl>
 
             {discountType === 'amount' ? (
-              <TextField
+              <PriceField
                 label="จำนวนเงินที่ลด (บาท)"
-                type="number"
                 value={createForm.discount}
-                onChange={(e) => setCreateForm({ ...createForm, discount: Number(e.target.value) })}
+                onChange={(val) => setCreateForm({ ...createForm, discount: val })}
                 fullWidth
-                InputProps={{ startAdornment: <Typography sx={{ mr: 1 }}>฿</Typography> }}
               />
             ) : (
               <TextField

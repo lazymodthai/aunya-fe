@@ -10,7 +10,12 @@ import {
   useTheme,
   Drawer,
   Modal,
-  Button
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from '@mui/material';
 import {
   ChevronLeft as ChevronLeftIcon,
@@ -64,33 +69,38 @@ const DayCell = styled(Paper, {
     prop !== 'isUnavailable' &&
     prop !== 'isToday' &&
     prop !== 'isCurrentMonth' &&
-    prop !== 'isMaintenance'
+    prop !== 'isMaintenance' &&
+    prop !== 'isPast'
 })<{
   isUnavailable?: boolean;
   isToday?: boolean;
   isCurrentMonth?: boolean;
   isMaintenance?: boolean;
-}>(({ theme, isUnavailable, isToday, isCurrentMonth, isMaintenance }) => ({
+  isPast?: boolean;
+}>(({ theme, isUnavailable, isToday, isCurrentMonth, isMaintenance, isPast }) => ({
   padding: theme.spacing(1),
   height: useMediaQuery("(max-width:480px)") ? '60px' : '80px',
   display: 'flex',
   flexDirection: 'column',
   position: 'relative',
-  cursor: (isUnavailable || isMaintenance) ? 'not-allowed' : 'pointer',
-  backgroundColor: isMaintenance
-    ? 'rgba(255, 165, 0, 0.1)'
-    : isUnavailable
-      ? 'rgba(255, 0, 0, 0.1)'
-      : isToday
-        ? 'rgba(66, 165, 245, 0.1)'
-        : theme.palette.background.paper,
+  cursor: (isPast || isUnavailable || isMaintenance) ? 'not-allowed' : 'pointer',
+  backgroundColor: isPast
+    ? theme.palette.action.disabledBackground
+    : isMaintenance
+      ? 'rgba(255, 165, 0, 0.1)'
+      : isUnavailable
+        ? 'rgba(255, 0, 0, 0.1)'
+        : isToday
+          ? 'rgba(66, 165, 245, 0.1)'
+          : theme.palette.background.paper,
   border: isToday
     ? `1px solid ${theme.palette.primary.main}`
     : `1px solid ${theme.palette.divider}`,
-  opacity: isCurrentMonth ? 1 : 0.5,
+  opacity: isPast ? 0.5 : isCurrentMonth ? 1 : 0.5,
+  pointerEvents: isPast ? 'none' : 'auto',
   '&:hover': {
-    backgroundColor: (isUnavailable || isMaintenance)
-      ? (isMaintenance ? 'rgba(255, 165, 0, 0.1)' : 'rgba(255, 0, 0, 0.1)')
+    backgroundColor: (isPast || isUnavailable || isMaintenance)
+      ? undefined
       : 'rgba(0, 0, 0, 0.04)',
   },
 }));
@@ -172,6 +182,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
   const [currentMonthData, setCurrentMonthData] = useState<(BookingData | null)[]>([]);
   const [selectedDay, setSelectedDay] = useState<BookingData | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [showInquiryAlert, setShowInquiryAlert] = useState<boolean>(false);
 
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -184,6 +195,12 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
       today.getMonth() + 1 === month &&
       today.getFullYear() === year
     );
+  };
+
+  const isPastCheck = (day: number, month: number, year: number): boolean => {
+    const cellDate = new Date(year, month - 1, day);
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    return cellDate < todayStart;
   };
 
   const canGoToPreviousMonth = () => {
@@ -362,6 +379,8 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
           const month = dayData ? parseInt(dayData.date.split('-')[1]) : 0;
           const year = dayData ? parseInt(dayData.date.split('-')[0]) : 0;
 
+          const past = disablePast && dayData ? isPastCheck(day, month, year) : false;
+
           return (
             <Grid size={12 / 7} key={index}>
               {dayData ? (
@@ -370,16 +389,17 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                   isMaintenance={dayData.isMaintenance}
                   isToday={isTodayCheck(day, month, year)}
                   isCurrentMonth={true}
+                  isPast={past}
                   elevation={0}
-                  onClick={() => handleDayClick(dayData)}
+                  onClick={() => !past && handleDayClick(dayData)}
                 >
                   <DayNumber>{day}</DayNumber>
 
-                  {!hidePrice && !dayData.isMaintenance && dayData.status === 'Available' && (
+                  {!past && !hidePrice && !dayData.isMaintenance && dayData.status === 'Available' && (
                     <Price>{dayData.price > 0 ? formatPrice(dayData.price) : 'สอบถาม'}</Price>
                   )}
 
-                  {(dayData.status === "Unavailable" ||
+                  {!past && (dayData.status === "Unavailable" ||
                     dayData.isMaintenance) && (
                       <StatusIndicator
                         isMaintenance={dayData.isMaintenance}
@@ -512,7 +532,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                   <Button
                     variant="contained"
                     fullWidth
-                    onClick={handleBookingClick}
+                    onClick={selectedDay.price === 0 ? () => setShowInquiryAlert(true) : handleBookingClick}
                     sx={{
                       fontSize: "24px",
                       mt: 1,
@@ -523,7 +543,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                       height: '3rem'
                     }}
                   >
-                    จอง
+                    {selectedDay.price === 0 ? 'สอบถาม' : 'จอง'}
                   </Button>
                 )}
               </>
@@ -590,7 +610,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                     variant="contained"
                     color="primary"
                     fullWidth
-                    onClick={handleBookingClick}
+                    onClick={selectedDay.price === 0 ? () => setShowInquiryAlert(true) : handleBookingClick}
                     sx={{
                       fontSize: "24px",
                       mt: 1,
@@ -601,7 +621,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                       height: '3rem'
                     }}
                   >
-                    จอง
+                    {selectedDay.price === 0 ? 'สอบถาม' : 'จอง'}
                   </Button>
                 )}
               </>
@@ -609,6 +629,22 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
           </ModalContent>
         </Modal>
       )}
+      <Dialog
+        open={showInquiryAlert}
+        onClose={() => setShowInquiryAlert(false)}
+      >
+        <DialogTitle>แจ้งเตือน</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            โปรดสอบถามราคาก่อนทำการจอง
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowInquiryAlert(false)} autoFocus>
+            ตกลง
+          </Button>
+        </DialogActions>
+      </Dialog>
     </CalendarContainer>
   );
 };

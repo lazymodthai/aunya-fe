@@ -30,6 +30,7 @@ import {
   Add as AddIcon,
 } from '@mui/icons-material';
 import { MyBookingData } from '@apis/booking';
+import PriceField from '@components/common/PriceField';
 
 // Define the type for the booking data
 export interface BookingData {
@@ -365,13 +366,10 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
   };
 
   // Content for modal/drawer
-  const ModalContentComponent = () => {
-    if (!selectedDay) return null;
+  const hasBookings = dayBookings.length > 0;
+  const isAvailable = selectedDay ? selectedDay.status === 'Available' && !selectedDay.isMaintenance : false;
 
-    const hasBookings = dayBookings.length > 0;
-    const isAvailable = selectedDay.status === 'Available' && !selectedDay.isMaintenance;
-
-    return (
+  const modalContent = selectedDay ? (
       <Box>
         {/* Status Badge */}
         <Box sx={{ mb: 2 }}>
@@ -456,13 +454,11 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
               </Stack>
               {isEditingPrice ? (
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <TextField
-                    type="number"
+                  <PriceField
                     value={editPrice}
-                    onChange={(e) => setEditPrice(Number(e.target.value))}
+                    onChange={(val) => setEditPrice(val)}
                     size="small"
                     fullWidth
-                    InputProps={{ startAdornment: <Typography sx={{ mr: 1 }}>฿</Typography> }}
                   />
                   <Button variant="contained" size="small" onClick={handleSavePrice}>
                     บันทึก
@@ -509,8 +505,7 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
           </Box>
         )}
       </Box>
-    );
-  };
+    ) : null;
 
   return (
     <CalendarContainer>
@@ -664,7 +659,7 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
                 <CloseIcon />
               </IconButton>
             </Stack>
-            <ModalContentComponent />
+            {modalContent}
           </DrawerContent>
         </Drawer>
       ) : (
@@ -680,7 +675,7 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
             </Stack>
           </DialogTitle>
           <DialogContent dividers>
-            <ModalContentComponent />
+            {modalContent}
           </DialogContent>
         </Dialog>
       )}
