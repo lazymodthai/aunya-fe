@@ -42,13 +42,13 @@ const instanceSettings = axios.create({
 });
 
 const instanceUpload = axios.create({
-  baseURL: "http://localhost:3200/",
+  baseURL: import.meta.env.VITE_BASE_URL || 'https://api.aunyapoolvilla.com/',
   timeout: 10000,
   // No need to set Content-Type header - Axios will automatically set it to multipart/form-data with boundary when sending FormData
 });
 
 const instanceBookingManage = axios.create({
-  baseURL: "http://localhost:3200/",
+  baseURL: import.meta.env.VITE_BASE_URL || 'https://api.aunyapoolvilla.com/',
   timeout: 10000,
   headers: {
     Accept: "application/json",
