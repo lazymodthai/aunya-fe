@@ -29,6 +29,10 @@ export default class BookingAPI extends InstanceBookingAPI {
     return this.api.get(`${path}/my-bookings`);
   }
 
+  static getAllDisabledDate(): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
+    return this.api.get(`${path}/disabled-dates`);
+  }
+
   // Admin APIs
   static getAllBookings(): Promise<{ data: MyBookingData[]; headers: RawAxiosResponseHeaders; }> {
     return this.api.get(`${path}/booked/all`);

@@ -71,7 +71,8 @@ function Booking(props: Props) {
   const [skipped, setSkipped] = useState(new Set<number>());
   const [isInvalidPhoneNumber, setIsInvalidPhoneNumber] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [disableDate, setDisableDate] = useState<any[]>([]);
+  const [disabledDateRange, setDisabledDateRange] = useState<any[]>([]);
+  const [disabledDates, setDisabledDates] = useState<any[]>([]);
   const [totalDate, setTotalDate] = useState<number>(0);
 
   // Booking State
@@ -88,7 +89,19 @@ function Booking(props: Props) {
     try {
       setLoading(true);
       const { data } = await BookingAPI.getBookedDate();
-      setDisableDate(data);
+      setDisabledDateRange(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getAllDisabledDate = async () => {
+    try {
+      setLoading(true);
+      const { data } = await BookingAPI.getAllDisabledDate();
+      setDisabledDates(data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -105,7 +118,10 @@ function Booking(props: Props) {
   }, [userData]);
 
   useEffect(() => {
-    if (step === 0) getDate();
+    if (step === 0) {
+      // getDate();
+      getAllDisabledDate();
+    }
   }, [step]);
 
   useEffect(() => {
@@ -245,7 +261,8 @@ function Booking(props: Props) {
             additionTowel={additionTowel}
             name={name}
             phoneNumber={phoneNumber}
-            disableDate={disableDate}
+            // disabledDateRange={disabledDateRange}
+            disabledDates={disabledDates}
             isInvalidPhoneNumber={isInvalidPhoneNumber}
             hasUserData={!!userData.firstName}
             additionGuestNumberPrice={additionGuestNumberPrice}

@@ -12,7 +12,8 @@ interface DateSelectionStepProps {
   additionTowel: number | null;
   name: string;
   phoneNumber: string;
-  disableDate: any[];
+  disabledDateRange?: any[];
+  disabledDates?: any[];
   isInvalidPhoneNumber: boolean;
   hasUserData: boolean;
   additionGuestNumberPrice: number;
@@ -34,7 +35,8 @@ function DateSelectionStep({
   additionTowel,
   name,
   phoneNumber,
-  disableDate,
+  disabledDateRange,
+  disabledDates,
   isInvalidPhoneNumber,
   hasUserData,
   additionGuestNumberPrice,
@@ -57,7 +59,8 @@ function DateSelectionStep({
         }}
         value={checkinDate}
         sx={{ width: '100%' }}
-        disabledDates={disableDate}
+        // disabledDateRange={disabledDateRange}
+        disabledDates={disabledDates}
         maximumMonth={3}
       />
       <CustomDatePicker
@@ -67,7 +70,7 @@ function DateSelectionStep({
         sx={{ width: '100%' }}
         minDate={addDays(checkinDate || new Date(), 1)}
         checkInDate={checkinDate}
-        disabledDates={disableDate}
+        disabledDateRange={disabledDateRange}
       />
       <NumberField
         label="จำนวนผู้เข้าพัก"

@@ -12,11 +12,12 @@ type DisabledDateRange = {
 type Props = {
   label: string
   value: Date | null
-  onChange: (e: any)=> void
+  onChange: (e: any) => void
   sx?: SxProps
   disabled?: boolean
   minDate?: Date | null
-  disabledDates?: DisabledDateRange[]
+  disabledDateRange?: DisabledDateRange[]
+  disabledDates?: string[] // format: YYYY-MM-DD
   checkInDate?: Date | null
   maximumMonth?: number
 }
@@ -52,29 +53,37 @@ const CustomDatePicker = (props: Props) => {
   }, [props.checkInDate, props.maximumMonth]);
 
   const flatDisabledDates = useMemo(() => {
-    if (!props.disabledDates) return [];
-    
     const allDisabled: Date[] = [];
-    props.disabledDates.forEach(range => {
-      const startDate = new Date(range.checkinDate);
-      const endDate = new Date(range.checkoutDate);
 
-      let currentDate = new Date(startDate);
-      while (currentDate < endDate) {
-        allDisabled.push(new Date(currentDate));
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-    });
+    if (props.disabledDateRange) {
+      props.disabledDateRange.forEach(range => {
+        const startDate = new Date(range.checkinDate);
+        const endDate = new Date(range.checkoutDate);
+
+        let currentDate = new Date(startDate);
+        while (currentDate < endDate) {
+          allDisabled.push(new Date(currentDate));
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+      });
+    }
+
+    if (props.disabledDates) {
+      props.disabledDates.forEach(item => {
+        allDisabled.push(new Date(item));
+      });
+    }
+
     return allDisabled;
-  }, [props.disabledDates]);
+  }, [props.disabledDateRange, props.disabledDates]);
 
 
   const shouldDisableDate = (date: Date) => {
     if (flatDisabledDates) {
       return flatDisabledDates.some(disabledDate => {
         return date.getFullYear() === disabledDate.getFullYear() &&
-               date.getMonth() === disabledDate.getMonth() &&
-               date.getDate() === disabledDate.getDate();
+          date.getMonth() === disabledDate.getMonth() &&
+          date.getDate() === disabledDate.getDate();
       });
     }
     return false;
@@ -82,9 +91,9 @@ const CustomDatePicker = (props: Props) => {
 
   const isDateInRange = (date: Date) => {
     if (!props.checkInDate || !props.value) return false;
-    const checkInTime = new Date(props.checkInDate).setHours(0,0,0,0);
-    const valueTime = new Date(props.value).setHours(0,0,0,0);
-    const dateTime = new Date(date).setHours(0,0,0,0);
+    const checkInTime = new Date(props.checkInDate).setHours(0, 0, 0, 0);
+    const valueTime = new Date(props.value).setHours(0, 0, 0, 0);
+    const dateTime = new Date(date).setHours(0, 0, 0, 0);
     const startTime = Math.min(checkInTime, valueTime);
     const endTime = Math.max(checkInTime, valueTime);
     return dateTime >= startTime && dateTime <= endTime;
@@ -92,34 +101,34 @@ const CustomDatePicker = (props: Props) => {
 
   const isRangeStart = (date: Date) => {
     if (!props.checkInDate || !props.value) return false;
-    const checkInTime = new Date(props.checkInDate).setHours(0,0,0,0);
-    const valueTime = new Date(props.value).setHours(0,0,0,0);
-    const dateTime = new Date(date).setHours(0,0,0,0);
+    const checkInTime = new Date(props.checkInDate).setHours(0, 0, 0, 0);
+    const valueTime = new Date(props.value).setHours(0, 0, 0, 0);
+    const dateTime = new Date(date).setHours(0, 0, 0, 0);
     return dateTime === Math.min(checkInTime, valueTime);
   };
 
   const isRangeEnd = (date: Date) => {
     if (!props.checkInDate || !props.value) return false;
-    const checkInTime = new Date(props.checkInDate).setHours(0,0,0,0);
-    const valueTime = new Date(props.value).setHours(0,0,0,0);
-    const dateTime = new Date(date).setHours(0,0,0,0);
+    const checkInTime = new Date(props.checkInDate).setHours(0, 0, 0, 0);
+    const valueTime = new Date(props.value).setHours(0, 0, 0, 0);
+    const dateTime = new Date(date).setHours(0, 0, 0, 0);
     return dateTime === Math.max(checkInTime, valueTime);
   };
 
   const isCheckInDate = (date: Date) => {
     if (!props.checkInDate) return false;
     return date.getFullYear() === props.checkInDate.getFullYear() &&
-           date.getMonth() === props.checkInDate.getMonth() &&
-           date.getDate() === props.checkInDate.getDate();
+      date.getMonth() === props.checkInDate.getMonth() &&
+      date.getDate() === props.checkInDate.getDate();
   };
-  
+
   const hasDisabledDateInRange = (endDate: Date) => {
     if (!props.checkInDate || !flatDisabledDates) return false;
     const startTime = new Date(props.checkInDate).getTime();
     const endTime = new Date(endDate).getTime();
     const rangeStart = Math.min(startTime, endTime);
     const rangeEnd = Math.max(startTime, endTime);
-    
+
     return flatDisabledDates.some(disabledDate => {
       const disabledTime = new Date(disabledDate).getTime();
       return disabledTime > rangeStart && disabledTime < rangeEnd;
@@ -129,11 +138,11 @@ const CustomDatePicker = (props: Props) => {
   const getNextDisabledDate = () => {
     if (!props.checkInDate || !flatDisabledDates) return null;
     const checkInTime = new Date(props.checkInDate).getTime();
-    
+
     const nextDisabledDates = flatDisabledDates
       .filter(date => new Date(date).getTime() > checkInTime)
       .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-    
+
     return nextDisabledDates.length > 0 ? nextDisabledDates[0] : null;
   };
 
@@ -143,25 +152,25 @@ const CustomDatePicker = (props: Props) => {
         const nextDisabledDate = getNextDisabledDate();
         if (nextDisabledDate) {
           const isNextDisabledDate = date.getFullYear() === nextDisabledDate.getFullYear() &&
-                                    date.getMonth() === nextDisabledDate.getMonth() &&
-                                    date.getDate() === nextDisabledDate.getDate();
+            date.getMonth() === nextDisabledDate.getMonth() &&
+            date.getDate() === nextDisabledDate.getDate();
           return !isNextDisabledDate;
         }
       }
       return true;
     }
-    
+
     if (props.checkInDate && hasDisabledDateInRange(date)) {
       return true;
     }
-    
+
     if (props.checkInDate) {
       const nextDisabledDate = getNextDisabledDate();
       if (nextDisabledDate && new Date(date).getTime() > new Date(nextDisabledDate).getTime()) {
         return true;
       }
     }
-    
+
     return false;
   };
 
@@ -174,7 +183,7 @@ const CustomDatePicker = (props: Props) => {
         label={props.label}
         value={props.value}
         onChange={props.onChange}
-        views={['year', 'month', 'day']} 
+        views={['year', 'month', 'day']}
         format="dd MMMM yyyy"
         sx={props.sx}
         open={open}
@@ -193,7 +202,7 @@ const CustomDatePicker = (props: Props) => {
           textField: {
             onClick: () => setOpen(true),
             inputProps: { readOnly: true, },
-            onFocus: (e:any) => { e.target.blur(); setOpen(true); },
+            onFocus: (e: any) => { e.target.blur(); setOpen(true); },
             onKeyDown: (e) => { e.preventDefault(); },
             style: { cursor: 'pointer' }
           },
@@ -209,8 +218,8 @@ const CustomDatePicker = (props: Props) => {
               const nextDisabledDate = getNextDisabledDate();
               if (nextDisabledDate) {
                 return date.getFullYear() === nextDisabledDate.getFullYear() &&
-                       date.getMonth() === nextDisabledDate.getMonth() &&
-                       date.getDate() === nextDisabledDate.getDate();
+                  date.getMonth() === nextDisabledDate.getMonth() &&
+                  date.getDate() === nextDisabledDate.getDate();
               }
               return false;
             })();
@@ -228,7 +237,7 @@ const CustomDatePicker = (props: Props) => {
               };
             }
             else if (isCheckIn) {
-              const isSameDay = props.value && 
+              const isSameDay = props.value &&
                 date.getFullYear() === props.value.getFullYear() &&
                 date.getMonth() === props.value.getMonth() &&
                 date.getDate() === props.value.getDate();
