@@ -3,7 +3,8 @@
  * ป้องกันปัญหา new Date("YYYY-MM-DD") ถูก parse เป็น UTC midnight แล้ววันเลื่อนใน timezone อื่น
  */
 export function parseLocalDate(dateStr: string): Date {
-  const [year, month, day] = dateStr.split('-').map(Number);
+  const datePart = dateStr.split('T')[0].split(' ')[0];
+  const [year, month, day] = datePart.split('-').map(Number);
   return new Date(year, month - 1, day);
 }
 
