@@ -3,6 +3,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { th } from 'date-fns/locale';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { SxProps } from '@mui/material';
+import { parseLocalDate } from '@utils/date';
 
 type DisabledDateRange = {
   checkinDate: string;
@@ -57,8 +58,8 @@ const CustomDatePicker = (props: Props) => {
 
     if (props.disabledDateRange) {
       props.disabledDateRange.forEach(range => {
-        const startDate = new Date(range.checkinDate);
-        const endDate = new Date(range.checkoutDate);
+        const startDate = parseLocalDate(range.checkinDate);
+        const endDate = parseLocalDate(range.checkoutDate);
 
         let currentDate = new Date(startDate);
         while (currentDate < endDate) {
@@ -70,7 +71,7 @@ const CustomDatePicker = (props: Props) => {
 
     if (props.disabledDates) {
       props.disabledDates.forEach(item => {
-        allDisabled.push(new Date(item));
+        allDisabled.push(parseLocalDate(item));
       });
     }
 

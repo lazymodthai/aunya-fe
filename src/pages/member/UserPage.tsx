@@ -5,6 +5,7 @@ import { clearUser, setUser, userSelector } from '@store/slices/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import BookingAPI, { MyBookingData } from '@apis/booking';
+import { parseLocalDate } from '@utils/date';
 
 function UserPage() {
   const dispatch = useDispatch();
@@ -75,7 +76,7 @@ function UserPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('th-TH', {
+    return parseLocalDate(dateString).toLocaleDateString('th-TH', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

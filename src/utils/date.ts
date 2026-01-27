@@ -1,4 +1,13 @@
 /**
+ * Parse "YYYY-MM-DD" string เป็น local Date โดยไม่ผ่าน UTC
+ * ป้องกันปัญหา new Date("YYYY-MM-DD") ถูก parse เป็น UTC midnight แล้ววันเลื่อนใน timezone อื่น
+ */
+export function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+/**
  * ฟังก์ชันสำหรับจัดรูปแบบวันที่หลากหลายรูปแบบทั้งภาษาอังกฤษและภาษาไทย
  * @param dateInput - วันที่ในรูปแบบ yyyy-MM-dd (เช่น 2025-02-15) หรือ Date object หรือ String ของ Date object
  * @param format - ตัวเลขระบุรูปแบบที่ต้องการ (1-10), ค่าเริ่มต้นเป็น 1
@@ -15,7 +24,7 @@ export function FormatDate(dateInput: string | Date, format: number = 1): string
     // กรณีเป็น string
     // ตรวจสอบว่าเป็นรูปแบบ yyyy-MM-dd หรือไม่
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
-      dateObj = new Date(dateInput);
+      dateObj = parseLocalDate(dateInput);
     } else {
       // ลองแปลงจาก string ของ Date object (เช่น "Wed Feb 15 2025 ...")
       dateObj = new Date(dateInput);

@@ -24,6 +24,7 @@ import { Close as CloseIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-mat
 import { MyBookingData } from '@apis/booking';
 import { BookingStatus } from '@constants/booking.enum';
 import { useMemo, useState } from 'react';
+import { parseLocalDate } from '@utils/date';
 
 interface BookingsTabProps {
   allBookings: MyBookingData[];
@@ -107,7 +108,7 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('th-TH', {
+    return parseLocalDate(dateString).toLocaleDateString('th-TH', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -147,7 +148,7 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
   // Today's confirmed bookings (check-in today with Confirmed status)
   const todayBookings = useMemo(() => {
     return allBookings?.filter((booking) => {
-      const date = new Date(booking.checkinDate);
+      const date = parseLocalDate(booking.checkinDate);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
@@ -165,7 +166,7 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
 
     allBookings?.forEach((booking) => {
       // Convert to local date to get correct date key (avoid UTC timezone issue)
-      const date = new Date(booking.checkinDate);
+      const date = parseLocalDate(booking.checkinDate);
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
       const day = String(date.getDate()).padStart(2, '0');
@@ -182,7 +183,7 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
     });
 
     const sortedDates = Object.keys(groups).sort((a, b) =>
-      new Date(b).getTime() - new Date(a).getTime()
+      parseLocalDate(b).getTime() - parseLocalDate(a).getTime()
     );
 
     return sortedDates.map((date) => ({

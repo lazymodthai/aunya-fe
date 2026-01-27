@@ -13,6 +13,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import CheckIcon from '@mui/icons-material/Check';
 import { format } from 'date-fns';
+import { parseLocalDate } from '@utils/date';
 import BookingAPI, { BookingPayload } from '@apis/booking';
 import PricesAPI, { DiscountCode, PriceDetail } from '@apis/prices';
 import Loading from '@components/Loading';
@@ -132,7 +133,7 @@ function Booking(props: Props) {
 
   useEffect(() => {
     if (searchParams.get('startDate')) {
-      setCheckinDate(new Date(String(searchParams.get('startDate'))));
+      setCheckinDate(parseLocalDate(String(searchParams.get('startDate'))));
     }
   }, [searchParams]);
 

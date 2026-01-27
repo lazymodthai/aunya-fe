@@ -32,6 +32,7 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import PricesAPI, { DiscountCode } from '@apis/prices';
+import { parseLocalDate } from '@utils/date';
 import PriceField from '@components/common/PriceField';
 import { useEffect, useState } from 'react';
 
@@ -102,7 +103,10 @@ function DiscountCodeTab({ showNoti }: DiscountCodeTabProps) {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('th-TH', {
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(dateString)
+      ? parseLocalDate(dateString)
+      : new Date(dateString);
+    return date.toLocaleDateString('th-TH', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
