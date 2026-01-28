@@ -5,7 +5,7 @@ import { validateEmailRFC } from '@utils/validation';
 import Noti from '@components/Noti';
 import Loading from "@components/Loading";
 import { useNavigate } from 'react-router-dom';
-import { routes } from '@configss/route-config';
+import { routes } from '@configs/route-config';
 import { useDispatch } from 'react-redux';
 import { setUser } from '@store/slices/userSlice';
 
