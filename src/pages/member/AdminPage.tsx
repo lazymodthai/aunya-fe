@@ -187,7 +187,7 @@ function AdminPage() {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5' }}>
       {/* Header */}
-      <Box sx={{ bgcolor: 'white', borderBottom: '1px solid #e0e0e0', px: 2, py: 1.5, width: '98vw' }}>
+      <Box sx={{ bgcolor: 'white', borderBottom: '1px solid #e0e0e0', px: 2, py: 1.5 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" maxWidth={800} mx="auto">
           <Typography variant="h6" fontWeight={600}>
             Admin Panel
@@ -208,8 +208,18 @@ function AdminPage() {
         <Tabs
           value={activeTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
-          centered
-          sx={{ maxWidth: 800, mx: 'auto' }}
+          variant="scrollable"
+          scrollButtons={false}
+          allowScrollButtonsMobile
+          sx={{
+            maxWidth: 800,
+            mx: 'auto',
+            '& .MuiTabs-scroller': {
+              '&::-webkit-scrollbar': { display: 'none' },
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            },
+          }}
         >
           <Tab label="ปฏิทิน" />
           <Tab label="การจองทั้งหมด" />
