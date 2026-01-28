@@ -41,7 +41,7 @@ function AdminPage() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
   // Dialogs
-  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; booking: MyBookingData | null; action: BookingStatus | null }>({
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; booking: MyBookingData | null; action: BookingStatus | null; additionalPayment?: number }>({
     open: false,
     booking: null,
     action: null,
@@ -158,15 +158,15 @@ function AdminPage() {
     navigate(`/booking?startDate=${date}`);
   };
 
-  const handleStatusChange = async (booking: MyBookingData, newStatus: BookingStatus) => {
-    setConfirmDialog({ open: true, booking, action: newStatus });
+  const handleStatusChange = async (booking: MyBookingData, newStatus: BookingStatus, additionalPayment?: number) => {
+    setConfirmDialog({ open: true, booking, action: newStatus, additionalPayment });
   };
 
   const confirmStatusChange = async () => {
     if (!confirmDialog.booking || !confirmDialog.action) return;
 
     try {
-      await BookingAPI.updateBookingStatus(confirmDialog.booking.id, { status: confirmDialog.action });
+      await BookingAPI.updateBookingStatus(confirmDialog.booking.id, { status: confirmDialog.action, additionalPayment: confirmDialog.additionalPayment });
       showNoti('success', 'อัปเดตสถานะสำเร็จ');
       fetchAllBookings();
     } catch (error) {

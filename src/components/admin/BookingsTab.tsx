@@ -18,6 +18,7 @@ import {
   MenuItem,
   Select,
   Stack,
+  TextField,
   Typography,
 } from '@mui/material';
 import { Close as CloseIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
@@ -28,7 +29,7 @@ import { parseLocalDate } from '@utils/date';
 
 interface BookingsTabProps {
   allBookings: MyBookingData[];
-  onStatusChange: (booking: MyBookingData, newStatus: BookingStatus) => void;
+  onStatusChange: (booking: MyBookingData, newStatus: BookingStatus, additionalPayment?: number) => void;
 }
 
 function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
@@ -198,6 +199,33 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
     return groupedBookings.reduce((acc, group) => acc + group.bookings.length, 0);
   }, [groupedBookings]);
 
+  const PaymentInfo = ({ booking }: { booking: MyBookingData }) => (
+    <>
+      {booking.isOnlyDeposit && booking.remainingAmount > 0 ? (
+        <Grid size={{ xs: 6 }}>
+          <Typography variant="body2" color="text.secondary">
+            ชำระแล้ว
+          </Typography>
+          <Typography variant="body1" fontWeight={600} color="success.main">
+            ฿{booking.paidAmount?.toLocaleString()}
+          </Typography>
+          <Typography variant="body2" fontWeight={600} sx={{ color: '#ed6c02' }}>
+            ค้างชำระ: ฿{booking.remainingAmount?.toLocaleString()}
+          </Typography>
+        </Grid>
+      ) : (
+        <Grid size={{ xs: 6 }}>
+          <Typography variant="body2" color="text.secondary">
+            ราคารวม
+          </Typography>
+          <Typography variant="body1" fontWeight={600} color="primary">
+            ฿{booking.totalPrice.toLocaleString()}
+          </Typography>
+        </Grid>
+      )}
+    </>
+  );
+
   const BookingCard = ({ booking }: { booking: MyBookingData }) => (
     <Card sx={{ borderRadius: 2, mb: 2 }}>
       <CardContent>
@@ -252,14 +280,7 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
               {booking.additionGuestNumber ? ` (+${booking.additionGuestNumber})` : ''}
             </Typography>
           </Grid>
-          <Grid size={{ xs: 6 }}>
-            <Typography variant="body2" color="text.secondary">
-              ราคารวม
-            </Typography>
-            <Typography variant="body1" fontWeight={600} color="primary">
-              ฿{booking.totalPrice.toLocaleString()}
-            </Typography>
-          </Grid>
+          <PaymentInfo booking={booking} />
         </Grid>
 
         <Divider sx={{ my: 1.5 }} />
@@ -349,14 +370,7 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
               {booking.additionGuestNumber ? ` (+${booking.additionGuestNumber})` : ''}
             </Typography>
           </Grid>
-          <Grid size={{ xs: 6 }}>
-            <Typography variant="body2" color="text.secondary">
-              ราคารวม
-            </Typography>
-            <Typography variant="body1" fontWeight={600} color="primary">
-              ฿{booking.totalPrice.toLocaleString()}
-            </Typography>
-          </Grid>
+          <PaymentInfo booking={booking} />
         </Grid>
 
         <Divider sx={{ my: 1.5 }} />
@@ -380,90 +394,105 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
   );
 
   // Booking card for today's bookings (with Check In button)
-  const TodayBookingCard = ({ booking, disabled }: { booking: MyBookingData; disabled: boolean }) => (
-    <Card sx={{ borderRadius: 2, mb: 2, opacity: disabled ? 0.6 : 1 }}>
-      <CardContent>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              รหัสการจอง
-            </Typography>
-            <Typography variant="subtitle1" fontWeight={600}>
-              {booking.refCode}
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            {booking.files?.slips && booking.files.slips.length > 0 && (
-              <Chip
-                label={"ดูสลิป"}
-                color="default"
+  const TodayBookingCard = ({ booking, disabled }: { booking: MyBookingData; disabled: boolean }) => {
+    const [additionalPayment, setAdditionalPayment] = useState<number>(booking.remainingAmount || 0);
+    const hasRemaining = booking.isOnlyDeposit && booking.remainingAmount > 0;
+
+    return (
+      <Card sx={{ borderRadius: 2, mb: 2, opacity: disabled ? 0.6 : 1 }}>
+        <CardContent>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                รหัสการจอง
+              </Typography>
+              <Typography variant="subtitle1" fontWeight={600}>
+                {booking.refCode}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {booking.files?.slips && booking.files.slips.length > 0 && (
+                <Chip
+                  label={"ดูสลิป"}
+                  color="default"
+                  size="small"
+                  clickable
+                  onClick={() => handleOpenSlipModal(booking.files.slips)}
+                />
+              )}
+              <Chip label={getStatusText(booking.status)} color={getStatusColor(booking.status) as any} size="small" />
+            </Box>
+          </Stack>
+
+          <Divider sx={{ my: 1.5 }} />
+
+          <Grid container spacing={1.5}>
+            <Grid size={{ xs: 6 }}>
+              <Typography variant="body2" color="text.secondary">
+                เช็คอิน
+              </Typography>
+              <Typography variant="body1" fontWeight={500}>
+                {formatDate(booking.checkinDate)}
+              </Typography>
+            </Grid>
+            <Grid size={{ xs: 6 }}>
+              <Typography variant="body2" color="text.secondary">
+                เช็คเอาท์
+              </Typography>
+              <Typography variant="body1" fontWeight={500}>
+                {formatDate(booking.checkoutDate)}
+              </Typography>
+            </Grid>
+            <Grid size={{ xs: 6 }}>
+              <Typography variant="body2" color="text.secondary">
+                ผู้เข้าพัก
+              </Typography>
+              <Typography variant="body1" fontWeight={500}>
+                {booking.guestNumber} คน
+                {booking.additionGuestNumber ? ` (+${booking.additionGuestNumber})` : ''}
+              </Typography>
+            </Grid>
+            <PaymentInfo booking={booking} />
+          </Grid>
+
+          <Divider sx={{ my: 1.5 }} />
+
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            ผู้จอง: {booking.name} - {booking.phoneNumber}
+          </Typography>
+
+          {hasRemaining && (
+            <Box sx={{ mt: 1.5, p: 1.5, bgcolor: '#fff3e0', borderRadius: 2 }}>
+              <Typography variant="body2" fontWeight={600} sx={{ color: '#ed6c02', mb: 1 }}>
+                ยอดค้างชำระ: ฿{booking.remainingAmount?.toLocaleString()}
+              </Typography>
+              <TextField
+                label="ยอดที่เก็บจริง (บาท)"
+                type="number"
                 size="small"
-                clickable
-                onClick={() => handleOpenSlipModal(booking.files.slips)}
+                fullWidth
+                value={additionalPayment}
+                onChange={(e) => setAdditionalPayment(Number(e.target.value))}
+                slotProps={{ input: { inputProps: { min: 0 } } }}
               />
-            )}
-            <Chip label={getStatusText(booking.status)} color={getStatusColor(booking.status) as any} size="small" />
-          </Box>
-        </Stack>
+            </Box>
+          )}
 
-        <Divider sx={{ my: 1.5 }} />
-
-        <Grid container spacing={1.5}>
-          <Grid size={{ xs: 6 }}>
-            <Typography variant="body2" color="text.secondary">
-              เช็คอิน
-            </Typography>
-            <Typography variant="body1" fontWeight={500}>
-              {formatDate(booking.checkinDate)}
-            </Typography>
-          </Grid>
-          <Grid size={{ xs: 6 }}>
-            <Typography variant="body2" color="text.secondary">
-              เช็คเอาท์
-            </Typography>
-            <Typography variant="body1" fontWeight={500}>
-              {formatDate(booking.checkoutDate)}
-            </Typography>
-          </Grid>
-          <Grid size={{ xs: 6 }}>
-            <Typography variant="body2" color="text.secondary">
-              ผู้เข้าพัก
-            </Typography>
-            <Typography variant="body1" fontWeight={500}>
-              {booking.guestNumber} คน
-              {booking.additionGuestNumber ? ` (+${booking.additionGuestNumber})` : ''}
-            </Typography>
-          </Grid>
-          <Grid size={{ xs: 6 }}>
-            <Typography variant="body2" color="text.secondary">
-              ราคารวม
-            </Typography>
-            <Typography variant="body1" fontWeight={600} color="primary">
-              ฿{booking.totalPrice.toLocaleString()}
-            </Typography>
-          </Grid>
-        </Grid>
-
-        <Divider sx={{ my: 1.5 }} />
-
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          ผู้จอง: {booking.name} - {booking.phoneNumber}
-        </Typography>
-
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
-          fullWidth
-          sx={{ mt: 2 }}
-          disabled={disabled}
-          onClick={() => onStatusChange(booking, BookingStatus.CHECKED_IN)}
-        >
-          {disabled ? 'กรุณา Check Out ก่อน' : 'Check In'}
-        </Button>
-      </CardContent>
-    </Card>
-  );
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            fullWidth
+            sx={{ mt: 2 }}
+            disabled={disabled}
+            onClick={() => onStatusChange(booking, BookingStatus.CHECKED_IN, hasRemaining ? additionalPayment : undefined)}
+          >
+            {disabled ? 'กรุณา Check Out ก่อน' : 'Check In'}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <Box>

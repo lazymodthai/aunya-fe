@@ -18,6 +18,9 @@ interface SuccessStepProps {
   depositPrice: number;
   totalPrice: number;
   discountAmount: number;
+  isOnlyDeposit: boolean;
+  paidAmount: number;
+  remainingAmount: number;
 }
 
 function SuccessStep({
@@ -36,6 +39,9 @@ function SuccessStep({
   depositPrice,
   totalPrice,
   discountAmount,
+  isOnlyDeposit,
+  paidAmount,
+  remainingAmount,
 }: SuccessStepProps) {
   return (
     <Box
@@ -165,17 +171,51 @@ function SuccessStep({
         <Divider sx={{ my: 1.5 }} />
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography sx={{ fontSize: 18, fontWeight: 600 }}>ยอดรวมทั้งสิ้น</Typography>
+          <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
+            {isOnlyDeposit ? 'ยอดชำระครั้งนี้ (มัดจำ)' : 'ยอดรวมทั้งสิ้น'}
+          </Typography>
           <Typography sx={{ fontSize: 22, fontWeight: 600, color: '#15a13aff' }}>
-            {totalPrice.toLocaleString('th-TH', {
+            {paidAmount.toLocaleString('th-TH', {
               style: 'currency',
               currency: 'THB',
             })}
           </Typography>
         </Box>
+        {isOnlyDeposit && remainingAmount > 0 && (
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+            <Typography sx={{ fontSize: 16, fontWeight: 600 }}>ยอดค้างชำระ (จ่ายตอน Check-in)</Typography>
+            <Typography sx={{ fontSize: 18, fontWeight: 600, color: '#ed6c02' }}>
+              {remainingAmount.toLocaleString('th-TH', {
+                style: 'currency',
+                currency: 'THB',
+              })}
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       <Divider sx={{ width: '100%', my: 1 }} />
+
+      {/* Remaining Payment Info */}
+      {isOnlyDeposit && remainingAmount > 0 && (
+        <Box
+          sx={{
+            width: '100%',
+            bgcolor: '#fff3e0',
+            p: 2,
+            borderRadius: 2,
+            textAlign: 'left',
+            border: '1px solid #ed6c02',
+          }}
+        >
+          <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#ed6c02', mb: 0.5 }}>
+            กรุณาชำระยอดคงเหลือในวัน Check-in
+          </Typography>
+          <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>
+            ยอดค้างชำระ {remainingAmount.toLocaleString('th-TH')} บาท จะต้องชำระให้ครบก่อนเข้าพัก
+          </Typography>
+        </Box>
+      )}
 
       {/* Additional Info */}
       <Box

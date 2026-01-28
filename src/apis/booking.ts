@@ -14,6 +14,10 @@ export interface BookingPayload {
   totalPrice: number | null;
   roomId: string;
   customerId?: string;
+  discount?: number;
+  isOnlyDeposit?: boolean;
+  paidAmount?: number;
+  remainingAmount?: number;
 }
 
 export default class BookingAPI extends InstanceBookingAPI {
@@ -42,7 +46,7 @@ export default class BookingAPI extends InstanceBookingAPI {
     return this.api.get(`${path}/find-by-date`, { params: payload });
   }
 
-  static updateBookingStatus(id: string, payload: { status: BookingStatus }): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
+  static updateBookingStatus(id: string, payload: { status: BookingStatus; additionalPayment?: number }): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
     return this.api.patch(`${path}/${id}/status`, payload);
   }
 
@@ -69,6 +73,10 @@ interface MyBookingData {
   updatedAt: string;
   roomId: string;
   customerId: string;
+  isOnlyDeposit: boolean;
+  paidAmount: number;
+  remainingAmount: number;
+  discount: number;
   files: {
     qrCode: any[];
     slips: any[];

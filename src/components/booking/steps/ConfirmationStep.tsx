@@ -1,9 +1,11 @@
 import {
   Box,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   Divider,
+  FormControlLabel,
   Stack,
   TextField,
   Typography,
@@ -26,6 +28,8 @@ interface ConfirmationStepProps {
   additionGuestNumberPrice: number;
   additionTowelPrice: number;
   depositPrice: number;
+  isOnlyDeposit: boolean;
+  onIsOnlyDepositChange: (value: boolean) => void;
   onDiscountCodeChange: (value: string) => void;
   onPriceCalculated: (
     totalPrice: number,
@@ -49,6 +53,8 @@ function ConfirmationStep({
   additionGuestNumberPrice,
   additionTowelPrice,
   depositPrice,
+  isOnlyDeposit,
+  onIsOnlyDepositChange,
   onDiscountCodeChange,
   onPriceCalculated,
 }: ConfirmationStepProps) {
@@ -281,6 +287,33 @@ function ConfirmationStep({
           {totalPrice.toLocaleString('th-TH', { style: 'currency', currency: 'THB' })}
         </Typography>
       </Box>
+
+      {/* Deposit Only Option */}
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={isOnlyDeposit}
+            onChange={(e) => onIsOnlyDepositChange(e.target.checked)}
+          />
+        }
+        label="จ่ายเฉพาะค่ามัดจำก่อน (จ่ายส่วนที่เหลือตอน Check-in)"
+      />
+      {isOnlyDeposit && (
+        <Box sx={{ bgcolor: '#fff3e0', p: 2, borderRadius: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+            <Typography sx={{ fontWeight: 500 }}>ยอดชำระตอนนี้ (มัดจำ)</Typography>
+            <Typography sx={{ fontWeight: 600, color: '#15a13aff' }}>
+              {depositPrice.toLocaleString('th-TH')} บาท
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography sx={{ fontWeight: 500 }}>ยอดค้างชำระ (จ่ายตอน Check-in)</Typography>
+            <Typography sx={{ fontWeight: 600, color: '#ed6c02' }}>
+              {(totalPrice - depositPrice).toLocaleString('th-TH')} บาท
+            </Typography>
+          </Box>
+        </Box>
+      )}
     </>
   );
 }

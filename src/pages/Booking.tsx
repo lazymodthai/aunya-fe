@@ -81,6 +81,7 @@ function Booking(props: Props) {
   const [slipImages, setSlipImages] = useState<File[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [bookingId, setBookingId] = useState<string>('');
+  const [isOnlyDeposit, setIsOnlyDeposit] = useState<boolean>(false);
 
   const steps = ['เลือกวันเข้าพัก', 'ยืนยันรายการ', 'ชำระเงิน', 'ใบเสร็จ'];
 
@@ -142,6 +143,9 @@ function Booking(props: Props) {
     if (isInvalidPhoneNumber || !checkinDate || !checkoutDate || !guestNumber || !name || !phoneNumber)
       return;
 
+    const currentPaidAmount = isOnlyDeposit ? depositPrice : totalPrice;
+    const currentRemainingAmount = isOnlyDeposit ? totalPrice - depositPrice : 0;
+
     const payload: BookingPayload = {
       checkinDate: format(checkinDate, 'yyyy-MM-dd'),
       checkoutDate: format(checkoutDate, 'yyyy-MM-dd'),
@@ -152,6 +156,10 @@ function Booking(props: Props) {
       totalPrice: totalPrice,
       roomId: roomId,
       customerId: userData.id,
+      discount: discountAmount,
+      isOnlyDeposit: isOnlyDeposit,
+      paidAmount: currentPaidAmount,
+      remainingAmount: currentRemainingAmount,
     };
 
     try {
@@ -296,6 +304,8 @@ function Booking(props: Props) {
             additionGuestNumberPrice={additionGuestNumberPrice}
             additionTowelPrice={additionTowelPrice}
             depositPrice={depositPrice}
+            isOnlyDeposit={isOnlyDeposit}
+            onIsOnlyDepositChange={setIsOnlyDeposit}
             onDiscountCodeChange={setDiscountCode}
             onPriceCalculated={handlePriceCalculated}
           />
@@ -316,6 +326,9 @@ function Booking(props: Props) {
             QRname={QRname}
             bankName={bankName}
             bankAccount={bankAccount}
+            isOnlyDeposit={isOnlyDeposit}
+            paidAmount={isOnlyDeposit ? depositPrice : totalPrice}
+            remainingAmount={isOnlyDeposit ? totalPrice - depositPrice : 0}
           />
         );
 
@@ -340,6 +353,9 @@ function Booking(props: Props) {
             depositPrice={depositPrice}
             totalPrice={totalPrice}
             discountAmount={discountAmount}
+            isOnlyDeposit={isOnlyDeposit}
+            paidAmount={isOnlyDeposit ? depositPrice : totalPrice}
+            remainingAmount={isOnlyDeposit ? totalPrice - depositPrice : 0}
           />
         );
 

@@ -3,7 +3,15 @@
  * ป้องกันปัญหา new Date("YYYY-MM-DD") ถูก parse เป็น UTC midnight แล้ววันเลื่อนใน timezone อื่น
  */
 export function parseLocalDate(dateStr: string): Date {
-  const datePart = dateStr.split('T')[0].split(' ')[0];
+  // If the string is a full ISO timestamp (contains 'T' with time info),
+  // parse it as a Date object first to get correct local date
+  // e.g. "2025-01-30T17:00:00.000Z" is actually Jan 31 in UTC+7
+  if (dateStr.includes('T') && dateStr.length > 10) {
+    const d = new Date(dateStr);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+  // For date-only strings like "2025-01-31", parse manually to avoid UTC interpretation
+  const datePart = dateStr.split(' ')[0];
   const [year, month, day] = datePart.split('-').map(Number);
   return new Date(year, month - 1, day);
 }

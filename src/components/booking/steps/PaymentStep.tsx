@@ -19,6 +19,9 @@ interface PaymentStepProps {
   QRname: string;
   bankName: string;
   bankAccount: string;
+  isOnlyDeposit: boolean;
+  paidAmount: number;
+  remainingAmount: number;
 }
 
 function PaymentStep({
@@ -34,6 +37,9 @@ function PaymentStep({
   QRname,
   bankName,
   bankAccount,
+  isOnlyDeposit,
+  paidAmount,
+  remainingAmount,
 }: PaymentStepProps) {
   const [copying, setCopying] = useState(false);
   const clipboard = useClipboard();
@@ -69,13 +75,20 @@ function PaymentStep({
         </Typography>
       )}
 
-      <Typography sx={{ fontSize: 18, fontWeight: 600 }}>{`รวมยอดชำระทั้งสิ้น:`}</Typography>
+      <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
+        {isOnlyDeposit ? 'ยอดชำระครั้งนี้ (มัดจำ):' : 'รวมยอดชำระทั้งสิ้น:'}
+      </Typography>
       <Typography sx={{ fontSize: 24, fontWeight: 600, color: '#15a13aff', mt: -2 }}>
-        {totalPrice.toLocaleString('th-TH', {
+        {paidAmount.toLocaleString('th-TH', {
           style: 'currency',
           currency: 'THB',
         })}
       </Typography>
+      {isOnlyDeposit && remainingAmount > 0 && (
+        <Typography sx={{ fontSize: 16, fontWeight: 600, color: '#ed6c02' }}>
+          ยอดค้างชำระ (จ่ายตอน Check-in): {remainingAmount.toLocaleString('th-TH', { style: 'currency', currency: 'THB' })}
+        </Typography>
+      )}
       <Divider />
       <Typography sx={{ fontSize: 18, fontWeight: 600 }}>ช่องทางชำระเงิน:</Typography>
       <Typography sx={{ alignItems: 'center', display: 'flex', gap: 1 }}>
@@ -134,7 +147,7 @@ function PaymentStep({
           border: '1px solid #08080809',
         }}
       >
-        <QRPayment qrId={QRcode} value={totalPrice} />
+        <QRPayment qrId={QRcode} value={paidAmount} />
         <Typography sx={{ fontSize: 12, fontWeight: 600 }}>
           {QRcode.slice(0, 0) + 'x-xxxx-xxxx' + QRcode.slice(9).replace(/(\d)(\d{2})(\d)/, '$1-$2-$3')}
         </Typography>

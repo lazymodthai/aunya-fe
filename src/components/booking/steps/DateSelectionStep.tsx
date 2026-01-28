@@ -70,7 +70,8 @@ function DateSelectionStep({
         sx={{ width: '100%' }}
         minDate={addDays(checkinDate || new Date(), 1)}
         checkInDate={checkinDate}
-        disabledDateRange={disabledDateRange}
+        // disabledDateRange={disabledDateRange}
+        disabledDates={disabledDates}
       />
       <NumberField
         label="จำนวนผู้เข้าพัก"
