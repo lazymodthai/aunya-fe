@@ -2,6 +2,7 @@ import { SxProps, TextField } from "@mui/material";
 
 type Props = {
   onChange: (e: any) => void;
+  onBlur?: (e: any) => void;
   value: number | null;
   min?: number;
   max?: number;
@@ -17,6 +18,7 @@ function NumberField(props: Props) {
       type="number"
       variant="outlined"
       onChange={props.onChange}
+      onBlur={props.onBlur}
       onKeyUp={(e: any) => {
         const charCode = e.which ? e.which : e.keyCode;
         if (charCode < 48 || charCode > 57) {

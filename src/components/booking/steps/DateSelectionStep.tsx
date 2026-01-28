@@ -89,15 +89,22 @@ function DateSelectionStep({
         label="จำนวนผู้ใหญ่"
         onChange={(e) => {
           const num = parseInt(e.target.value);
+          const maxTotal = maxGuests + maxExtraBeds;
           if (num <= 0) {
             onGuestNumberChange(1);
+            onAdditionGuestNumberChange(null);
             return;
           }
-          if (num > maxGuests) {
-            onGuestNumberChange(maxGuests);
+          if (num > maxTotal) {
+            onGuestNumberChange(maxTotal);
+            onAdditionGuestNumberChange(maxExtraBeds);
             return;
+          }
+          onGuestNumberChange(num);
+          if (num > maxGuests) {
+            const minBeds = num - maxGuests;
+            onAdditionGuestNumberChange(minBeds);
           } else {
-            onGuestNumberChange(num);
             onAdditionGuestNumberChange(null);
           }
         }}
@@ -105,7 +112,7 @@ function DateSelectionStep({
         sx={{ width: '100%' }}
       />
       <NumberField
-        label="จำนวนเด็ก"
+        label="จำนวนเด็ก (ต่ำกว่า 8 ขวบ)"
         onChange={(e) => {
           const num = parseInt(e.target.value);
           if (num < 0) {
@@ -125,15 +132,25 @@ function DateSelectionStep({
         label={`ที่นอนเสริม (ชุดละ ${additionGuestNumberPrice} บาท)`}
         onChange={(e) => {
           const num = parseInt(e.target.value);
+          const minBeds = guestNumber && guestNumber > maxGuests ? guestNumber - maxGuests : 0;
+          if (num < minBeds) {
+            onAdditionGuestNumberChange(minBeds);
+            return;
+          }
           if (num > maxExtraBeds) {
             onAdditionGuestNumberChange(maxExtraBeds);
             return;
-          } else {
-            onAdditionGuestNumberChange(num);
+          }
+          onAdditionGuestNumberChange(num);
+        }}
+        onBlur={(e) => {
+          const minBeds = guestNumber && guestNumber > maxGuests ? guestNumber - maxGuests : 0;
+          if (!additionGuestNumber) {
+            onAdditionGuestNumberChange(minBeds);
           }
         }}
         value={additionGuestNumber}
-        disabled={!guestNumber || guestNumber < maxGuests}
+        disabled={!guestNumber || guestNumber <= maxGuests}
         sx={{ width: '100%' }}
       />
       <NumberField
