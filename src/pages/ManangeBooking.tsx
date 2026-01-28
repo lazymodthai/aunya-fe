@@ -29,12 +29,12 @@ function ManangeBooking() {
                 checkinDate: item.checkinDate,
                 checkoutDate: item.checkoutDate,
                 guestNumber: item.guestNumber,
+                childrenNumber: item.childrenNumber ?? null,
                 additionGuestNumber: item.additionGuestNumber,
                 name: item.name,
                 phoneNumber: item.phoneNumber,
                 totalPrice: item.totalPrice,
                 status: item.status,
-
             }))}
                 onClick={(id) => { console.log('id', id) }} />
 
