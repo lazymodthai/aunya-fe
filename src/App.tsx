@@ -19,6 +19,7 @@ import PoolIcon from './assets/icons/pool.svg'
 import KaraokeIcon from './assets/icons/karaoke.svg'
 import TreesIcon from './assets/icons/trees.svg'
 import BilliardIcon from './assets/icons/billiard.svg'
+import Room from '@pages/Room'
 import UnderConstruction from '@pages/UnderConstruction'
 import ManangeBooking from '@pages/ManangeBooking'
 import AdminPage from '@pages/member/AdminPage'
@@ -117,8 +118,7 @@ function App() {
         }}>
           <Routes>
             <Route path="/" element={<Main />} />
-            {/* <Route path="/room" element={<Room />} /> */}
-            <Route path="/room" element={<UnderConstruction />} />
+            <Route path="/room" element={<Room />} />
             <Route path="/map" element={<Map />} />
             <Route path="/booking" element={<Booking bookingData={bookingData} />} />
             {/* <Route path="/booking" element={<UnderConstruction />} /> */}
