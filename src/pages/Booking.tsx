@@ -28,6 +28,7 @@ import {
   DEFAULT_MAX_GUESTS,
   DEFAULT_EXTRA_BED_COUNT,
   DEFAULT_TOWEL_COUNT,
+  DEFAULT_MAX_CHILDREN,
   DEPOSIT_PRICE,
   PROMPTPAY_QR_CODE,
   PROMPTPAY_NAME,
@@ -65,6 +66,7 @@ function Booking(props: Props) {
   const [additionGuestNumberPrice, setAdditionGuestNumberPrice] = useState(DEFAULT_EXTRA_BED_PRICE);
   const [additionTowelPrice, setAdditionTowelPrice] = useState(DEFAULT_TOWEL_PRICE);
   const [maxGuests, setMaxGuests] = useState(DEFAULT_MAX_GUESTS);
+  const [maxChildren, setMaxChildren] = useState(DEFAULT_MAX_CHILDREN);
   const [maxExtraBeds, setMaxExtraBeds] = useState(DEFAULT_EXTRA_BED_COUNT);
   const [maxTowels, setMaxTowels] = useState(DEFAULT_TOWEL_COUNT);
 
@@ -72,6 +74,7 @@ function Booking(props: Props) {
   const [checkinDate, setCheckinDate] = useState<Date | null>(null);
   const [checkoutDate, setCheckoutDate] = useState<Date | null>(null);
   const [guestNumber, setGuestNumber] = useState<number | null>(null);
+  const [childrenNumber, setChildrenNumber] = useState<number | null>(null);
   const [additionGuestNumber, setAdditionGuestNumber] = useState<number | null>(null);
   const [additionTowel, setAdditionTowel] = useState<number | null>(null);
   const [name, setName] = useState<string>('');
@@ -135,6 +138,7 @@ function Booking(props: Props) {
       setAdditionGuestNumberPrice(s.extraBedPrice);
       setAdditionTowelPrice(s.towelPrice);
       setMaxGuests(s.maxGuests);
+      setMaxChildren(s.maxChildren);
       setMaxExtraBeds(s.extraBedCount);
       setMaxTowels(s.towelCount);
     });
@@ -179,6 +183,7 @@ function Booking(props: Props) {
       checkinDate: format(checkinDate, 'yyyy-MM-dd'),
       checkoutDate: format(checkoutDate, 'yyyy-MM-dd'),
       guestNumber: guestNumber,
+      childrenNumber: childrenNumber,
       additionGuestNumber: additionGuestNumber,
       name: name,
       phoneNumber: phoneNumber,
@@ -295,6 +300,7 @@ function Booking(props: Props) {
             checkinDate={checkinDate}
             checkoutDate={checkoutDate}
             guestNumber={guestNumber}
+            childrenNumber={childrenNumber}
             additionGuestNumber={additionGuestNumber}
             additionTowel={additionTowel}
             name={name}
@@ -306,11 +312,13 @@ function Booking(props: Props) {
             additionGuestNumberPrice={additionGuestNumberPrice}
             additionTowelPrice={additionTowelPrice}
             maxGuests={maxGuests}
+            maxChildren={maxChildren}
             maxExtraBeds={maxExtraBeds}
             maxTowels={maxTowels}
             onCheckinChange={setCheckinDate}
             onCheckoutChange={setCheckoutDate}
             onGuestNumberChange={setGuestNumber}
+            onChildrenNumberChange={setChildrenNumber}
             onAdditionGuestNumberChange={setAdditionGuestNumber}
             onAdditionTowelChange={setAdditionTowel}
             onNameChange={setName}
@@ -327,6 +335,7 @@ function Booking(props: Props) {
             checkinDate={checkinDate!}
             checkoutDate={checkoutDate!}
             guestNumber={guestNumber!}
+            childrenNumber={childrenNumber}
             additionGuestNumber={additionGuestNumber}
             additionTowel={additionTowel}
             name={name}
@@ -377,6 +386,7 @@ function Booking(props: Props) {
             checkoutDate={checkoutDate!}
             totalDate={totalDate}
             guestNumber={guestNumber!}
+            childrenNumber={childrenNumber}
             additionGuestNumber={additionGuestNumber}
             additionTowel={additionTowel}
             totalRoomPrice={totalRoomPrice}

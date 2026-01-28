@@ -8,6 +8,7 @@ interface BookingData {
     checkinDate: string;
     checkoutDate: string;
     guestNumber: number;
+    childrenNumber: number | null;
     additionGuestNumber: number | null;
     name: string;
     phoneNumber: string;
@@ -62,10 +63,10 @@ function BookManagementCard({ bookingData, onClick }: BookManagementCardProps) {
                         </Box>
                         <Box display="flex" gap={2} mb={1}>
                             <Typography variant="body2" sx={{ fontWeight: 600, minWidth: '100px' }}>
-                                จำนวนผู้เข้าพัก:
+                                ผู้ใหญ่:
                             </Typography>
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                {item.guestNumber}
+                                {item.guestNumber} คน{item.childrenNumber ? ` + เด็ก ${item.childrenNumber}` : ''}
                             </Typography>
                         </Box>
                         <Box display="flex" gap={2} mb={1}>

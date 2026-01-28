@@ -8,6 +8,7 @@ export interface BookingPayload {
   checkinDate: Date | string | null;
   checkoutDate: Date | string | null;
   guestNumber: number | null;
+  childrenNumber: number | null;
   additionGuestNumber: number | null;
   name: string;
   phoneNumber: string;
@@ -64,6 +65,7 @@ interface MyBookingData {
   checkinDate: string;
   checkoutDate: string;
   guestNumber: number;
+  childrenNumber: number | null;
   additionGuestNumber: number | null;
   name: string;
   phoneNumber: string;

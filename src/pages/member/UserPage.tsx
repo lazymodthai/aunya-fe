@@ -150,10 +150,10 @@ function UserPage() {
                       </Grid>
                       <Grid size={{ xs: 6 }}>
                         <Typography variant="body2" color="text.secondary">
-                          จำนวนผู้เข้าพัก
+                          ผู้ใหญ่ / เด็ก
                         </Typography>
                         <Typography variant="body1" fontWeight={500}>
-                          {booking.guestNumber} คน
+                          {booking.guestNumber} คน{booking.childrenNumber ? ` + เด็ก ${booking.childrenNumber}` : ''}
                           {booking.additionGuestNumber ? ` (+${booking.additionGuestNumber})` : ''}
                         </Typography>
                       </Grid>

@@ -19,6 +19,7 @@ interface ConfirmationStepProps {
   checkinDate: Date;
   checkoutDate: Date;
   guestNumber: number;
+  childrenNumber: number | null;
   additionGuestNumber: number | null;
   additionTowel: number | null;
   name: string;
@@ -44,6 +45,7 @@ function ConfirmationStep({
   checkinDate,
   checkoutDate,
   guestNumber,
+  childrenNumber,
   additionGuestNumber,
   additionTowel,
   name,
@@ -183,8 +185,13 @@ function ConfirmationStep({
         <span style={{ color: '#0b538eff' }}>{`${nights} `} คืน</span>
       </Typography>
       <Typography sx={{ display: 'flex', gap: 1 }}>
-        จำนวนผู้เข้าพัก: <span style={{ color: '#0b538eff' }}>{guestNumber} คน</span>
+        จำนวนผู้ใหญ่: <span style={{ color: '#0b538eff' }}>{guestNumber} คน</span>
       </Typography>
+      {!!childrenNumber && (
+        <Typography sx={{ display: 'flex', gap: 1 }}>
+          จำนวนเด็ก: <span style={{ color: '#0b538eff' }}>{childrenNumber} คน</span>
+        </Typography>
+      )}
       {!!additionGuestNumber && (
         <Typography sx={{ display: 'flex', gap: 1 }}>
           ที่นอนเสริม: <span style={{ color: '#57768fff' }}>{additionGuestNumber} ชุด</span>

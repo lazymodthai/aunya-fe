@@ -22,6 +22,9 @@ export const DEFAULT_EXTRA_BED_COUNT = 2;
 /** จำนวนผ้าขนหนูสูงสุด — overridable by API key: towelCount */
 export const DEFAULT_TOWEL_COUNT = 10;
 
+/** จำนวนเด็กสูงสุด — overridable by API key: maxChildren */
+export const DEFAULT_MAX_CHILDREN = 3;
+
 /** เงินมัดจำ (บาท) */
 export const DEPOSIT_PRICE = 2000;
 
@@ -80,6 +83,7 @@ export interface AppSettings {
   extraBedPrice: number;
   towelPrice: number;
   maxGuests: number;
+  maxChildren: number;
   extraBedCount: number;
   towelCount: number;
 }
@@ -89,6 +93,7 @@ export async function fetchAppSettings(): Promise<AppSettings> {
     extraBedPrice: DEFAULT_EXTRA_BED_PRICE,
     towelPrice: DEFAULT_TOWEL_PRICE,
     maxGuests: DEFAULT_MAX_GUESTS,
+    maxChildren: DEFAULT_MAX_CHILDREN,
     extraBedCount: DEFAULT_EXTRA_BED_COUNT,
     towelCount: DEFAULT_TOWEL_COUNT,
   };
@@ -101,6 +106,7 @@ export async function fetchAppSettings(): Promise<AppSettings> {
       extraBedPrice: Number(map.get('extraBedPrice')) || defaults.extraBedPrice,
       towelPrice: Number(map.get('towelPrice')) || defaults.towelPrice,
       maxGuests: Number(map.get('maxGuests')) || defaults.maxGuests,
+      maxChildren: Number(map.get('maxChildren')) || defaults.maxChildren,
       extraBedCount: Number(map.get('extraBedCount')) || defaults.extraBedCount,
       towelCount: Number(map.get('towelCount')) || defaults.towelCount,
     };

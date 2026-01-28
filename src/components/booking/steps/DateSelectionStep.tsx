@@ -8,6 +8,7 @@ interface DateSelectionStepProps {
   checkinDate: Date | null;
   checkoutDate: Date | null;
   guestNumber: number | null;
+  childrenNumber: number | null;
   additionGuestNumber: number | null;
   additionTowel: number | null;
   name: string;
@@ -19,11 +20,13 @@ interface DateSelectionStepProps {
   additionGuestNumberPrice: number;
   additionTowelPrice: number;
   maxGuests: number;
+  maxChildren: number;
   maxExtraBeds: number;
   maxTowels: number;
   onCheckinChange: (date: Date | null) => void;
   onCheckoutChange: (date: Date | null) => void;
   onGuestNumberChange: (value: number | null) => void;
+  onChildrenNumberChange: (value: number | null) => void;
   onAdditionGuestNumberChange: (value: number | null) => void;
   onAdditionTowelChange: (value: number | null) => void;
   onNameChange: (value: string) => void;
@@ -34,6 +37,7 @@ function DateSelectionStep({
   checkinDate,
   checkoutDate,
   guestNumber,
+  childrenNumber,
   additionGuestNumber,
   additionTowel,
   name,
@@ -45,11 +49,13 @@ function DateSelectionStep({
   additionGuestNumberPrice,
   additionTowelPrice,
   maxGuests,
+  maxChildren,
   maxExtraBeds,
   maxTowels,
   onCheckinChange,
   onCheckoutChange,
   onGuestNumberChange,
+  onChildrenNumberChange,
   onAdditionGuestNumberChange,
   onAdditionTowelChange,
   onNameChange,
@@ -67,7 +73,7 @@ function DateSelectionStep({
         sx={{ width: '100%' }}
         // disabledDateRange={disabledDateRange}
         disabledDates={disabledDates}
-        maximumMonth={3}
+        maximumMonth={4}
       />
       <CustomDatePicker
         label="เลือกวันที่ Check-out"
@@ -80,7 +86,7 @@ function DateSelectionStep({
         disabledDates={disabledDates}
       />
       <NumberField
-        label="จำนวนผู้เข้าพัก"
+        label="จำนวนผู้ใหญ่"
         onChange={(e) => {
           const num = parseInt(e.target.value);
           if (num <= 0) {
@@ -96,6 +102,23 @@ function DateSelectionStep({
           }
         }}
         value={guestNumber}
+        sx={{ width: '100%' }}
+      />
+      <NumberField
+        label="จำนวนเด็ก"
+        onChange={(e) => {
+          const num = parseInt(e.target.value);
+          if (num < 0) {
+            onChildrenNumberChange(0);
+            return;
+          }
+          if (num > maxChildren) {
+            onChildrenNumberChange(maxChildren);
+            return;
+          }
+          onChildrenNumberChange(num);
+        }}
+        value={childrenNumber}
         sx={{ width: '100%' }}
       />
       <NumberField

@@ -10,6 +10,7 @@ interface SuccessStepProps {
   checkoutDate: Date;
   totalDate: number;
   guestNumber: number;
+  childrenNumber: number | null;
   additionGuestNumber: number | null;
   additionTowel: number | null;
   totalRoomPrice: number;
@@ -31,6 +32,7 @@ function SuccessStep({
   checkoutDate,
   totalDate,
   guestNumber,
+  childrenNumber,
   additionGuestNumber,
   additionTowel,
   totalRoomPrice,
@@ -113,9 +115,15 @@ function SuccessStep({
             <Typography sx={{ fontSize: 14, fontWeight: 500 }}>{totalDate} คืน</Typography>
           </Grid>
           <Grid size={6} sx={{ mt: 1 }}>
-            <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>จำนวนผู้เข้าพัก</Typography>
+            <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>ผู้ใหญ่</Typography>
             <Typography sx={{ fontSize: 14, fontWeight: 500 }}>{guestNumber} คน</Typography>
           </Grid>
+          {!!childrenNumber && (
+            <Grid size={6} sx={{ mt: 1 }}>
+              <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>เด็ก</Typography>
+              <Typography sx={{ fontSize: 14, fontWeight: 500 }}>{childrenNumber} คน</Typography>
+            </Grid>
+          )}
         </Grid>
       </Box>
 
