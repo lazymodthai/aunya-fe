@@ -18,7 +18,7 @@ import BedroomParentIcon from '@mui/icons-material/BedroomParent';
 import MapIcon from '@mui/icons-material/Map';
 import BookOnlineIcon from '../../assets/icons/booking.png';
 import PersonIcon from '@mui/icons-material/Person';
-import { routes } from '../../config/route-config';
+import { routes } from '../../configs/route-config';
 
 const menuItems = [
   { label: "หน้าหลัก", icon: <HomeIcon />, path: routes.main },

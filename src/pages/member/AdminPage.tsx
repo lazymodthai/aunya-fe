@@ -27,8 +27,9 @@ import BookingsTab from '@components/admin/BookingsTab';
 import PriceSettingsTab from '@components/admin/PriceSettingsTab';
 import DiscountCodeTab from '@components/admin/DiscountCodeTab';
 import GalleryTab from '@components/admin/GalleryTab';
-
-const roomId = import.meta.env.VITE_ROOM_ID;
+import SettingsTab from '@components/admin/SettingsTab';
+import { ROOM_ID } from '@configs/app-settings';
+import SettingsAPI from '@apis/settings';
 
 function AdminPage() {
   const dispatch = useDispatch();
@@ -54,6 +55,8 @@ function AdminPage() {
     type: 'success',
     message: '',
   });
+
+  const [serverOffline, setServerOffline] = useState(false);
 
   const showNoti = (type: 'success' | 'error', message: string) => {
     setNoti({ open: true, type, message });
@@ -99,7 +102,7 @@ function AdminPage() {
       const { data } = await PricesAPI.getPrices({
         month: adjustedMonth + 1,
         year: adjustedYear,
-        roomId: roomId,
+        roomId: ROOM_ID,
       });
 
       if (data) {
@@ -178,7 +181,18 @@ function AdminPage() {
     }
   };
 
+  const checkServerConnection = async () => {
+    try {
+      await SettingsAPI.healthCheck();
+      setServerOffline(false);
+    } catch {
+      setServerOffline(true);
+      showNoti('error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+    }
+  };
+
   useEffect(() => {
+    checkServerConnection();
     fetchProfile();
     fetchCalendarData(new Date().getMonth());
     fetchAllBookings();
@@ -226,8 +240,18 @@ function AdminPage() {
           <Tab label="ตั้งราคา" />
           <Tab label="โค้ดส่วนลด" />
           <Tab label="รูปภาพ" />
+          <Tab label="ตั้งค่า" />
         </Tabs>
       </Box>
+
+      {/* Server Offline Banner */}
+      {serverOffline && (
+        <Box sx={{ bgcolor: '#d32f2f', color: 'white', px: 2, py: 1.5, textAlign: 'center' }}>
+          <Typography variant="body2" fontWeight={600}>
+            ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ — ข้อมูลอาจไม่เป็นปัจจุบัน
+          </Typography>
+        </Box>
+      )}
 
       {/* Content */}
       <Box sx={{ py: 3, px: 2 }}>
@@ -270,6 +294,11 @@ function AdminPage() {
           {/* Tab 4: Gallery */}
           {activeTab === 4 && (
             <GalleryTab showNoti={showNoti} />
+          )}
+
+          {/* Tab 5: Settings */}
+          {activeTab === 5 && (
+            <SettingsTab showNoti={showNoti} />
           )}
         </Box>
       </Box>

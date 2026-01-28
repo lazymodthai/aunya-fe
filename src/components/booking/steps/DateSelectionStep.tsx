@@ -18,6 +18,9 @@ interface DateSelectionStepProps {
   hasUserData: boolean;
   additionGuestNumberPrice: number;
   additionTowelPrice: number;
+  maxGuests: number;
+  maxExtraBeds: number;
+  maxTowels: number;
   onCheckinChange: (date: Date | null) => void;
   onCheckoutChange: (date: Date | null) => void;
   onGuestNumberChange: (value: number | null) => void;
@@ -41,6 +44,9 @@ function DateSelectionStep({
   hasUserData,
   additionGuestNumberPrice,
   additionTowelPrice,
+  maxGuests,
+  maxExtraBeds,
+  maxTowels,
   onCheckinChange,
   onCheckoutChange,
   onGuestNumberChange,
@@ -81,8 +87,8 @@ function DateSelectionStep({
             onGuestNumberChange(1);
             return;
           }
-          if (num > 10) {
-            onGuestNumberChange(10);
+          if (num > maxGuests) {
+            onGuestNumberChange(maxGuests);
             return;
           } else {
             onGuestNumberChange(num);
@@ -96,23 +102,23 @@ function DateSelectionStep({
         label={`ที่นอนเสริม (ชุดละ ${additionGuestNumberPrice} บาท)`}
         onChange={(e) => {
           const num = parseInt(e.target.value);
-          if (num > 2) {
-            onAdditionGuestNumberChange(2);
+          if (num > maxExtraBeds) {
+            onAdditionGuestNumberChange(maxExtraBeds);
             return;
           } else {
             onAdditionGuestNumberChange(num);
           }
         }}
         value={additionGuestNumber}
-        disabled={!guestNumber || guestNumber < 10}
+        disabled={!guestNumber || guestNumber < maxGuests}
         sx={{ width: '100%' }}
       />
       <NumberField
         label={`เพิ่มผ้าขนหนู+ผ้าเช็ดผม (ชุดละ ${additionTowelPrice} บาท)`}
         onChange={(e) => {
           const num = parseInt(e.target.value);
-          if (num > 20) {
-            onAdditionTowelChange(20);
+          if (num > maxTowels) {
+            onAdditionTowelChange(maxTowels);
             return;
           } else {
             onAdditionTowelChange(num);

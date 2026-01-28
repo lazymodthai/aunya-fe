@@ -14,6 +14,7 @@ import {
 import PricesAPI from '@apis/prices';
 import PriceField from '@components/common/PriceField';
 import { useState } from 'react';
+import { ROOM_ID } from '@configs/app-settings';
 
 interface PriceSettingsTabProps {
   currentYear: number;
@@ -22,7 +23,7 @@ interface PriceSettingsTabProps {
   showNoti: (type: 'success' | 'error', message: string) => void;
 }
 
-const roomId = import.meta.env.VITE_ROOM_ID;
+const roomId = ROOM_ID;
 
 function PriceSettingsTab({ currentYear, currentMonth, onRefreshCalendar, showNoti }: PriceSettingsTabProps) {
   const [generateDialog, setGenerateDialog] = useState(false);

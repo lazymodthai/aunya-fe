@@ -21,6 +21,20 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { UploadfileAPI } from '@apis/upload';
 import { userSelector } from '@store/slices/userSlice';
 import { useSelector } from 'react-redux';
+import {
+  fetchAppSettings,
+  DEFAULT_EXTRA_BED_PRICE,
+  DEFAULT_TOWEL_PRICE,
+  DEFAULT_MAX_GUESTS,
+  DEFAULT_EXTRA_BED_COUNT,
+  DEFAULT_TOWEL_COUNT,
+  DEPOSIT_PRICE,
+  PROMPTPAY_QR_CODE,
+  PROMPTPAY_NAME,
+  BANK_NAME,
+  BANK_ACCOUNT,
+  ROOM_ID,
+} from '@configs/app-settings';
 
 // Step Components
 import DateSelectionStep from '@components/booking/steps/DateSelectionStep';
@@ -34,21 +48,25 @@ type Props = {
   bookingData: any;
 };
 
-// Constants
-const QRcode = '1100400100824';
-const QRname = 'นางสุจิตรา อ่อนคำ';
-const additionGuestNumberPrice = 300;
-const additionTowelPrice = 100;
-const depositPrice = 2000;
-const bankName = 'กรุงไทย';
-const bankAccount = '7790516787';
-const roomId = import.meta.env.VITE_ROOM_ID;
+const QRcode = PROMPTPAY_QR_CODE;
+const QRname = PROMPTPAY_NAME;
+const depositPrice = DEPOSIT_PRICE;
+const bankName = BANK_NAME;
+const bankAccount = BANK_ACCOUNT;
+const roomId = ROOM_ID;
 
 function Booking(props: Props) {
   const isMobile = useMediaQuery('(max-width:800px)');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { userData } = useSelector(userSelector);
+
+  // Settings from API
+  const [additionGuestNumberPrice, setAdditionGuestNumberPrice] = useState(DEFAULT_EXTRA_BED_PRICE);
+  const [additionTowelPrice, setAdditionTowelPrice] = useState(DEFAULT_TOWEL_PRICE);
+  const [maxGuests, setMaxGuests] = useState(DEFAULT_MAX_GUESTS);
+  const [maxExtraBeds, setMaxExtraBeds] = useState(DEFAULT_EXTRA_BED_COUNT);
+  const [maxTowels, setMaxTowels] = useState(DEFAULT_TOWEL_COUNT);
 
   // Form State
   const [checkinDate, setCheckinDate] = useState<Date | null>(null);
@@ -110,6 +128,17 @@ function Booking(props: Props) {
       setLoading(false);
     }
   };
+
+  // Fetch settings from API
+  useEffect(() => {
+    fetchAppSettings().then((s) => {
+      setAdditionGuestNumberPrice(s.extraBedPrice);
+      setAdditionTowelPrice(s.towelPrice);
+      setMaxGuests(s.maxGuests);
+      setMaxExtraBeds(s.extraBedCount);
+      setMaxTowels(s.towelCount);
+    });
+  }, []);
 
   // Effects
   useEffect(() => {
@@ -276,6 +305,9 @@ function Booking(props: Props) {
             hasUserData={!!userData.firstName}
             additionGuestNumberPrice={additionGuestNumberPrice}
             additionTowelPrice={additionTowelPrice}
+            maxGuests={maxGuests}
+            maxExtraBeds={maxExtraBeds}
+            maxTowels={maxTowels}
             onCheckinChange={setCheckinDate}
             onCheckoutChange={setCheckoutDate}
             onGuestNumberChange={setGuestNumber}

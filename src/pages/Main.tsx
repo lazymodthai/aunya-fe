@@ -30,16 +30,13 @@ import SpeakerIcon from "@assets/icons/speaker.svg"
 import NopetIcon from "@assets/icons/nopet.png"
 import PricesAPI from "@apis/prices"
 import { useEffect, useState } from "react"
-
-const roomId = import.meta.env.VITE_ROOM_ID
-
-const info = [
-  { key: 'room', text: "3 ห้องนอน", icon: <Box component={'img'} src={BedIcon} width={24} /> },
-  { key: 'bath', text: "3 ห้องน้ำ", icon: <Box component={'img'} src={ShowerIcon} width={24} /> },
-  { key: 'people', text: "รองรับ 8 - 10 คน", icon: <Box component={'img'} src={PeopleIcon} width={24} /> },
-  { key: 'plus', text: "ที่นอนเสริม 2 ชุด", icon: <Box component={'img'} src={AddUserIcon} width={24} /> },
-  { key: 'car', text: "ที่จอดรถมากกว่า 4 คัน", icon: <Box component={'img'} src={CarIcon} width={24} /> },
-]
+import {
+  fetchAppSettings,
+  CONTACTS,
+  SOCIAL_LINKS,
+  PROPERTY,
+  ROOM_ID,
+} from "@configs/app-settings"
 
 const facilities = [
   { key: 'pool', text: "สระว่ายน้ำระบบเกลือ ลึก 1.2 เมตร", icon: <Box component={'img'} src={PoolIcon} width={24} /> },
@@ -73,7 +70,16 @@ interface BookingData {
 function Main() {
   const isMobile = useMediaQuery("(max-width:800px)")
   const [bookingData, setBookingData] = useState<BookingData[]>([])
+  const [maxGuests, setMaxGuests] = useState(10)
+  const [extraBedCount, setExtraBedCount] = useState(2)
 
+  const info = [
+    { key: 'room', text: `${PROPERTY.bedrooms} ห้องนอน`, icon: <Box component={'img'} src={BedIcon} width={24} /> },
+    { key: 'bath', text: `${PROPERTY.bathrooms} ห้องน้ำ`, icon: <Box component={'img'} src={ShowerIcon} width={24} /> },
+    { key: 'people', text: `รองรับ 8 - ${maxGuests} คน`, icon: <Box component={'img'} src={PeopleIcon} width={24} /> },
+    { key: 'plus', text: `ที่นอนเสริม ${extraBedCount} ชุด`, icon: <Box component={'img'} src={AddUserIcon} width={24} /> },
+    { key: 'car', text: `ที่จอดรถมากกว่า ${PROPERTY.parkingSlots} คัน`, icon: <Box component={'img'} src={CarIcon} width={24} /> },
+  ]
 
   const getPriceByMonth = async (month: number) => {
     if (month < 0 || month > 11) return;
@@ -81,7 +87,7 @@ function Main() {
       const { data } = await PricesAPI.getPrices({
         month: month + 1,
         year: new Date().getFullYear(),
-        roomId: roomId
+        roomId: ROOM_ID
       });
       setBookingData(data.prices);
     } catch (error) {
@@ -91,6 +97,10 @@ function Main() {
 
   useEffect(() => {
     getPriceByMonth(new Date().getMonth())
+    fetchAppSettings().then((s) => {
+      setMaxGuests(s.maxGuests);
+      setExtraBedCount(s.extraBedCount);
+    });
   }, [])
 
   return (
@@ -111,53 +121,34 @@ function Main() {
 
         <Grid size={12} borderRadius={2} padding={2} my={isMobile ? -2 : 0}>
           <Grid container gap={1} justifyContent={"end"}>
-            <Box
-              onClick={() => (window.location.href = "tel:0880844455")}
-              sx={{
-                bgcolor: "#fff",
-                pl: 1,
-                pr: 2,
-                py: 1,
-                borderRadius: 6,
-                display: "flex",
-                gap: 1,
-                border: "1px solid #77B3D4",
-                cursor: "pointer",
-              }}
-            >
-              <Box component={"img"} src={PhoneIcon} width={20} />
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 500, color: "#77B3D4" }}
+            {CONTACTS.map((c) => (
+              <Box
+                key={c.phone}
+                onClick={() => (window.location.href = `tel:${c.phone}`)}
+                sx={{
+                  bgcolor: "#fff",
+                  pl: 1,
+                  pr: 2,
+                  py: 1,
+                  borderRadius: 6,
+                  display: "flex",
+                  gap: 1,
+                  border: "1px solid #77B3D4",
+                  cursor: "pointer",
+                }}
               >
-                {!isMobile ? "088-084-4455" : "คุณธนิก"}
-              </Typography>
-            </Box>
-            <Box
-              onClick={() => (window.location.href = "tel:0831818502")}
-              sx={{
-                bgcolor: "#fff",
-                pl: 1,
-                pr: 2,
-                py: 1,
-                borderRadius: 6,
-                display: "flex",
-                gap: 1,
-                border: "1px solid #77B3D4",
-                cursor: "pointer",
-              }}
-            >
-              <Box component={"img"} src={PhoneIcon} width={20} />
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 500, color: "#77B3D4" }}
-              >
-                {!isMobile ? "083-181-8502:" : "คุณสุ"}
-              </Typography>
-            </Box>
+                <Box component={"img"} src={PhoneIcon} width={20} />
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 500, color: "#77B3D4" }}
+                >
+                  {!isMobile ? c.phoneDisplay : c.name}
+                </Typography>
+              </Box>
+            ))}
             <Box
               onClick={() =>
-                (window.location.href = "https://www.facebook.com/muangkhon399")
+                (window.location.href = SOCIAL_LINKS.facebook)
               }
               sx={{
                 bgcolor: "#fff",
@@ -177,13 +168,13 @@ function Main() {
                   variant="body2"
                   sx={{ fontWeight: 500, color: "#3b5998" }}
                 >
-                  อันหยาพูลวิลล่า นครศรีธรรมราช Aunya Pool Villa
+                  {PROPERTY.nameThFull} Aunya Pool Villa
                 </Typography>
               )}
             </Box>
             <Box
               onClick={() =>
-                (window.location.href = "https://line.me/ti/p/~jent11")
+                (window.location.href = SOCIAL_LINKS.line)
               }
               sx={{
                 bgcolor: "#fff",
@@ -203,7 +194,7 @@ function Main() {
                   variant="body2"
                   sx={{ fontWeight: 500, color: "#2CCF54" }}
                 >
-                  jent11
+                  {SOCIAL_LINKS.lineId}
                 </Typography>
               )}
             </Box>

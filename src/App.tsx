@@ -13,6 +13,7 @@ import Register from './pages/member/Register'
 
 import PhoneIcon from "./assets/icons/phone.svg"
 import LineIcon from "./assets/icons/line.svg"
+import { CONTACTS, SOCIAL_LINKS, PROPERTY } from "@configs/app-settings"
 
 import PoolIcon from './assets/icons/pool.svg'
 import KaraokeIcon from './assets/icons/karaoke.svg'
@@ -152,10 +153,10 @@ function App() {
               <Grid container spacing={4}>
                 <Grid size={4}>
                   <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                    อันหยาพูลวิลล่า นครศรีธรรมราช
+                    {PROPERTY.nameThFull}
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1, lineHeight: 1.6 }}>
-                    Aunya Pool Villa Nakhon Si Thammarat
+                    {PROPERTY.nameEn}
                   </Typography>
                   <Typography variant="body2" sx={{ lineHeight: 1.6, opacity: 0.9 }}>
                     บ้านพักตากอากาศที่มาพร้อมกับสิ่งอำนวยความสะดวกครบครัน
@@ -167,17 +168,15 @@ function App() {
                   <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                     ติดต่อเรา
                   </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <Box component={'img'} src={PhoneIcon} width={16} sx={{ filter: 'brightness(0) invert(1)' }} />
-                    <Typography variant="body2">088-084-4455 (คุณธนิก)</Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <Box component={'img'} src={PhoneIcon} width={16} sx={{ filter: 'brightness(0) invert(1)' }} />
-                    <Typography variant="body2">083-181-8502 (คุณสุ)</Typography>
-                  </Box>
+                  {CONTACTS.map((c) => (
+                    <Box key={c.phone} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <Box component={'img'} src={PhoneIcon} width={16} sx={{ filter: 'brightness(0) invert(1)' }} />
+                      <Typography variant="body2">{c.phoneDisplay} ({c.name})</Typography>
+                    </Box>
+                  ))}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                     <Box component={'img'} src={LineIcon} width={16} />
-                    <Typography variant="body2">Line: jent11</Typography>
+                    <Typography variant="body2">Line: {SOCIAL_LINKS.lineId}</Typography>
                   </Box>
                 </Grid>
 
@@ -207,7 +206,7 @@ function App() {
 
               <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.2)', mt: 3, pt: 3, textAlign: 'center' }}>
                 <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                  © 2024 อันหยาพูลวิลล่า นครศรีธรรมราช - All rights reserved
+                  © 2024 {PROPERTY.nameThFull} - All rights reserved
                 </Typography>
               </Box>
             </Box>
