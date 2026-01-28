@@ -26,6 +26,7 @@ import CalendarTab from '@components/admin/CalendarTab';
 import BookingsTab from '@components/admin/BookingsTab';
 import PriceSettingsTab from '@components/admin/PriceSettingsTab';
 import DiscountCodeTab from '@components/admin/DiscountCodeTab';
+import GalleryTab from '@components/admin/GalleryTab';
 
 const roomId = import.meta.env.VITE_ROOM_ID;
 
@@ -214,6 +215,7 @@ function AdminPage() {
           <Tab label="การจองทั้งหมด" />
           <Tab label="ตั้งราคา" />
           <Tab label="โค้ดส่วนลด" />
+          <Tab label="รูปภาพ" />
         </Tabs>
       </Box>
 
@@ -253,6 +255,11 @@ function AdminPage() {
           {/* Tab 3: Discount Codes */}
           {activeTab === 3 && (
             <DiscountCodeTab showNoti={showNoti} />
+          )}
+
+          {/* Tab 4: Gallery */}
+          {activeTab === 4 && (
+            <GalleryTab showNoti={showNoti} />
           )}
         </Box>
       </Box>

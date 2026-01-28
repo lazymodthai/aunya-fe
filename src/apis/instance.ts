@@ -42,12 +42,23 @@ const instanceSettings = axios.create({
 });
 
 const instanceUpload = axios.create({
+  withCredentials: true,
   baseURL: import.meta.env.VITE_BASE_URL || 'https://api.aunyapoolvilla.com/',
   timeout: 10000,
   // No need to set Content-Type header - Axios will automatically set it to multipart/form-data with boundary when sending FormData
 });
 
 const instanceBookingManage = axios.create({
+  withCredentials: true,
+  baseURL: import.meta.env.VITE_BASE_URL || 'https://api.aunyapoolvilla.com/',
+  timeout: 10000,
+  headers: {
+    Accept: "application/json",
+  },
+});
+
+const instanceGallery = axios.create({
+  withCredentials: true,
   baseURL: import.meta.env.VITE_BASE_URL || 'https://api.aunyapoolvilla.com/',
   timeout: 10000,
   headers: {
@@ -73,4 +84,7 @@ export class InstanceBookingManageAPI {
 
 export class InstanceSettingsAPI {
   static api = instanceSettings;
+}
+export class InstanceGalleryAPI {
+  static api = instanceGallery;
 }

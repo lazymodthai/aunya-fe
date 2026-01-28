@@ -1,29 +1,47 @@
 import { Autoplay, Navigation, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
-import Slide1 from '../../assets/slide/slide1.jpg'
-import Slide2 from '../../assets/slide/slide2.jpg'
-import Slide3 from '../../assets/slide/slide3.jpg'
-import Slide4 from '../../assets/slide/slide4.jpg'
-import Slide5 from '../../assets/slide/slide5.jpg'
-
-
 //@ts-ignore
 import 'swiper/css';
 
-const items = [
-  {id: 1, src: Slide1},
-  {id: 2, src: Slide2},
-  {id: 3, src: Slide3},
-  {id: 4, src: Slide4},
-  {id: 5, src: Slide5},
-]
-
 import './styles.css';
-import { Box, useMediaQuery } from "@mui/material";
+import { Box, CircularProgress, Typography, useMediaQuery } from "@mui/material";
+import { useEffect, useState } from "react";
+import GalleryAPI, { GalleryImage } from "@apis/gallery";
+
 function SwiperPreview() {
   const isMobile = useMediaQuery("(max-width:800px)")
-  
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    GalleryAPI.getAll()
+      .then(({ data }) => {
+        const sorted = [...data].sort((a, b) => a.sortOrder - b.sortOrder);
+        setImages(sorted);
+      })
+      .catch((err) => {
+        console.error("Failed to load gallery:", err);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (images.length === 0) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', bgcolor: '#f5f5f5', borderRadius: 2 }}>
+        <Typography color="text.secondary">ไม่มีรูปภาพ</Typography>
+      </Box>
+    );
+  }
+
   return (
     <Swiper
       spaceBetween={30}
@@ -38,9 +56,9 @@ function SwiperPreview() {
       navigation={true}
       modules={[Autoplay]}
     >
-      {items.map((i) => (
-        <SwiperSlide key={i.id} style={{ height: '50vh', backgroundColor: '#fff'}}>
-          <Box component={"img"} src={i.src} onClick={()=>alert(1)} sx={{borderRadius: 2, bgcolor: '#fff'}}/>
+      {images.map((img) => (
+        <SwiperSlide key={img.id} style={{ height: '50vh', backgroundColor: '#fff'}}>
+          <Box component={"img"} src={img.fileUrl} alt={img.alt} sx={{borderRadius: 2, bgcolor: '#fff'}}/>
         </SwiperSlide>
       ))}
     </Swiper>
