@@ -25,8 +25,14 @@ export const DEFAULT_TOWEL_COUNT = 10;
 /** จำนวนเด็กสูงสุด — overridable by API key: maxChildren */
 export const DEFAULT_MAX_CHILDREN = 3;
 
-/** เงินมัดจำ (บาท) */
+/** เงินมัดจำปกติ (บาท/คืน) */
 export const DEPOSIT_PRICE = 2000;
+
+/** ราคาห้องที่ถือว่าเป็น High Price (บาท) */
+export const HIGH_PRICE_THRESHOLD = 7900;
+
+/** เงินมัดจำสำหรับวัน High Price (บาท/คืน) */
+export const HIGH_PRICE_DEPOSIT = 3000;
 
 // ──────────────────────────────────────────────
 // Payment / PromptPay

@@ -143,7 +143,7 @@ function DateSelectionStep({
           }
           onAdditionGuestNumberChange(num);
         }}
-        onBlur={(e) => {
+        onBlur={() => {
           const minBeds = guestNumber && guestNumber > maxGuests ? guestNumber - maxGuests : 0;
           if (!additionGuestNumber) {
             onAdditionGuestNumberChange(minBeds);

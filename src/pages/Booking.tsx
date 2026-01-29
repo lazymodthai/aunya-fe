@@ -103,6 +103,7 @@ function Booking(props: Props) {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [bookingId, setBookingId] = useState<string>('');
   const [isOnlyDeposit, setIsOnlyDeposit] = useState<boolean>(false);
+  const [actualDeposit, setActualDeposit] = useState<number>(depositPrice);
 
   const steps = ['เลือกวันเข้าพัก', 'ยืนยันรายการ', 'ชำระเงิน', 'ใบเสร็จ'];
 
@@ -176,8 +177,8 @@ function Booking(props: Props) {
     if (isInvalidPhoneNumber || !checkinDate || !checkoutDate || !guestNumber || !name || !phoneNumber)
       return;
 
-    const currentPaidAmount = isOnlyDeposit ? depositPrice : totalPrice;
-    const currentRemainingAmount = isOnlyDeposit ? totalPrice - depositPrice : 0;
+    const currentPaidAmount = isOnlyDeposit ? actualDeposit : totalPrice;
+    const currentRemainingAmount = isOnlyDeposit ? totalPrice - actualDeposit : 0;
 
     const payload: BookingPayload = {
       checkinDate: format(checkinDate, 'yyyy-MM-dd'),
@@ -282,7 +283,8 @@ function Booking(props: Props) {
     calculatedRoomPrices: PriceDetail[],
     discount: number,
     discountData: DiscountCode | null,
-    nights: number
+    nights: number,
+    calculatedDeposit: number
   ) => {
     setTotalPrice(calculatedTotalPrice);
     setRoomPrices(calculatedRoomPrices);
@@ -290,6 +292,7 @@ function Booking(props: Props) {
     setDiscountAmount(discount);
     setValidatedDiscountData(discountData);
     setTotalDate(nights);
+    setActualDeposit(calculatedDeposit);
   };
 
   const renderStep = () => {
@@ -360,7 +363,7 @@ function Booking(props: Props) {
             additionTowel={additionTowel}
             additionGuestNumberPrice={additionGuestNumberPrice}
             additionTowelPrice={additionTowelPrice}
-            depositPrice={depositPrice}
+            depositPrice={actualDeposit}
             discountAmount={discountAmount}
             totalPrice={totalPrice}
             QRcode={QRcode}
@@ -368,8 +371,8 @@ function Booking(props: Props) {
             bankName={bankName}
             bankAccount={bankAccount}
             isOnlyDeposit={isOnlyDeposit}
-            paidAmount={isOnlyDeposit ? depositPrice : totalPrice}
-            remainingAmount={isOnlyDeposit ? totalPrice - depositPrice : 0}
+            paidAmount={isOnlyDeposit ? actualDeposit : totalPrice}
+            remainingAmount={isOnlyDeposit ? totalPrice - actualDeposit : 0}
           />
         );
 
@@ -392,12 +395,12 @@ function Booking(props: Props) {
             totalRoomPrice={totalRoomPrice}
             additionGuestNumberPrice={additionGuestNumberPrice}
             additionTowelPrice={additionTowelPrice}
-            depositPrice={depositPrice}
+            depositPrice={actualDeposit}
             totalPrice={totalPrice}
             discountAmount={discountAmount}
             isOnlyDeposit={isOnlyDeposit}
-            paidAmount={isOnlyDeposit ? depositPrice : totalPrice}
-            remainingAmount={isOnlyDeposit ? totalPrice - depositPrice : 0}
+            paidAmount={isOnlyDeposit ? actualDeposit : totalPrice}
+            remainingAmount={isOnlyDeposit ? totalPrice - actualDeposit : 0}
           />
         );
 

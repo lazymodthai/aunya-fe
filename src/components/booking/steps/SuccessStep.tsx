@@ -1,6 +1,7 @@
 import { Box, Divider, Grid, Typography } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { FormatDate } from '@utils/date';
+import { CONTACTS } from '@configs/app-settings';
 
 interface SuccessStepProps {
   refCode: string;
@@ -238,7 +239,7 @@ function SuccessStep({
         <Typography sx={{ fontSize: 13, color: '#7d7d7dff', lineHeight: 1.6 }}>
           📌 กรุณาเก็บรหัสอ้างอิงนี้ไว้เพื่อใช้สำหรับการติดต่อหรือสอบถามข้อมูล
           <br />
-          📞 หากมีข้อสงสัย กรุณาติดต่อ: โจ
+          📞 หากมีข้อสงสัย กรุณาติดต่อ: {`${CONTACTS[0].phoneDisplay} ${CONTACTS[0].name}`}
         </Typography>
       </Box>
     </Box>

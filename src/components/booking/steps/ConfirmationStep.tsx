@@ -14,6 +14,7 @@ import { FormatDate } from '@utils/date';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import PricesAPI, { DiscountCode, PriceDetail } from '@apis/prices';
+import { HIGH_PRICE_THRESHOLD, HIGH_PRICE_DEPOSIT } from '@configs/app-settings';
 
 interface ConfirmationStepProps {
   checkinDate: Date;
@@ -37,7 +38,8 @@ interface ConfirmationStepProps {
     roomPrices: PriceDetail[],
     discountAmount: number,
     discountData: DiscountCode | null,
-    nights: number
+    nights: number,
+    actualDeposit: number
   ) => void;
 }
 
@@ -119,14 +121,20 @@ function ConfirmationStep({
     totalRoomPrice +
     (additionGuestNumber || 0) * additionGuestNumberPrice +
     (additionTowel || 0) * additionTowelPrice;
-  const totalPrice = Math.max(0, subtotal - discountAmount + depositPrice);
+
+  // Calculate deposit per day: high price days = HIGH_PRICE_DEPOSIT, others = depositPrice
+  const actualDeposit = roomPrices.reduce((total, p) => {
+    return total + (p.price >= HIGH_PRICE_THRESHOLD ? HIGH_PRICE_DEPOSIT : depositPrice);
+  }, 0);
+
+  const totalPrice = Math.max(0, subtotal - discountAmount + actualDeposit);
 
   // Notify parent of calculated price whenever it changes
   useEffect(() => {
     if (!isLoadingPrice) {
-      onPriceCalculated(totalPrice, roomPrices, discountAmount, discountData, nights);
+      onPriceCalculated(totalPrice, roomPrices, discountAmount, discountData, nights, actualDeposit);
     }
-  }, [totalRoomPrice, discountData, isLoadingPrice, additionGuestNumber, additionTowel, nights]);
+  }, [totalRoomPrice, discountData, isLoadingPrice, additionGuestNumber, additionTowel, nights, actualDeposit]);
 
   // Validate discount code
   const handleValidateDiscount = async () => {
@@ -235,8 +243,11 @@ function ConfirmationStep({
         </Box>
       )}
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Typography>ค่ามัดจำ <span style={{ fontSize: 12, color: '#7d7d7dff' }}>(คืนหลัง Check-out)</span></Typography>
-        <Typography fontWeight={500}>{depositPrice.toLocaleString('th-TH')} บาท</Typography>
+        <Typography>
+          ค่ามัดจำ ({nights} คืน)
+          <span style={{ fontSize: 12, color: '#7d7d7dff' }}> (คืนหลัง Check-out)</span>
+        </Typography>
+        <Typography fontWeight={500}>{actualDeposit.toLocaleString('th-TH')} บาท</Typography>
       </Box>
 
       {/* Discount Code Input */}
@@ -310,13 +321,13 @@ function ConfirmationStep({
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
             <Typography sx={{ fontWeight: 500 }}>ยอดชำระตอนนี้ (มัดจำ)</Typography>
             <Typography sx={{ fontWeight: 600, color: '#15a13aff' }}>
-              {depositPrice.toLocaleString('th-TH')} บาท
+              {actualDeposit.toLocaleString('th-TH')} บาท
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography sx={{ fontWeight: 500 }}>ยอดค้างชำระ (จ่ายตอน Check-in)</Typography>
             <Typography sx={{ fontWeight: 600, color: '#ed6c02' }}>
-              {(totalPrice - depositPrice).toLocaleString('th-TH')} บาท
+              {(totalPrice - actualDeposit).toLocaleString('th-TH')} บาท
             </Typography>
           </Box>
         </Box>
