@@ -1,0 +1,13 @@
+# Robots.txt for Aunya Pool Villa
+# https://www.aunyapoolvilla.com
+
+User-agent: *
+Allow: /
+Disallow: /member/
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://www.aunyapoolvilla.com/sitemap.xml
+
+# Crawl-delay (optional, for politeness)
+Crawl-delay: 1

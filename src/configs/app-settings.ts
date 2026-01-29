@@ -78,6 +78,19 @@ export const PROPERTY = {
 } as const;
 
 // ──────────────────────────────────────────────
+// SEO Configuration
+// ──────────────────────────────────────────────
+export const SEO = {
+  siteUrl: 'https://www.aunyapoolvilla.com',
+  siteName: 'Aunya Pool Villa',
+  defaultTitle: 'อันหยา พูลวิลล่า นครศรีธรรมราช | Aunya Pool Villa | จองห้องพัก 088-084-4455',
+  defaultDescription: 'พูลวิลล่าสุดหรู นครศรีธรรมราช 3 ห้องนอน 3 ห้องน้ำ สระว่ายน้ำส่วนตัว รองรับ 10+ คน เหมาะสำหรับครอบครัว ปาร์ตี้ สังสรรค์ จองเลย โทร 088-084-4455',
+  keywords: 'พูลวิลล่า, pool villa, นครศรีธรรมราช, ที่พัก, บ้านพักมีสระว่ายน้ำ, อันหยา, Aunya, วิลล่า, ห้องพัก, จองที่พัก, สระว่ายน้ำส่วนตัว, ที่พักครอบครัว',
+  ogImage: '/og-image.jpg',
+  themeColor: '#1976d2',
+} as const;
+
+// ──────────────────────────────────────────────
 // Room ID (from env)
 // ──────────────────────────────────────────────
 export const ROOM_ID: string = import.meta.env.VITE_ROOM_ID;
