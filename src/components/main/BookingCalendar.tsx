@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -151,6 +151,8 @@ const DrawerContent = styled(Box)(({ theme }) => ({
   gap: theme.spacing(2),
 }));
 
+const SWIPE_THRESHOLD = 50; // minimum pixels to trigger swipe
+
 // Main component
 const BookingCalendar: React.FC<BookingCalendarProps> = ({
   bookingData,
@@ -183,6 +185,10 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
   const [selectedDay, setSelectedDay] = useState<BookingData | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [showInquiryAlert, setShowInquiryAlert] = useState<boolean>(false);
+
+  // Touch refs for swipe detection
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -241,6 +247,35 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
       setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
     }
   };
+
+  // Swipe handlers for month navigation
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffX = touchStartX.current - touchEndX;
+    const diffY = Math.abs(touchStartY.current - touchEndY);
+
+    // Only trigger if horizontal swipe is greater than vertical
+    if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(diffX) > diffY) {
+      if (diffX > 0 && canGoToNextMonth()) {
+        // Swipe left → next month
+        handleNextMonth();
+      } else if (diffX < 0 && canGoToPreviousMonth()) {
+        // Swipe right → previous month
+        handlePreviousMonth();
+      }
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+  }, [currentDate]);
 
   // Create calendar data
   useEffect(() => {
@@ -332,7 +367,10 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
   };
 
   return (
-    <CalendarContainer>
+    <CalendarContainer
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <Box
         sx={{
           display: "flex",

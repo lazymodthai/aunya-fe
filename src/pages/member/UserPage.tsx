@@ -84,7 +84,7 @@ function UserPage() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4 }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4, width: '100vw' }}>
       <Grid container direction="column" alignItems="center" sx={{ px: 2 }}>
         <Box sx={{ width: '100%', maxWidth: 600, mb: 3 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
