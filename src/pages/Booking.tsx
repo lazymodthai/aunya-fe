@@ -104,6 +104,7 @@ function Booking(props: Props) {
   const [bookingId, setBookingId] = useState<string>('');
   const [isOnlyDeposit, setIsOnlyDeposit] = useState<boolean>(false);
   const [actualDeposit, setActualDeposit] = useState<number>(depositPrice);
+  const [acceptedPDPA, setAcceptedPDPA] = useState<boolean>(false);
 
   const steps = ['เลือกวันเข้าพัก', 'ยืนยันรายการ', 'ชำระเงิน', 'ใบเสร็จ'];
 
@@ -318,6 +319,7 @@ function Booking(props: Props) {
             maxChildren={maxChildren}
             maxExtraBeds={maxExtraBeds}
             maxTowels={maxTowels}
+            acceptedPDPA={acceptedPDPA}
             onCheckinChange={setCheckinDate}
             onCheckoutChange={setCheckoutDate}
             onGuestNumberChange={setGuestNumber}
@@ -329,6 +331,7 @@ function Booking(props: Props) {
               setPhoneNumber(value);
               setIsInvalidPhoneNumber(isInvalid);
             }}
+            onAcceptedPDPAChange={setAcceptedPDPA}
           />
         );
 
@@ -467,7 +470,7 @@ function Booking(props: Props) {
             sx={{ height: 50, borderRadius: 2 }}
             disabled={
               step !== 4 &&
-              (!checkinDate || !checkoutDate || !guestNumber || !name || !phoneNumber || isInvalidPhoneNumber)
+              (!checkinDate || !checkoutDate || !guestNumber || !name || !phoneNumber || isInvalidPhoneNumber || !acceptedPDPA)
             }
           >
             {step === 4 ? 'กลับหน้าหลัก' : step === steps.length - 1 ? 'ยืนยัน' : 'ถัดไป'}

@@ -1,7 +1,10 @@
-import { Box, Divider, Grid, Typography } from '@mui/material';
+import { Box, Button, Divider, Grid, Typography } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import { FormatDate } from '@utils/date';
 import { CONTACTS } from '@configs/app-settings';
+import { useRef, useState } from 'react';
+import html2canvas from 'html2canvas';
 
 interface SuccessStepProps {
   refCode: string;
@@ -46,6 +49,31 @@ function SuccessStep({
   paidAmount,
   remainingAmount,
 }: SuccessStepProps) {
+  const captureRef = useRef<HTMLDivElement>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSaveImage = async () => {
+    if (!captureRef.current) return;
+
+    setIsSaving(true);
+    try {
+      const canvas = await html2canvas(captureRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+      });
+
+      const link = document.createElement('a');
+      link.download = `booking-${refCode}-${new Date().toISOString().split('T')[0]}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('Error saving image:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -53,11 +81,24 @@ function SuccessStep({
         flexDirection: 'column',
         alignItems: 'center',
         gap: 2,
-        textAlign: 'center',
       }}
     >
-      {/* Success Icon */}
-      <CheckCircleIcon sx={{ fontSize: 80, color: '#15a13aff' }} />
+      {/* Capture Area */}
+      <Box
+        ref={captureRef}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 2,
+          textAlign: 'center',
+          bgcolor: '#ffffff',
+          p: 2,
+          width: '100%',
+        }}
+      >
+        {/* Success Icon */}
+        <CheckCircleIcon sx={{ fontSize: 80, color: '#15a13aff' }} />
 
       <Typography sx={{ fontSize: 24, fontWeight: 600, color: '#15a13aff' }}>
         จองห้องพักสำเร็จ!
@@ -242,6 +283,23 @@ function SuccessStep({
           📞 หากมีข้อสงสัย กรุณาติดต่อ: {`${CONTACTS[0].phoneDisplay} ${CONTACTS[0].name}`}
         </Typography>
       </Box>
+      </Box>
+      {/* End Capture Area */}
+
+      {/* Save Image Button */}
+      <Button
+        variant="outlined"
+        startIcon={<SaveAltIcon />}
+        onClick={handleSaveImage}
+        disabled={isSaving}
+        sx={{
+          mt: 1,
+          borderRadius: 2,
+          width: '100%',
+        }}
+      >
+        {isSaving ? 'กำลังบันทึก...' : 'บันทึกภาพหลักฐาน'}
+      </Button>
     </Box>
   );
 }

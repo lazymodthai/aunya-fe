@@ -1,7 +1,9 @@
-import { TextField } from '@mui/material';
+import { Checkbox, FormControlLabel, Link, TextField, Typography } from '@mui/material';
 import CustomDatePicker from '@components/booking/CustomDatePicker';
 import NumberField from '@components/booking/NumberField';
+import PDPADialog from '@components/PDPADialog';
 import { addDays } from 'date-fns';
+import { useState } from 'react';
 import { isValidThaiPhoneNumber } from '@utils/input';
 
 interface DateSelectionStepProps {
@@ -23,6 +25,7 @@ interface DateSelectionStepProps {
   maxChildren: number;
   maxExtraBeds: number;
   maxTowels: number;
+  acceptedPDPA: boolean;
   onCheckinChange: (date: Date | null) => void;
   onCheckoutChange: (date: Date | null) => void;
   onGuestNumberChange: (value: number | null) => void;
@@ -31,6 +34,7 @@ interface DateSelectionStepProps {
   onAdditionTowelChange: (value: number | null) => void;
   onNameChange: (value: string) => void;
   onPhoneNumberChange: (value: string, isInvalid: boolean) => void;
+  onAcceptedPDPAChange: (value: boolean) => void;
 }
 
 function DateSelectionStep({
@@ -52,6 +56,7 @@ function DateSelectionStep({
   maxChildren,
   maxExtraBeds,
   maxTowels,
+  acceptedPDPA,
   onCheckinChange,
   onCheckoutChange,
   onGuestNumberChange,
@@ -60,7 +65,10 @@ function DateSelectionStep({
   onAdditionTowelChange,
   onNameChange,
   onPhoneNumberChange,
+  onAcceptedPDPAChange,
 }: DateSelectionStepProps) {
+  const [pdpaDialogOpen, setPdpaDialogOpen] = useState(false);
+
   return (
     <>
       <CustomDatePicker
@@ -205,6 +213,37 @@ function DateSelectionStep({
         helperText={isInvalidPhoneNumber ? 'เบอร์โทรศัพท์ไม่ถูกต้อง' : ''}
         disabled={hasUserData}
       />
+
+      {/* PDPA Acceptance */}
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={acceptedPDPA}
+            onChange={(e) => onAcceptedPDPAChange(e.target.checked)}
+          />
+        }
+        label={
+          <Typography variant="body2">
+            ฉันได้อ่านและยอมรับ{' '}
+            <Link
+              component="button"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                setPdpaDialogOpen(true);
+              }}
+              sx={{ fontWeight: 500 }}
+            >
+              นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+            </Link>
+          </Typography>
+        }
+        sx={{
+          alignItems: 'flex-start',
+          '& .MuiCheckbox-root': { pt: 0 },
+        }}
+      />
+      <PDPADialog open={pdpaDialogOpen} onClose={() => setPdpaDialogOpen(false)} />
     </>
   );
 }

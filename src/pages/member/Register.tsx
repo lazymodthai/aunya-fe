@@ -1,9 +1,10 @@
-import { Button, Grid, SxProps, TextField, Typography, useMediaQuery } from '@mui/material';
+import { Button, Checkbox, FormControlLabel, Grid, Link, SxProps, TextField, Typography, useMediaQuery } from '@mui/material';
 import { useState } from 'react';
 import AuthAPI from '@apis/auth';
 import { validateEmailRFC } from '@utils/validation';
 import Noti from '@components/Noti';
 import Loading from "@components/Loading";
+import PDPADialog from '@components/PDPADialog';
 import { useNavigate } from 'react-router-dom';
 
 const textFieldStyle: SxProps = {
@@ -26,6 +27,8 @@ function Register() {
   const [errorType, setErrorType] = useState<string>('')
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
+  const [acceptedPDPA, setAcceptedPDPA] = useState<boolean>(false)
+  const [pdpaDialogOpen, setPdpaDialogOpen] = useState<boolean>(false)
 
 
   const navigate = useNavigate()
@@ -35,6 +38,11 @@ function Register() {
       setError(true)
       setErrorType('empty')
       return setErrorMessage('กรุณากรอกข้อมูลให้ครบถ้วน')
+    }
+    if (!acceptedPDPA) {
+      setError(true)
+      setErrorType('pdpa')
+      return setErrorMessage('กรุณายอมรับนโยบายคุ้มครองข้อมูลส่วนบุคคล')
     }
     if (!isValidEmail) {
       setError(true)
@@ -170,12 +178,41 @@ function Register() {
           error={errorType === 'phoneNumber' || (errorType === 'empty' && !phoneNumber)}
           helperText={error ? errorMessage : ""}
         />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={acceptedPDPA}
+              onChange={(e) => setAcceptedPDPA(e.target.checked)}
+            />
+          }
+          label={
+            <Typography variant="body2">
+              ฉันได้อ่านและยอมรับ{' '}
+              <Link
+                component="button"
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  setPdpaDialogOpen(true)
+                }}
+                sx={{ fontWeight: 500 }}
+              >
+                นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+              </Link>
+            </Typography>
+          }
+          sx={{
+            alignItems: 'flex-start',
+            '& .MuiCheckbox-root': { pt: 0 },
+            ...(errorType === 'pdpa' && { color: 'error.main' }),
+          }}
+        />
         <Button
           fullWidth
           variant="contained"
           sx={{ borderRadius: 2, height: 48 }}
           onClick={handleRegister}
-          disabled={email === '' || password === ''}
+          disabled={email === '' || password === '' || !acceptedPDPA}
         >
           สมัคร
         </Button>
@@ -190,6 +227,7 @@ function Register() {
       </Grid>
       <Noti type={'error'} open={error} value={errorMessage} onClose={() => setError(false)} />
       <Noti type={'success'} open={success} onClose={() => setSuccess(false)} value='สมัครสมาชิกสำเร็จ' />
+      <PDPADialog open={pdpaDialogOpen} onClose={() => setPdpaDialogOpen(false)} />
     </Grid>
   );
 }
