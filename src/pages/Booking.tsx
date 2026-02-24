@@ -227,7 +227,7 @@ function Booking(props: Props) {
     try {
       setLoading(true);
       const { data } = await UploadfileAPI.uploadFile(formData);
-      if (data.slipVerification?.code === '200000') {
+      if (data) {
         // Use discount code if valid
         if (validatedDiscountData && discountCode) {
           try {
