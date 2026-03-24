@@ -14,6 +14,7 @@ interface BookingData {
     phoneNumber: string;
     totalPrice: string;
     status: string;
+    remark?: string;
 }
 interface BookManagementCardProps {
     bookingData: BookingData[]
@@ -114,6 +115,16 @@ function BookManagementCard({ bookingData, onClick }: BookManagementCardProps) {
                                 </Button>
                             )}
                         </Box>
+                        {item.remark && (
+                            <Box display="flex" gap={2} mt={1}>
+                                <Typography variant="body2" sx={{ fontWeight: 600, minWidth: '100px', color: 'text.secondary' }}>
+                                    หมายเหตุ:
+                                </Typography>
+                                <Typography variant="body2" sx={{ fontWeight: 600, color: 'error.main' }}>
+                                    {item.remark}
+                                </Typography>
+                            </Box>
+                        )}
                     </Box>
                 ))}
             </Box>

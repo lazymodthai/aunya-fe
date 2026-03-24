@@ -166,6 +166,9 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
     const groups: { [date: string]: MyBookingData[] } = {};
 
     allBookings?.forEach((booking) => {
+      // Filter out cancelled bookings
+      if (booking.status === 'Cancelled') return;
+
       // Convert to local date to get correct date key (avoid UTC timezone issue)
       const date = parseLocalDate(booking.checkinDate);
       const year = date.getFullYear();
@@ -289,6 +292,17 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
           ผู้จอง: {booking.name} - {booking.phoneNumber}
         </Typography>
 
+        {booking.remark && (
+          <Box sx={{ mt: 1, p: 1, bgcolor: 'rgba(211, 47, 47, 0.05)', borderRadius: 1, border: '1px solid rgba(211, 47, 47, 0.1)' }}>
+            <Typography variant="caption" fontWeight={600} color="error.main" display="block">
+              หมายเหตุ:
+            </Typography>
+            <Typography variant="body2" color="error.main">
+              {booking.remark}
+            </Typography>
+          </Box>
+        )}
+
         {(booking.status === 'Pending' || booking.status === 'Payment') && (
           <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
             <Button
@@ -379,6 +393,17 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
           ผู้จอง: {booking.name} - {booking.phoneNumber}
         </Typography>
 
+        {booking.remark && (
+          <Box sx={{ mt: 1, p: 1, bgcolor: 'rgba(211, 47, 47, 0.05)', borderRadius: 1, border: '1px solid rgba(211, 47, 47, 0.1)' }}>
+            <Typography variant="caption" fontWeight={600} color="error.main" display="block">
+              หมายเหตุ:
+            </Typography>
+            <Typography variant="body2" color="error.main">
+              {booking.remark}
+            </Typography>
+          </Box>
+        )}
+
         <Button
           variant="contained"
           color="error"
@@ -460,6 +485,17 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             ผู้จอง: {booking.name} - {booking.phoneNumber}
           </Typography>
+
+          {booking.remark && (
+            <Box sx={{ mt: 1, p: 1, bgcolor: 'rgba(211, 47, 47, 0.05)', borderRadius: 1, border: '1px solid rgba(211, 47, 47, 0.1)' }}>
+              <Typography variant="caption" fontWeight={600} color="error.main" display="block">
+                หมายเหตุ:
+              </Typography>
+              <Typography variant="body2" color="error.main">
+                {booking.remark}
+              </Typography>
+            </Box>
+          )}
 
           {hasRemaining && (
             <Box sx={{ mt: 1.5, p: 1.5, bgcolor: '#fff3e0', borderRadius: 2 }}>

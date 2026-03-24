@@ -31,6 +31,7 @@ import {
 } from '@mui/icons-material';
 import { MyBookingData } from '@apis/booking';
 import PriceField from '@components/common/PriceField';
+import { parseLocalDate } from '@utils/date';
 
 // Define the type for the booking data
 export interface BookingData {
@@ -177,6 +178,10 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
   const [isEditingPrice, setIsEditingPrice] = useState<boolean>(false);
   const [editPrice, setEditPrice] = useState<number>(0);
   const [editMaintenance, setEditMaintenance] = useState<boolean>(false);
+
+  // Slip modal state
+  const [slipModalOpen, setSlipModalOpen] = useState(false);
+  const [selectedSlips, setSelectedSlips] = useState<{ fileUrl: string }[]>([]);
 
   // Touch refs for swipe detection
   const touchStartX = useRef<number | null>(null);
@@ -372,6 +377,16 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
     }
   };
 
+  const handleOpenSlipModal = (slips: { fileUrl: string }[]) => {
+    setSelectedSlips(slips);
+    setSlipModalOpen(true);
+  };
+
+  const handleCloseSlipModal = () => {
+    setSlipModalOpen(false);
+    setSelectedSlips([]);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Confirmed': return 'success';
@@ -393,7 +408,7 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('th-TH', {
+    return parseLocalDate(dateString).toLocaleDateString('th-TH', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -457,12 +472,60 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
                     <Typography variant="body2" color="text.secondary">
                       {booking.name} - {booking.phoneNumber}
                     </Typography>
+                    
                     <Typography variant="body2" color="text.secondary">
                       {formatDate(booking.checkinDate)} - {formatDate(booking.checkoutDate)}
                     </Typography>
-                    <Typography variant="body2" fontWeight={600} color="primary">
-                      ฿{booking.totalPrice.toLocaleString()}
+
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                      ผู้ใหญ่/เด็ก: {booking.guestNumber} คน{booking.childrenNumber ? ` + เด็ก ${booking.childrenNumber}` : ''}
+                      {booking.additionGuestNumber ? ` (+${booking.additionGuestNumber})` : ''}
                     </Typography>
+
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 1 }}>
+                      {booking.isOnlyDeposit && booking.remainingAmount > 0 ? (
+                        <Box>
+                          <Typography variant="caption" color="text.secondary" display="block">
+                            ชำระแล้ว (มัดจำ)
+                          </Typography>
+                          <Typography variant="body2" fontWeight={600} color="success.main">
+                            ฿{booking.paidAmount?.toLocaleString()}
+                          </Typography>
+                          <Typography variant="caption" fontWeight={600} sx={{ color: '#ed6c02' }}>
+                            ค้างชำระ: ฿{booking.remainingAmount?.toLocaleString()}
+                          </Typography>
+                        </Box>
+                      ) : (
+                        <Box>
+                          <Typography variant="caption" color="text.secondary" display="block">
+                            ราคารวม
+                          </Typography>
+                          <Typography variant="body2" fontWeight={600} color="primary">
+                            ฿{booking.totalPrice.toLocaleString()}
+                          </Typography>
+                        </Box>
+                      )}
+                      
+                      {booking.files?.slips && booking.files.slips.length > 0 && (
+                        <Chip
+                          label={"ดูสลิป"}
+                          color="default"
+                          size="small"
+                          clickable
+                          onClick={() => handleOpenSlipModal(booking.files.slips)}
+                        />
+                      )}
+                    </Stack>
+                    {booking.remark && (
+                      <Box sx={{ mt: 1, p: 1, bgcolor: 'rgba(211, 47, 47, 0.05)', borderRadius: 1, border: '1px solid rgba(211, 47, 47, 0.1)' }}>
+                        <Typography variant="caption" fontWeight={600} color="error.main" display="block">
+                          หมายเหตุ:
+                        </Typography>
+                        <Typography variant="body2" color="error.main">
+                          {booking.remark}
+                        </Typography>
+                      </Box>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -717,6 +780,39 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Slip Viewer Modal */}
+      <Dialog
+        open={slipModalOpen}
+        onClose={handleCloseSlipModal}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6" fontWeight={600}>สลีปการชำระเงิน</Typography>
+          <IconButton onClick={handleCloseSlipModal} size="small">
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ py: 1 }}>
+            {selectedSlips.map((slip, index) => (
+              <Box key={index} sx={{ textAlign: 'center' }}>
+                <img
+                  src={slip.fileUrl}
+                  alt={`สลิป ${index + 1}`}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '500px',
+                    objectFit: 'contain',
+                    borderRadius: '8px'
+                  }}
+                />
+              </Box>
+            ))}
+          </Stack>
+        </DialogContent>
+      </Dialog>
     </CalendarContainer>
   );
 };

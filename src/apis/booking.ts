@@ -83,6 +83,7 @@ interface MyBookingData {
     qrCode: any[];
     slips: any[];
   }
+  remark: string;
 }
 
 export type { MyBookingResponse, MyBookingData };

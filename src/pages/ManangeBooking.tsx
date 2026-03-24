@@ -35,6 +35,7 @@ function ManangeBooking() {
                 phoneNumber: item.phoneNumber,
                 totalPrice: item.totalPrice,
                 status: item.status,
+                remark: item.remark,
             }))}
                 onClick={(id) => { console.log('id', id) }} />
 
