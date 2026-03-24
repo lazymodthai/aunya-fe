@@ -276,15 +276,34 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
           </Grid>
           <Grid size={{ xs: 6 }}>
             <Typography variant="body2" color="text.secondary">
-              ผู้ใหญ่ / เด็ก
+              ผู้เข้าพัก
             </Typography>
             <Typography variant="body1" fontWeight={500}>
               {booking.guestNumber} คน{booking.childrenNumber ? ` + เด็ก ${booking.childrenNumber}` : ''}
-              {booking.additionGuestNumber ? ` (+${booking.additionGuestNumber})` : ''}
             </Typography>
           </Grid>
           <PaymentInfo booking={booking} />
         </Grid>
+
+        {(!!booking.additionGuestNumber || !!booking.additionTowel) && (
+          <Box sx={{ mt: 1.5, p: 1.5, bgcolor: '#f5f5f5', borderRadius: 2 }}>
+            <Typography variant="subtitle2" color="primary.main" gutterBottom>
+              รายการเพิ่มเติม:
+            </Typography>
+            <Stack spacing={0.5}>
+              {!!booking.additionGuestNumber && (
+                <Typography variant="body2" fontWeight={600}>
+                  • ที่นอนเสริม: {booking.additionGuestNumber} ชุด
+                </Typography>
+              )}
+              {!!booking.additionTowel && (
+                <Typography variant="body2" fontWeight={600}>
+                  • ผ้าเช็ดตัวเพิ่ม: {booking.additionTowel} ชุด
+                </Typography>
+              )}
+            </Stack>
+          </Box>
+        )}
 
         <Divider sx={{ my: 1.5 }} />
 
@@ -377,15 +396,34 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
           </Grid>
           <Grid size={{ xs: 6 }}>
             <Typography variant="body2" color="text.secondary">
-              ผู้ใหญ่ / เด็ก
+              ผู้เข้าพัก
             </Typography>
             <Typography variant="body1" fontWeight={500}>
               {booking.guestNumber} คน{booking.childrenNumber ? ` + เด็ก ${booking.childrenNumber}` : ''}
-              {booking.additionGuestNumber ? ` (+${booking.additionGuestNumber})` : ''}
             </Typography>
           </Grid>
           <PaymentInfo booking={booking} />
         </Grid>
+
+        {(!!booking.additionGuestNumber || !!booking.additionTowel) && (
+          <Box sx={{ mt: 1.5, p: 1.5, bgcolor: '#f5f5f5', borderRadius: 2 }}>
+            <Typography variant="subtitle2" color="primary.main" gutterBottom>
+              รายการเพิ่มเติม:
+            </Typography>
+            <Stack spacing={0.5}>
+              {!!booking.additionGuestNumber && (
+                <Typography variant="body2" fontWeight={600}>
+                  • ที่นอนเสริม: {booking.additionGuestNumber} ชุด
+                </Typography>
+              )}
+              {!!booking.additionTowel && (
+                <Typography variant="body2" fontWeight={600}>
+                  • ผ้าเช็ดตัวเพิ่ม: {booking.additionTowel} ชุด
+                </Typography>
+              )}
+            </Stack>
+          </Box>
+        )}
 
         <Divider sx={{ my: 1.5 }} />
 
@@ -473,12 +511,31 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
                 ผู้เข้าพัก
               </Typography>
               <Typography variant="body1" fontWeight={500}>
-                {booking.guestNumber} คน
-                {booking.additionGuestNumber ? ` (+${booking.additionGuestNumber})` : ''}
+                {booking.guestNumber} คน{booking.childrenNumber ? ` + เด็ก ${booking.childrenNumber}` : ''}
               </Typography>
             </Grid>
             <PaymentInfo booking={booking} />
           </Grid>
+
+          {(!!booking.additionGuestNumber || !!booking.additionTowel) && (
+            <Box sx={{ mt: 1.5, p: 1.5, bgcolor: '#f5f5f5', borderRadius: 2 }}>
+              <Typography variant="subtitle2" color="primary.main" gutterBottom>
+                รายการเพิ่มเติม:
+              </Typography>
+              <Stack spacing={0.5}>
+                {!!booking.additionGuestNumber && (
+                  <Typography variant="body2" fontWeight={600}>
+                    • ที่นอนเสริม: {booking.additionGuestNumber} ชุด
+                  </Typography>
+                )}
+                {!!booking.additionTowel && (
+                  <Typography variant="body2" fontWeight={600}>
+                    • ผ้าเช็ดตัวเพิ่ม: {booking.additionTowel} ชุด
+                  </Typography>
+                )}
+              </Stack>
+            </Box>
+          )}
 
           <Divider sx={{ my: 1.5 }} />
 

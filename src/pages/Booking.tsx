@@ -185,8 +185,8 @@ function Booking(props: Props) {
       checkinDate: format(checkinDate, 'yyyy-MM-dd'),
       checkoutDate: format(checkoutDate, 'yyyy-MM-dd'),
       guestNumber: guestNumber,
-      childrenNumber: childrenNumber,
-      additionGuestNumber: additionGuestNumber,
+      childrenNumber: childrenNumber || 0,
+      additionGuestNumber: additionGuestNumber || 0,
       name: name,
       phoneNumber: phoneNumber,
       totalPrice: totalPrice,
@@ -196,6 +196,7 @@ function Booking(props: Props) {
       isOnlyDeposit: isOnlyDeposit,
       paidAmount: currentPaidAmount,
       remainingAmount: currentRemainingAmount,
+      additionTowel: additionTowel || 0,
     };
 
     try {

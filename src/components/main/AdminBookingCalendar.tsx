@@ -335,7 +335,8 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
       setIsLoading(true);
       try {
         const bookings = await getBookingsByDate(dayData.date);
-        setDayBookings(bookings);
+        // Filter out cancelled bookings
+        setDayBookings(bookings.filter(b => b.status !== 'Cancelled'));
       } catch (error) {
         console.error('Error fetching bookings:', error);
       } finally {
@@ -478,9 +479,23 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
                     </Typography>
 
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                      ผู้ใหญ่/เด็ก: {booking.guestNumber} คน{booking.childrenNumber ? ` + เด็ก ${booking.childrenNumber}` : ''}
-                      {booking.additionGuestNumber ? ` (+${booking.additionGuestNumber})` : ''}
+                      ผู้ใหญ่: {booking.guestNumber} คน{booking.childrenNumber ? ` + เด็ก ${booking.childrenNumber} คน` : ''}
                     </Typography>
+
+                    {(!!booking.additionGuestNumber || !!booking.additionTowel) && (
+                      <Box sx={{ mt: 0.5, p: 1, bgcolor: '#f5f5f5', borderRadius: 1 }}>
+                        {!!booking.additionGuestNumber && (
+                          <Typography variant="body2" color="primary.main" fontWeight={600}>
+                            • ที่นอนเสริม: {booking.additionGuestNumber} ชุด
+                          </Typography>
+                        )}
+                        {!!booking.additionTowel && (
+                          <Typography variant="body2" color="primary.main" fontWeight={600}>
+                            • ผ้าเช็ดตัวเพิ่ม: {booking.additionTowel} ชุด
+                          </Typography>
+                        )}
+                      </Box>
+                    )}
 
                     <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 1 }}>
                       {booking.isOnlyDeposit && booking.remainingAmount > 0 ? (

@@ -8,8 +8,8 @@ export interface BookingPayload {
   checkinDate: Date | string | null;
   checkoutDate: Date | string | null;
   guestNumber: number | null;
-  childrenNumber: number | null;
-  additionGuestNumber: number | null;
+  childrenNumber: number;
+  additionGuestNumber: number;
   name: string;
   phoneNumber: string;
   totalPrice: number | null;
@@ -19,6 +19,7 @@ export interface BookingPayload {
   isOnlyDeposit?: boolean;
   paidAmount?: number;
   remainingAmount?: number;
+  additionTowel: number;
 }
 
 export default class BookingAPI extends InstanceBookingAPI {
@@ -65,8 +66,8 @@ interface MyBookingData {
   checkinDate: string;
   checkoutDate: string;
   guestNumber: number;
-  childrenNumber: number | null;
-  additionGuestNumber: number | null;
+  childrenNumber: number;
+  additionGuestNumber: number;
   name: string;
   phoneNumber: string;
   totalPrice: number;
@@ -84,6 +85,7 @@ interface MyBookingData {
     slips: any[];
   }
   remark: string;
+  additionTowel: number;
 }
 
 export type { MyBookingResponse, MyBookingData };
