@@ -28,6 +28,7 @@ import PriceSettingsTab from '@components/admin/PriceSettingsTab';
 import DiscountCodeTab from '@components/admin/DiscountCodeTab';
 import GalleryTab from '@components/admin/GalleryTab';
 import SettingsTab from '@components/admin/SettingsTab';
+import SummaryTab from '@components/admin/SummaryTab';
 import { ROOM_ID } from '@configs/app-settings';
 import SettingsAPI from '@apis/settings';
 
@@ -36,7 +37,7 @@ function AdminPage() {
   const navigate = useNavigate();
   const { userData } = useSelector(userSelector);
 
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(1);
   const [calendarData, setCalendarData] = useState<BookingData[]>([]);
   const [allBookings, setAllBookings] = useState<MyBookingData[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
@@ -235,6 +236,7 @@ function AdminPage() {
             },
           }}
         >
+          <Tab label="สรุปยอด" />
           <Tab label="ปฏิทิน" />
           <Tab label="การจองทั้งหมด" />
           <Tab label="ตั้งราคา" />
@@ -256,8 +258,13 @@ function AdminPage() {
       {/* Content */}
       <Box sx={{ py: 3, px: 2 }}>
         <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-          {/* Tab 0: Calendar */}
+          {/* Tab 0: Summary */}
           {activeTab === 0 && (
+            <SummaryTab />
+          )}
+
+          {/* Tab 1: Calendar */}
+          {activeTab === 1 && (
             <CalendarTab
               calendarData={calendarData}
               onChangeMonth={fetchCalendarData}
@@ -268,16 +275,16 @@ function AdminPage() {
             />
           )}
 
-          {/* Tab 1: All Bookings */}
-          {activeTab === 1 && (
+          {/* Tab 2: All Bookings */}
+          {activeTab === 2 && (
             <BookingsTab
               allBookings={allBookings}
               onStatusChange={handleStatusChange}
             />
           )}
 
-          {/* Tab 2: Price Settings */}
-          {activeTab === 2 && (
+          {/* Tab 3: Price Settings */}
+          {activeTab === 3 && (
             <PriceSettingsTab
               currentYear={currentYear}
               currentMonth={currentMonth}
@@ -286,18 +293,18 @@ function AdminPage() {
             />
           )}
 
-          {/* Tab 3: Discount Codes */}
-          {activeTab === 3 && (
+          {/* Tab 4: Discount Codes */}
+          {activeTab === 4 && (
             <DiscountCodeTab showNoti={showNoti} />
           )}
 
-          {/* Tab 4: Gallery */}
-          {activeTab === 4 && (
+          {/* Tab 5: Gallery */}
+          {activeTab === 5 && (
             <GalleryTab showNoti={showNoti} />
           )}
 
-          {/* Tab 5: Settings */}
-          {activeTab === 5 && (
+          {/* Tab 6: Settings */}
+          {activeTab === 6 && (
             <SettingsTab showNoti={showNoti} />
           )}
         </Box>

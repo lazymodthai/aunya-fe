@@ -52,6 +52,10 @@ export default class BookingAPI extends InstanceBookingAPI {
     return this.api.patch(`${path}/${id}/status`, payload);
   }
 
+  static getSummary(year: number): Promise<{ data: SummaryResponse; headers: RawAxiosResponseHeaders; }> {
+    return this.api.get(`${path}/summary`, { params: { year } });
+  }
+
 }
 
 interface MyBookingResponse {
@@ -87,5 +91,45 @@ interface MyBookingData {
   remark: string;
   additionTowel: number;
 }
+
+export interface SummaryResponse {
+  year: number;
+  monthly: {
+    month: number;
+    revenue: number;
+    rentRevenue: number;
+    extraBedRevenue: number;
+    extraTowelRevenue: number;
+    discountUsed: number;
+    guestCount: number;
+    childrenCount: number;
+    bookingCount: number;
+    potentialRevenue: number;
+    }[];
+  yearly: {
+    revenue: number;
+    rentRevenue: number;
+    extraBedRevenue: number;
+    extraTowelRevenue: number;
+    discountUsed: number;
+    guestCount: number;
+    childrenCount: number;
+    bookingCount: number;
+    potentialRevenue: number;
+  };
+  currentMonth: {
+    month: number;
+    revenue: number;
+    rentRevenue: number;
+    extraBedRevenue: number;
+    extraTowelRevenue: number;
+    discountUsed: number;
+    guestCount: number;
+    childrenCount: number;
+    bookingCount: number;
+    potentialRevenue: number;
+  } | null;
+}
+
 
 export type { MyBookingResponse, MyBookingData };
