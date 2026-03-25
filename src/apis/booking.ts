@@ -104,6 +104,7 @@ export interface SummaryResponse {
     guestCount: number;
     childrenCount: number;
     bookingCount: number;
+    nightCount: number;
     potentialRevenue: number;
     }[];
   yearly: {
@@ -115,6 +116,7 @@ export interface SummaryResponse {
     guestCount: number;
     childrenCount: number;
     bookingCount: number;
+    nightCount: number;
     potentialRevenue: number;
   };
   currentMonth: {
@@ -127,6 +129,7 @@ export interface SummaryResponse {
     guestCount: number;
     childrenCount: number;
     bookingCount: number;
+    nightCount: number;
     potentialRevenue: number;
   } | null;
 }

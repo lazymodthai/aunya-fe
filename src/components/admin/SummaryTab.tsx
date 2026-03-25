@@ -115,8 +115,8 @@ function SummaryTab() {
               <Grid size={{ xs: 6, sm: 4 }}>
                 <StatCard
                   title="จำนวนการจอง"
-                  value={summaryData.yearly.bookingCount}
-                  subtitle="ครั้ง"
+                  value={`${summaryData.yearly.bookingCount} ครั้ง`}
+                  subtitle={`รวมทั้งหมด ${summaryData.yearly.nightCount} คืน`}
                   color="secondary.main"
                 />
               </Grid>
@@ -148,7 +148,8 @@ function SummaryTab() {
                 <Grid size={{ xs: 6, sm: 4 }}>
                   <StatCard
                     title="การจองเดือนนี้"
-                    value={summaryData.currentMonth.bookingCount}
+                    value={`${summaryData.currentMonth.bookingCount} ครั้ง`}
+                    subtitle={`รวมทั้งหมด ${summaryData.currentMonth.nightCount} คืน`}
                     color="secondary.dark"
                   />
                 </Grid>
@@ -180,6 +181,7 @@ function SummaryTab() {
                     <TableCell align="right" sx={{ fontWeight: 600 }}>ผ้าเช็ดตัว</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600 }}>ส่วนลด</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 600 }}>จำนวนจอง</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600 }}>จำนวนคืน</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -194,6 +196,7 @@ function SummaryTab() {
                       <TableCell align="right">฿{m.extraTowelRevenue.toLocaleString()}</TableCell>
                       <TableCell align="right" sx={{ color: 'error.main' }}>-฿{m.discountUsed.toLocaleString()}</TableCell>
                       <TableCell align="right">{m.bookingCount}</TableCell>
+                      <TableCell align="right">{m.nightCount}</TableCell>
                     </TableRow>
                   ))}
                   <TableRow sx={{ bgcolor: 'rgba(176, 48, 82, 0.05)' }}>
@@ -206,6 +209,7 @@ function SummaryTab() {
                     <TableCell align="right" sx={{ fontWeight: 700 }}>฿{summaryData.yearly.extraTowelRevenue.toLocaleString()}</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 700, color: 'error.main' }}>-฿{summaryData.yearly.discountUsed.toLocaleString()}</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 700 }}>{summaryData.yearly.bookingCount}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700 }}>{summaryData.yearly.nightCount}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
