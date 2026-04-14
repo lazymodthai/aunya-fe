@@ -21,6 +21,13 @@ import {
   Chip,
   Card,
   CardContent,
+  DialogActions,
+  FormControl,
+  MenuItem,
+  InputLabel,
+  Select,
+  Checkbox,
+  CircularProgress,
 } from '@mui/material';
 import {
   ChevronLeft as ChevronLeftIcon,
@@ -28,8 +35,13 @@ import {
   Close as CloseIcon,
   Edit as EditIcon,
   Add as AddIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { MyBookingData } from '@apis/booking';
+import BookingAPI from '@apis/booking';
+import { BookingStatus } from '@constants/booking.enum';
 import PriceField from '@components/common/PriceField';
 import { parseLocalDate } from '@utils/date';
 
@@ -179,9 +191,15 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
   const [editPrice, setEditPrice] = useState<number>(0);
   const [editMaintenance, setEditMaintenance] = useState<boolean>(false);
 
-  // Slip modal state
-  const [slipModalOpen, setSlipModalOpen] = useState(false);
   const [selectedSlips, setSelectedSlips] = useState<{ fileUrl: string }[]>([]);
+  const [slipModalOpen, setSlipModalOpen] = useState<boolean>(false);
+
+  // Edit/Cancel states
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState<boolean>(false);
+  const [editFormData, setEditFormData] = useState<any>(null);
+  const [selectedBooking, setSelectedBooking] = useState<MyBookingData | null>(null);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // Touch refs for swipe detection
   const touchStartX = useRef<number | null>(null);
@@ -388,6 +406,70 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
     setSelectedSlips([]);
   };
 
+  const handleEditClick = (booking: MyBookingData) => {
+    setSelectedBooking(booking);
+    setEditFormData({ ...booking });
+    setIsEditModalOpen(true);
+  };
+
+  const handleCancelClick = (booking: MyBookingData) => {
+    setSelectedBooking(booking);
+    setShowCancelConfirm(true);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!selectedBooking) return;
+    setIsSaving(true);
+    try {
+      await BookingAPI.updateBooking(selectedBooking.id, { status: BookingStatus.CANCELLED as any });
+      setShowCancelConfirm(false);
+      // Refresh local data
+      if (selectedDay) {
+        const bookings = await getBookingsByDate!(selectedDay.date);
+        setDayBookings(bookings.filter(b => b.status !== 'Cancelled'));
+      }
+      // Refresh calendar
+      onChangeMonth(currentDate.getMonth());
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      alert('เกิดข้อผิดพลาดในการยกเลิกการจอง');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedBooking || !editFormData) return;
+    setIsSaving(true);
+    try {
+      await BookingAPI.updateBooking(selectedBooking.id, {
+        guestNumber: Number(editFormData.guestNumber),
+        childrenNumber: Number(editFormData.childrenNumber),
+        additionGuestNumber: Number(editFormData.additionGuestNumber),
+        totalPrice: Number(editFormData.totalPrice),
+        discount: Number(editFormData.discount),
+        paidAmount: Number(editFormData.paidAmount),
+        isOnlyDeposit: editFormData.isOnlyDeposit,
+        additionTowel: Number(editFormData.additionTowel),
+        remark: editFormData.remark,
+        status: editFormData.status
+      });
+      setIsEditModalOpen(false);
+      // Refresh local data
+      if (selectedDay) {
+        const bookings = await getBookingsByDate!(selectedDay.date);
+        setDayBookings(bookings.filter(b => b.status !== 'Cancelled'));
+      }
+      // Refresh calendar
+      onChangeMonth(currentDate.getMonth());
+    } catch (error) {
+      console.error('Error updating booking:', error);
+      alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Confirmed': return 'success';
@@ -541,6 +623,27 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
                         </Typography>
                       </Box>
                     )}
+                    <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        startIcon={<EditIcon />}
+                        onClick={() => handleEditClick(booking)}
+                      >
+                        แก้ไข
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="error"
+                        fullWidth
+                        startIcon={<DeleteIcon />}
+                        onClick={() => handleCancelClick(booking)}
+                      >
+                        ยกเลิกการจอง
+                      </Button>
+                    </Stack>
                   </CardContent>
                 </Card>
               ))}
@@ -827,6 +930,171 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
             ))}
           </Stack>
         </DialogContent>
+      </Dialog>
+      {/* Edit Booking Dialog */}
+      <Dialog 
+        open={isEditModalOpen} 
+        onClose={() => !isSaving && setIsEditModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ bgcolor: '#2D336B', color: '#fff' }}>
+          แก้ไขข้อมูลการจอง ({selectedBooking?.refCode})
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2 }}>
+          {editFormData && (
+            <Grid container spacing={2}>
+              {/* Read Only Fields */}
+              <Grid size={12}>
+                <Typography variant="caption" color="textSecondary">
+                  ข้อมูลที่ไม่สามารถแก้ไขได้ (หากต้องการเปลี่ยนกรุณายกเลิกและจองใหม่)
+                </Typography>
+              </Grid>
+              <Grid size={6}>
+                <TextField label="Check-in" value={editFormData.checkinDate?.split('T')[0]} fullWidth disabled variant="filled" size="small" />
+              </Grid>
+              <Grid size={6}>
+                <TextField label="Check-out" value={editFormData.checkoutDate?.split('T')[0]} fullWidth disabled variant="filled" size="small" />
+              </Grid>
+              <Grid size={6}>
+                <TextField label="ชื่อผู้จอง" value={editFormData.name} fullWidth disabled variant="filled" size="small" />
+              </Grid>
+              <Grid size={6}>
+                <TextField label="เบอร์โทร" value={editFormData.phoneNumber} fullWidth disabled variant="filled" size="small" />
+              </Grid>
+              
+              <Grid size={12}><Typography variant="subtitle2" sx={{ mt: 1 }}>ข้อมูลที่แก้ไขได้</Typography></Grid>
+              
+              {/* Editable Fields */}
+              <Grid size={4}>
+                <TextField 
+                  label="จำนวนผู้ใหญ่" 
+                  type="number" 
+                  value={editFormData.guestNumber} 
+                  onChange={(e) => setEditFormData({...editFormData, guestNumber: Number(e.target.value)})}
+                  fullWidth size="small" 
+                />
+              </Grid>
+              <Grid size={4}>
+                <TextField 
+                  label="จำนวนเด็ก" 
+                  type="number" 
+                  value={editFormData.childrenNumber} 
+                  onChange={(e) => setEditFormData({...editFormData, childrenNumber: Number(e.target.value)})}
+                  fullWidth size="small" 
+                />
+              </Grid>
+              <Grid size={4}>
+                <TextField 
+                  label="เตียงเสริม" 
+                  type="number" 
+                  value={editFormData.additionGuestNumber} 
+                  onChange={(e) => setEditFormData({...editFormData, additionGuestNumber: Number(e.target.value)})}
+                  fullWidth size="small" 
+                />
+              </Grid>
+              <Grid size={4}>
+                <TextField 
+                  label="ราคาสุทธิ" 
+                  type="number" 
+                  value={editFormData.totalPrice} 
+                  onChange={(e) => setEditFormData({...editFormData, totalPrice: Number(e.target.value)})}
+                  fullWidth size="small" 
+                />
+              </Grid>
+              <Grid size={4}>
+                <TextField 
+                  label="ส่วนลด" 
+                  type="number" 
+                  value={editFormData.discount} 
+                  onChange={(e) => setEditFormData({...editFormData, discount: Number(e.target.value)})}
+                  fullWidth size="small" 
+                />
+              </Grid>
+              <Grid size={4}>
+                <TextField 
+                  label="จ่ายแล้ว" 
+                  type="number" 
+                  value={editFormData.paidAmount} 
+                  onChange={(e) => setEditFormData({...editFormData, paidAmount: Number(e.target.value)})}
+                  fullWidth size="small" 
+                />
+              </Grid>
+              <Grid size={6}>
+                <TextField 
+                  label="ผ้าเช็ดตัวเสริม" 
+                  type="number" 
+                  value={editFormData.additionTowel} 
+                  onChange={(e) => setEditFormData({...editFormData, additionTowel: Number(e.target.value)})}
+                  fullWidth size="small" 
+                />
+              </Grid>
+              <Grid size={6}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>สถานะ</InputLabel>
+                  <Select
+                    value={editFormData.status}
+                    label="สถานะ"
+                    onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
+                  >
+                    {Object.values(BookingStatus).map(s => (
+                      <MenuItem key={s} value={s}>{s}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid size={12}>
+                <FormControlLabel
+                  control={<Checkbox checked={editFormData.isOnlyDeposit} onChange={(e) => setEditFormData({...editFormData, isOnlyDeposit: e.target.checked})} />}
+                  label="จ่ายเฉพาะมัดจำ"
+                />
+              </Grid>
+              <Grid size={12}>
+                <TextField 
+                  label="หมายเหตุ" 
+                  multiline 
+                  rows={2} 
+                  value={editFormData.remark || ''} 
+                  onChange={(e) => setEditFormData({...editFormData, remark: e.target.value})}
+                  fullWidth size="small" 
+                />
+              </Grid>
+              <Grid size={12}>
+                <Typography variant="body2" color="primary" sx={{ fontWeight: 'bold' }}>
+                  ยอดค้างชำระที่จะบันทึก: {(Number(editFormData.totalPrice) - Number(editFormData.paidAmount) - Number(editFormData.discount)).toLocaleString()} บ.
+                </Typography>
+              </Grid>
+            </Grid>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2, bgcolor: '#f5f5f5' }}>
+          <Button onClick={() => setIsEditModalOpen(false)} disabled={isSaving}>ยกเลิก</Button>
+          <Button 
+            onClick={handleSaveEdit} 
+            variant="contained" 
+            startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+            disabled={isSaving}
+          >
+            บันทึกการแก้ไข
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Cancel Confirmation Dialog */}
+      <Dialog open={showCancelConfirm} onClose={() => !isSaving && setShowCancelConfirm(false)}>
+        <DialogTitle>ยืนยันการยกเลิกการจอง</DialogTitle>
+        <DialogContent>
+          <Typography>
+            คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการจองหมายเลข {selectedBooking?.refCode}? 
+            การดำเนินการนี้ไม่สามารถย้อนกลับได้
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowCancelConfirm(false)} disabled={isSaving}>ไม่ยกเลิก</Button>
+          <Button onClick={handleConfirmCancel} color="error" variant="contained" disabled={isSaving}>
+            {isSaving ? <CircularProgress size={20} color="inherit" /> : 'ยืนยันการยกเลิก'}
+          </Button>
+        </DialogActions>
       </Dialog>
     </CalendarContainer>
   );

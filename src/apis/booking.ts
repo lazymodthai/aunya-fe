@@ -20,6 +20,8 @@ export interface BookingPayload {
   paidAmount?: number;
   remainingAmount?: number;
   additionTowel: number;
+  remark?: string;
+  status?: string;
 }
 
 export default class BookingAPI extends InstanceBookingAPI {
@@ -50,6 +52,10 @@ export default class BookingAPI extends InstanceBookingAPI {
 
   static updateBookingStatus(id: string, payload: { status: BookingStatus; additionalPayment?: number }): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
     return this.api.patch(`${path}/${id}/status`, payload);
+  }
+
+  static updateBooking(id: string, payload: Partial<BookingPayload> & { status?: BookingStatus }): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
+    return this.api.patch(`${path}/${id}`, payload);
   }
 
   static getSummary(year: number): Promise<{ data: SummaryResponse; headers: RawAxiosResponseHeaders; }> {
