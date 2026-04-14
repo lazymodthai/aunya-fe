@@ -88,3 +88,14 @@ export class InstanceSettingsAPI {
 export class InstanceGalleryAPI {
   static api = instanceGallery;
 }
+
+const instancePropertyInfo = axios.create({
+  withCredentials: true,
+  baseURL: import.meta.env.VITE_BASE_URL || 'https://api.aunyapoolvilla.com/',
+  timeout: 10000,
+  headers: { Accept: 'application/json' },
+});
+
+export class InstancePropertyInfoAPI {
+  static api = instancePropertyInfo;
+}
