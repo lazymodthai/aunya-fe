@@ -12,7 +12,7 @@ function Map() {
 
   return (
     <Box sx={{
-      width: isMobile ? '95vw' : '100vw',
+      width: '100%',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',

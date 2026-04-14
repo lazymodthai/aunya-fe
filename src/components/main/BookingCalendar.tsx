@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   IconButton,
-  Grid,
   Paper,
   styled,
   useMediaQuery,
@@ -58,10 +57,11 @@ interface BookingCalendarProps {
 
 // Styled components
 const CalendarContainer = styled(Box)(({ theme }) => ({
-  minWidth: 350,
+  width: '100%',
   maxWidth: 600,
   margin: '0 auto',
   padding: theme.spacing(2),
+  boxSizing: 'border-box',
 }));
 
 const DayCell = styled(Paper, {
@@ -78,25 +78,28 @@ const DayCell = styled(Paper, {
   isMaintenance?: boolean;
   isPast?: boolean;
 }>(({ theme, isUnavailable, isToday, isCurrentMonth, isMaintenance, isPast }) => ({
-  padding: theme.spacing(1),
-  height: useMediaQuery("(max-width:480px)") ? '60px' : '80px',
+  padding: '4px',
+  minHeight: '64px',
   display: 'flex',
   flexDirection: 'column',
+  alignItems: 'flex-start',
   position: 'relative',
+  overflow: 'hidden',
   cursor: (isPast || isUnavailable || isMaintenance) ? 'not-allowed' : 'pointer',
   backgroundColor: isPast
     ? theme.palette.action.disabledBackground
     : isMaintenance
       ? 'rgba(255, 165, 0, 0.1)'
       : isUnavailable
-        ? 'rgba(255, 0, 0, 0.1)'
+        ? 'rgba(255, 0, 0, 0.08)'
         : isToday
           ? 'rgba(66, 165, 245, 0.1)'
           : theme.palette.background.paper,
   border: isToday
-    ? `1px solid ${theme.palette.primary.main}`
+    ? `2px solid ${theme.palette.primary.main}`
     : `1px solid ${theme.palette.divider}`,
-  opacity: isPast ? 0.5 : isCurrentMonth ? 1 : 0.5,
+  borderRadius: '6px',
+  opacity: isPast ? 0.5 : isCurrentMonth ? 1 : 0.3,
   pointerEvents: isPast ? 'none' : 'auto',
   '&:hover': {
     backgroundColor: (isPast || isUnavailable || isMaintenance)
@@ -105,15 +108,18 @@ const DayCell = styled(Paper, {
   },
 }));
 
-const DayNumber = styled(Typography)(({ theme }) => ({
+const DayNumber = styled(Typography)(() => ({
   fontWeight: 'bold',
-  marginBottom: theme.spacing(1),
+  fontSize: '0.8rem',
+  lineHeight: 1.2,
 }));
 
 const Price = styled(Typography)(({ theme }) => ({
   textAlign: 'center',
-  fontSize: '0.85rem',
+  fontSize: '0.65rem',
   color: theme.palette.text.secondary,
+  width: '100%',
+  lineHeight: 1.1,
 }));
 
 const StatusIndicator = styled(Typography, {
@@ -121,13 +127,12 @@ const StatusIndicator = styled(Typography, {
 })<{
   isMaintenance?: boolean;
 }>(({ theme, isMaintenance }) => ({
-  position: 'absolute',
-  bottom: 4,
-  width: useMediaQuery("(max-width:800px)") ? '70%' : '75%',
+  width: '100%',
   textAlign: 'center',
-  fontSize: '0.7rem',
+  fontSize: '0.6rem',
   fontWeight: 'bold',
-  color: isMaintenance ? theme.palette.warning.main : theme.palette.error.main
+  lineHeight: 1.1,
+  color: isMaintenance ? theme.palette.warning.main : theme.palette.error.main,
 }));
 
 const ModalContent = styled(Box)(({ theme }) => ({
@@ -393,25 +398,26 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
         </IconButton>
       </Box>
 
-      {/* Day names row - CORRECTED GRID */}
-      <Grid container spacing={1} sx={{ mb: 1 }}>
+      {/* Day names row — CSS grid for perfect 7-column alignment */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', mb: 0.5 }}>
         {dayNames.map((day, index) => (
-          <Grid size={12 / 7} key={index}>
-            <Typography
-              align="center"
-              sx={{
-                fontWeight: "bold",
-                color: index === 0 ? "error.main" : "text.primary",
-              }}
-            >
-              {day}
-            </Typography>
-          </Grid>
+          <Typography
+            key={index}
+            align="center"
+            sx={{
+              fontWeight: 'bold',
+              fontSize: '0.75rem',
+              color: index === 0 ? 'error.main' : 'text.secondary',
+              py: 0.5,
+            }}
+          >
+            {day}
+          </Typography>
         ))}
-      </Grid>
+      </Box>
 
-      {/* Calendar grid - CORRECTED GRID */}
-      <Grid container spacing={1}>
+      {/* Calendar grid */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
         {currentMonthData.map((dayData, index) => {
           const day = dayData ? parseInt(dayData.date.split('-')[2]) : 0;
           const month = dayData ? parseInt(dayData.date.split('-')[1]) : 0;
@@ -419,42 +425,36 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
 
           const past = disablePast && dayData ? isPastCheck(day, month, year) : false;
 
-          return (
-            <Grid size={12 / 7} key={index}>
-              {dayData ? (
-                <DayCell
-                  isUnavailable={dayData.status === "Unavailable"}
-                  isMaintenance={dayData.isMaintenance}
-                  isToday={isTodayCheck(day, month, year)}
-                  isCurrentMonth={true}
-                  isPast={past}
-                  elevation={0}
-                  onClick={() => !past && handleDayClick(dayData)}
-                >
-                  <DayNumber>{day}</DayNumber>
+          return dayData ? (
+            <DayCell
+              key={index}
+              isUnavailable={dayData.status === "Unavailable"}
+              isMaintenance={dayData.isMaintenance}
+              isToday={isTodayCheck(day, month, year)}
+              isCurrentMonth={true}
+              isPast={past}
+              elevation={0}
+              onClick={() => !past && handleDayClick(dayData)}
+            >
+              <DayNumber>{day}</DayNumber>
 
-                  {!past && !hidePrice && !dayData.isMaintenance && dayData.status === 'Available' && (
-                    <Price>{dayData.price > 0 ? formatPrice(dayData.price) : 'สอบถาม'}</Price>
-                  )}
-
-                  {!past && (dayData.status === "Unavailable" ||
-                    dayData.isMaintenance) && (
-                      <StatusIndicator
-                        isMaintenance={dayData.isMaintenance}
-                      >
-                        {dayData.isMaintenance
-                          ? "ปิดปรับปรุง"
-                          : "ไม่ว่าง"}
-                      </StatusIndicator>
-                    )}
-                </DayCell>
-              ) : (
-                <DayCell isCurrentMonth={false} elevation={0} />
+              {!past && !hidePrice && !dayData.isMaintenance && dayData.status === 'Available' && (
+                <Price sx={{ width: '100%', textAlign: 'center' }}>
+                  {dayData.price > 0 ? formatPrice(dayData.price) : 'สอบถาม'}
+                </Price>
               )}
-            </Grid>
-          )
+
+              {!past && (dayData.status === "Unavailable" || dayData.isMaintenance) && (
+                <StatusIndicator isMaintenance={dayData.isMaintenance}>
+                  {dayData.isMaintenance ? "ปิด" : "ไม่ว่าง"}
+                </StatusIndicator>
+              )}
+            </DayCell>
+          ) : (
+            <Box key={index} sx={{ minHeight: '64px', borderRadius: '6px', bgcolor: 'transparent' }} />
+          );
         })}
-      </Grid>
+      </Box>
 
       {showLegend && (
         <Box

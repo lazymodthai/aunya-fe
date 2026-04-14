@@ -414,7 +414,7 @@ function Booking(props: Props) {
   };
 
   return (
-    <Grid container direction={'column'} gap={2} width={isMobile ? undefined : 600}>
+    <Grid container direction={'column'} gap={2} width={isMobile ? '100%' : 600}>
       {loading && <Loading />}
       <Grid textAlign={'center'}>
         <Typography sx={{ fontSize: 24 }}>จองห้องพัก</Typography>

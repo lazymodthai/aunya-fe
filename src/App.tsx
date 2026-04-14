@@ -66,12 +66,10 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         html: {
-          // กำหนดขนาดความกว้างขั้นต่ำ
-          minWidth: '390px',
-          overflowX: 'auto', // ให้มี scroll bar เมื่อขนาดหน้าจอเล็กกว่าขนาดขั้นต่ำ
+          overflowX: 'hidden',
         },
         body: {
-          minWidth: '390px', // กำหนดขนาดความกว้างขั้นต่ำ
+          overflowX: 'hidden',
         },
       },
     },
@@ -93,8 +91,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{
-        width: '100vw',
-        minWidth: '390px',
+        width: '100%',
         minHeight: '100vh',
         bgcolor: 'rgba(255, 255, 255, 0.87)'
       }}>
@@ -104,7 +101,6 @@ function App() {
           left: 0,
           right: 0,
           zIndex: 1100,
-          minWidth: '390px'
         }}>
           <Navbar />
         </Box>
@@ -114,7 +110,8 @@ function App() {
           justifyContent: 'center',
           pt: paddingTop,
           pb: paddingBottom,
-          minWidth: `calc(390px - ${padding} * 2)`
+          width: '100%',
+          boxSizing: 'border-box',
         }}>
           <Routes>
             <Route path="/" element={<Main />} />

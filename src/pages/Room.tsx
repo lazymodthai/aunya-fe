@@ -29,7 +29,7 @@ function Room() {
   }
 
   return (
-    <Box sx={{ width: isMobile ? '95vw' : '100vw', maxWidth: 1200, mx: 'auto' }}>
+    <Box sx={{ width: '100%', maxWidth: isMobile ? '100%' : 1200, mx: 'auto' }}>
       {/* Header */}
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography sx={{ fontSize: 28, fontWeight: 700, color: '#2D336B' }}>

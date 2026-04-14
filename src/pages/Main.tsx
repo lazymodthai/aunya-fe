@@ -108,11 +108,11 @@ function Main() {
       <Grid
         size={12}
         container
-        // direction={"column"}
         spacing={2}
         sx={{
           minHeight: 280,
-          width: 1366,
+          width: '100%',
+          maxWidth: isMobile ? '100%' : 1366,
         }}
       >
         <Grid size={12}>

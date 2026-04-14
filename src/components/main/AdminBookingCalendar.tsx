@@ -74,10 +74,11 @@ interface AdminBookingCalendarProps {
 
 // Styled components
 const CalendarContainer = styled(Box)(({ theme }) => ({
-  minWidth: 350,
-  maxWidth: 600,
+  width: '100%',
+  maxWidth: 700,
   margin: '0 auto',
-  padding: theme.spacing(2),
+  padding: theme.spacing(1),
+  boxSizing: 'border-box',
 }));
 
 const DayCell = styled(Paper, {
@@ -92,39 +93,47 @@ const DayCell = styled(Paper, {
   isCurrentMonth?: boolean;
   isMaintenance?: boolean;
 }>(({ theme, isUnavailable, isToday, isMaintenance }) => ({
-  padding: theme.spacing(1),
-  height: useMediaQuery("(max-width:480px)") ? '60px' : '80px',
+  padding: '4px',
+  minHeight: '64px',
   display: 'flex',
   flexDirection: 'column',
+  alignItems: 'flex-start',
   position: 'relative',
   cursor: 'pointer',
+  overflow: 'hidden',
   backgroundColor: isMaintenance
     ? 'rgba(255, 165, 0, 0.1)'
     : isUnavailable
-      ? 'rgba(255, 0, 0, 0.1)'
+      ? 'rgba(255, 0, 0, 0.08)'
       : isToday
         ? 'rgba(66, 165, 245, 0.1)'
         : theme.palette.background.paper,
   border: isToday
-    ? `1px solid ${theme.palette.primary.main}`
+    ? `2px solid ${theme.palette.primary.main}`
     : `1px solid ${theme.palette.divider}`,
+  borderRadius: '6px',
   '&:hover': {
     backgroundColor: isMaintenance
       ? 'rgba(255, 165, 0, 0.2)'
       : isUnavailable
-        ? 'rgba(255, 0, 0, 0.2)'
+        ? 'rgba(255, 0, 0, 0.16)'
         : 'rgba(0, 0, 0, 0.04)',
   },
 }));
 
 const DayNumber = styled(Typography)(() => ({
   fontWeight: 'bold',
+  fontSize: '0.8rem',
+  lineHeight: 1.2,
 }));
 
 const Price = styled(Typography)(({ theme }) => ({
   textAlign: 'center',
-  fontSize: '0.85rem',
+  fontSize: '0.65rem',
   color: theme.palette.text.secondary,
+  width: '100%',
+  lineHeight: 1.1,
+  mt: 0.25,
 }));
 
 const StatusIndicator = styled(Typography, {
@@ -132,13 +141,12 @@ const StatusIndicator = styled(Typography, {
 })<{
   isMaintenance?: boolean;
 }>(({ theme, isMaintenance }) => ({
-  position: 'absolute',
-  bottom: 4,
-  width: useMediaQuery("(max-width:800px)") ? '70%' : '75%',
+  width: '100%',
   textAlign: 'center',
-  fontSize: '0.7rem',
+  fontSize: '0.6rem',
   fontWeight: 'bold',
-  color: isMaintenance ? theme.palette.warning.main : theme.palette.error.main
+  lineHeight: 1.1,
+  color: isMaintenance ? theme.palette.warning.main : theme.palette.error.main,
 }));
 
 const DrawerContent = styled(Box)(({ theme }) => ({
@@ -190,6 +198,14 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
   const [isEditingPrice, setIsEditingPrice] = useState<boolean>(false);
   const [editPrice, setEditPrice] = useState<number>(0);
   const [editMaintenance, setEditMaintenance] = useState<boolean>(false);
+  
+  const isPastOrToday = useCallback(() => {
+    if (!selectedDay) return false;
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+    const checkDate = parseLocalDate(selectedDay.date);
+    return checkDate <= todayDate;
+  }, [selectedDay]);
 
   const [selectedSlips, setSelectedSlips] = useState<{ fileUrl: string }[]>([]);
   const [slipModalOpen, setSlipModalOpen] = useState<boolean>(false);
@@ -535,9 +551,9 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
         {/* If has bookings - show booking list */}
         {!isLoading && hasBookings && (
           <Box>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+            {/* <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
               รายการจอง ({dayBookings.length})
-            </Typography>
+            </Typography> */}
             <Box sx={{ maxHeight: '300px', overflow: 'auto' }}>
               {dayBookings.map((booking) => (
                 <Card key={booking.id} sx={{ mb: 2, borderRadius: 2 }}>
@@ -633,16 +649,27 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
                       >
                         แก้ไข
                       </Button>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        color="error"
-                        fullWidth
-                        startIcon={<DeleteIcon />}
-                        onClick={() => handleCancelClick(booking)}
-                      >
-                        ยกเลิกการจอง
-                      </Button>
+                      <Box sx={{ width: '100%' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color="error"
+                          fullWidth
+                          startIcon={<DeleteIcon />}
+                          onClick={() => handleCancelClick(booking)}
+                          disabled={isPastOrToday()}
+                          sx={{ 
+                            opacity: isPastOrToday() ? 0.5 : 1,
+                            '&.Mui-disabled': {
+                                color: 'error.main',
+                                borderColor: 'error.main',
+                                opacity: 0.4
+                            }
+                          }}
+                        >
+                          ยกเลิกการจอง
+                        </Button>
+                      </Box>
                     </Stack>
                   </CardContent>
                 </Card>
@@ -722,6 +749,159 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
         )}
       </Box>
     ) : null;
+  
+  const editFormContent = editFormData ? (
+    <Box>
+      {/* Read Only Section */}
+      <Box sx={{ p: 2, bgcolor: 'rgba(0, 0, 0, 0.02)', borderRadius: 2, mb: 3 }}>
+        <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ display: 'block', mb: 1 }}>
+          ข้อมูลพื้นฐาน (แก้ไขไม่ได้)
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 6 }}>
+            <Typography variant="caption" color="text.secondary">วันที่เข้าพัก</Typography>
+            <Typography variant="body2" fontWeight={500}>{editFormData.checkinDate?.split('T')[0]}</Typography>
+          </Grid>
+          <Grid size={{ xs: 6 }}>
+            <Typography variant="caption" color="text.secondary">วันที่ออก</Typography>
+            <Typography variant="body2" fontWeight={500}>{editFormData.checkoutDate?.split('T')[0]}</Typography>
+          </Grid>
+          <Grid size={{ xs: 6 }}>
+            <Typography variant="caption" color="text.secondary">ชื่อผู้จอง</Typography>
+            <Typography variant="body2" fontWeight={500}>{editFormData.name}</Typography>
+          </Grid>
+          <Grid size={{ xs: 6 }}>
+            <Typography variant="caption" color="text.secondary">เบอร์โทร</Typography>
+            <Typography variant="body2" fontWeight={500}>{editFormData.phoneNumber}</Typography>
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <Typography variant="caption" color="text.secondary">สถานะปัจจุบัน</Typography>
+            <Box sx={{ mt: 0.5 }}>
+              <Chip 
+                label={getStatusText(editFormData.status)} 
+                color={getStatusColor(editFormData.status) as any} 
+                size="small" 
+                variant="outlined"
+              />
+            </Box>
+          </Grid>
+        </Grid>
+      </Box>
+      
+      {/* Editable Section */}
+      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2, px: 0.5 }}>
+        จัดการข้อมูลการเข้าพัก
+      </Typography>
+      
+      <Grid container spacing={2.5} sx={{ px: 0.5 }}>
+        <Grid size={{ xs: 4, sm: 4 }}>
+          <TextField 
+            label="ผู้ใหญ่" 
+            type="number" 
+            value={editFormData.guestNumber} 
+            onChange={(e) => setEditFormData({...editFormData, guestNumber: Number(e.target.value)})}
+            fullWidth size="small" 
+          />
+        </Grid>
+        <Grid size={{ xs: 4, sm: 4 }}>
+          <TextField 
+            label="เด็ก" 
+            type="number" 
+            value={editFormData.childrenNumber} 
+            onChange={(e) => setEditFormData({...editFormData, childrenNumber: Number(e.target.value)})}
+            fullWidth size="small" 
+          />
+        </Grid>
+        <Grid size={{ xs: 4, sm: 4 }}>
+          <TextField 
+            label="เตียงเสริม" 
+            type="number" 
+            value={editFormData.additionGuestNumber} 
+            onChange={(e) => setEditFormData({...editFormData, additionGuestNumber: Number(e.target.value)})}
+            fullWidth size="small" 
+          />
+        </Grid>
+        <Grid size={{ xs: 4, sm: 4 }}>
+          <TextField 
+            label="ราคาสุทธิ" 
+            type="number" 
+            value={editFormData.totalPrice} 
+            onChange={(e) => setEditFormData({...editFormData, totalPrice: Number(e.target.value)})}
+            fullWidth size="small" 
+          />
+        </Grid>
+        <Grid size={{ xs: 4, sm: 4 }}>
+          <TextField 
+            label="ส่วนลด" 
+            type="number" 
+            value={editFormData.discount} 
+            onChange={(e) => setEditFormData({...editFormData, discount: Number(e.target.value)})}
+            fullWidth size="small" 
+          />
+        </Grid>
+        <Grid size={{ xs: 4, sm: 4 }}>
+          <TextField 
+            label="จ่ายแล้ว" 
+            type="number" 
+            value={editFormData.paidAmount} 
+            onChange={(e) => setEditFormData({...editFormData, paidAmount: Number(e.target.value)})}
+            fullWidth size="small" 
+          />
+        </Grid>
+        <Grid size={{ xs: 6, sm: 6 }}>
+          <TextField 
+            label="ผ้าเช็ดตัวเพิ่ม" 
+            type="number" 
+            value={editFormData.additionTowel} 
+            onChange={(e) => setEditFormData({...editFormData, additionTowel: Number(e.target.value)})}
+            fullWidth size="small" 
+          />
+        </Grid>
+        <Grid size={{ xs: 6, sm: 6 }}>
+          <FormControlLabel
+            control={<Checkbox checked={editFormData.isOnlyDeposit} onChange={(e) => setEditFormData({...editFormData, isOnlyDeposit: e.target.checked})} />}
+            label="มัดจำเท่านั้น"
+            sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.875rem' } }}
+          />
+        </Grid>
+        <Grid size={12}>
+          <TextField 
+            label="หมายเหตุ" 
+            multiline 
+            rows={2} 
+            value={editFormData.remark || ''} 
+            onChange={(e) => setEditFormData({...editFormData, remark: e.target.value})}
+            fullWidth size="small" 
+          />
+        </Grid>
+        <Grid size={12}>
+          <Box sx={{ p: 1.5, bgcolor: 'primary.main', color: 'white', borderRadius: 1 }}>
+            <Typography variant="body2" sx={{ opacity: 0.9 }}>ยอดค้างชำระ:</Typography>
+            <Typography variant="h6" fontWeight={700}>
+              ฿{(Number(editFormData.totalPrice) - Number(editFormData.paidAmount) - Number(editFormData.discount)).toLocaleString()}
+            </Typography>
+          </Box>
+        </Grid>
+      </Grid>
+    </Box>
+  ) : null;
+
+  const editFormActions = (
+    <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ width: '100%' }}>
+      <Button onClick={() => setIsEditModalOpen(false)} disabled={isSaving} fullWidth={isMobile}>
+        ยกเลิก
+      </Button>
+      <Button 
+        onClick={handleSaveEdit} 
+        variant="contained" 
+        startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+        disabled={isSaving}
+        fullWidth={isMobile}
+      >
+        บันทึกการแก้ไข
+      </Button>
+    </Stack>
+  );
 
   return (
     <CalendarContainer
@@ -750,60 +930,60 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
         </IconButton>
       </Box>
 
-      {/* Day names row */}
-      <Grid container spacing={1} sx={{ mb: 1 }}>
+      {/* Day names row — CSS grid for perfect 7-column alignment */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', mb: 0.5 }}>
         {dayNames.map((day, index) => (
-          <Grid size={12 / 7} key={index}>
-            <Typography
-              align="center"
-              sx={{
-                fontWeight: "bold",
-                color: index === 0 ? "error.main" : "text.primary",
-              }}
-            >
-              {day}
-            </Typography>
-          </Grid>
+          <Typography
+            key={index}
+            align="center"
+            sx={{
+              fontWeight: 'bold',
+              fontSize: '0.75rem',
+              color: index === 0 ? 'error.main' : 'text.secondary',
+              py: 0.5,
+            }}
+          >
+            {day}
+          </Typography>
         ))}
-      </Grid>
+      </Box>
 
       {/* Calendar grid */}
-      <Grid container spacing={1}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
         {currentMonthData.map((dayData, index) => {
           const day = dayData ? parseInt(dayData.date.split('-')[2]) : 0;
           const month = dayData ? parseInt(dayData.date.split('-')[1]) : 0;
           const year = dayData ? parseInt(dayData.date.split('-')[0]) : 0;
 
-          return (
-            <Grid size={12 / 7} key={index}>
-              {dayData ? (
-                <DayCell
-                  isUnavailable={dayData.status === "Unavailable"}
-                  isMaintenance={dayData.isMaintenance}
-                  isToday={isTodayCheck(day, month, year)}
-                  isCurrentMonth={true}
-                  elevation={0}
-                  onClick={() => handleDayClick(dayData)}
-                >
-                  <DayNumber>{day}</DayNumber>
+          return dayData ? (
+            <DayCell
+              key={index}
+              isUnavailable={dayData.status === "Unavailable"}
+              isMaintenance={dayData.isMaintenance}
+              isToday={isTodayCheck(day, month, year)}
+              isCurrentMonth={true}
+              elevation={0}
+              onClick={() => handleDayClick(dayData)}
+            >
+              <DayNumber>{day}</DayNumber>
 
-                  {!dayData.isMaintenance && (
-                    <Price>{dayData.price > 0 ? formatPrice(dayData.price) : 'สอบถาม'}</Price>
-                  )}
-
-                  {(dayData.status === "Unavailable" || dayData.isMaintenance) && (
-                    <StatusIndicator isMaintenance={dayData.isMaintenance}>
-                      {dayData.isMaintenance ? "ปิดปรับปรุง" : "ไม่ว่าง"}
-                    </StatusIndicator>
-                  )}
-                </DayCell>
-              ) : (
-                <DayCell isCurrentMonth={false} elevation={0} />
+              {!dayData.isMaintenance && dayData.price > 0 && (
+                <Price sx={{ fontSize: '0.6rem', color: 'text.secondary', width: '100%', textAlign: 'center' }}>
+                  {formatPrice(dayData.price)}
+                </Price>
               )}
-            </Grid>
-          )
+
+              {(dayData.status === "Unavailable" || dayData.isMaintenance) && (
+                <StatusIndicator isMaintenance={dayData.isMaintenance}>
+                  {dayData.isMaintenance ? "ปิด" : "ไม่ว่าง"}
+                </StatusIndicator>
+              )}
+            </DayCell>
+          ) : (
+            <Box key={index} sx={{ minHeight: '64px', borderRadius: '6px', bgcolor: 'transparent' }} />
+          );
         })}
-      </Grid>
+      </Box>
 
       {showLegend && (
         <Box
@@ -931,171 +1111,118 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
           </Stack>
         </DialogContent>
       </Dialog>
-      {/* Edit Booking Dialog */}
-      <Dialog 
-        open={isEditModalOpen} 
-        onClose={() => !isSaving && setIsEditModalOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle sx={{ bgcolor: '#2D336B', color: '#fff' }}>
-          แก้ไขข้อมูลการจอง ({selectedBooking?.refCode})
-        </DialogTitle>
-        <DialogContent sx={{ mt: 2 }}>
-          {editFormData && (
-            <Grid container spacing={2}>
-              {/* Read Only Fields */}
-              <Grid size={12}>
-                <Typography variant="caption" color="textSecondary">
-                  ข้อมูลที่ไม่สามารถแก้ไขได้ (หากต้องการเปลี่ยนกรุณายกเลิกและจองใหม่)
+      {/* Edit Booking UI */}
+      {isMobile ? (
+        <Drawer
+          anchor="bottom"
+          open={isEditModalOpen}
+          onClose={() => !isSaving && setIsEditModalOpen(false)}
+          sx={{
+            "& .MuiDrawer-paper": {
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+              maxHeight: '90vh',
+            },
+          }}
+        >
+          <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            {/* Sticky Header */}
+            <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="h6" fontWeight={700}>
+                  แก้ไขข้อมูลการจอง ({selectedBooking?.refCode})
                 </Typography>
-              </Grid>
-              <Grid size={6}>
-                <TextField label="Check-in" value={editFormData.checkinDate?.split('T')[0]} fullWidth disabled variant="filled" size="small" />
-              </Grid>
-              <Grid size={6}>
-                <TextField label="Check-out" value={editFormData.checkoutDate?.split('T')[0]} fullWidth disabled variant="filled" size="small" />
-              </Grid>
-              <Grid size={6}>
-                <TextField label="ชื่อผู้จอง" value={editFormData.name} fullWidth disabled variant="filled" size="small" />
-              </Grid>
-              <Grid size={6}>
-                <TextField label="เบอร์โทร" value={editFormData.phoneNumber} fullWidth disabled variant="filled" size="small" />
-              </Grid>
-              
-              <Grid size={12}><Typography variant="subtitle2" sx={{ mt: 1 }}>ข้อมูลที่แก้ไขได้</Typography></Grid>
-              
-              {/* Editable Fields */}
-              <Grid size={4}>
-                <TextField 
-                  label="จำนวนผู้ใหญ่" 
-                  type="number" 
-                  value={editFormData.guestNumber} 
-                  onChange={(e) => setEditFormData({...editFormData, guestNumber: Number(e.target.value)})}
-                  fullWidth size="small" 
-                />
-              </Grid>
-              <Grid size={4}>
-                <TextField 
-                  label="จำนวนเด็ก" 
-                  type="number" 
-                  value={editFormData.childrenNumber} 
-                  onChange={(e) => setEditFormData({...editFormData, childrenNumber: Number(e.target.value)})}
-                  fullWidth size="small" 
-                />
-              </Grid>
-              <Grid size={4}>
-                <TextField 
-                  label="เตียงเสริม" 
-                  type="number" 
-                  value={editFormData.additionGuestNumber} 
-                  onChange={(e) => setEditFormData({...editFormData, additionGuestNumber: Number(e.target.value)})}
-                  fullWidth size="small" 
-                />
-              </Grid>
-              <Grid size={4}>
-                <TextField 
-                  label="ราคาสุทธิ" 
-                  type="number" 
-                  value={editFormData.totalPrice} 
-                  onChange={(e) => setEditFormData({...editFormData, totalPrice: Number(e.target.value)})}
-                  fullWidth size="small" 
-                />
-              </Grid>
-              <Grid size={4}>
-                <TextField 
-                  label="ส่วนลด" 
-                  type="number" 
-                  value={editFormData.discount} 
-                  onChange={(e) => setEditFormData({...editFormData, discount: Number(e.target.value)})}
-                  fullWidth size="small" 
-                />
-              </Grid>
-              <Grid size={4}>
-                <TextField 
-                  label="จ่ายแล้ว" 
-                  type="number" 
-                  value={editFormData.paidAmount} 
-                  onChange={(e) => setEditFormData({...editFormData, paidAmount: Number(e.target.value)})}
-                  fullWidth size="small" 
-                />
-              </Grid>
-              <Grid size={6}>
-                <TextField 
-                  label="ผ้าเช็ดตัวเสริม" 
-                  type="number" 
-                  value={editFormData.additionTowel} 
-                  onChange={(e) => setEditFormData({...editFormData, additionTowel: Number(e.target.value)})}
-                  fullWidth size="small" 
-                />
-              </Grid>
-              <Grid size={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>สถานะ</InputLabel>
-                  <Select
-                    value={editFormData.status}
-                    label="สถานะ"
-                    onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
-                  >
-                    {Object.values(BookingStatus).map(s => (
-                      <MenuItem key={s} value={s}>{s}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid size={12}>
-                <FormControlLabel
-                  control={<Checkbox checked={editFormData.isOnlyDeposit} onChange={(e) => setEditFormData({...editFormData, isOnlyDeposit: e.target.checked})} />}
-                  label="จ่ายเฉพาะมัดจำ"
-                />
-              </Grid>
-              <Grid size={12}>
-                <TextField 
-                  label="หมายเหตุ" 
-                  multiline 
-                  rows={2} 
-                  value={editFormData.remark || ''} 
-                  onChange={(e) => setEditFormData({...editFormData, remark: e.target.value})}
-                  fullWidth size="small" 
-                />
-              </Grid>
-              <Grid size={12}>
-                <Typography variant="body2" color="primary" sx={{ fontWeight: 'bold' }}>
-                  ยอดค้างชำระที่จะบันทึก: {(Number(editFormData.totalPrice) - Number(editFormData.paidAmount) - Number(editFormData.discount)).toLocaleString()} บ.
-                </Typography>
-              </Grid>
-            </Grid>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ p: 2, bgcolor: '#f5f5f5' }}>
-          <Button onClick={() => setIsEditModalOpen(false)} disabled={isSaving}>ยกเลิก</Button>
-          <Button 
-            onClick={handleSaveEdit} 
-            variant="contained" 
-            startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
-            disabled={isSaving}
-          >
-            บันทึกการแก้ไข
-          </Button>
-        </DialogActions>
-      </Dialog>
+                <IconButton onClick={() => setIsEditModalOpen(false)} size="small" disabled={isSaving}>
+                  <CloseIcon />
+                </IconButton>
+              </Stack>
+            </Box>
 
-      {/* Cancel Confirmation Dialog */}
-      <Dialog open={showCancelConfirm} onClose={() => !isSaving && setShowCancelConfirm(false)}>
-        <DialogTitle>ยืนยันการยกเลิกการจอง</DialogTitle>
-        <DialogContent>
-          <Typography>
-            คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการจองหมายเลข {selectedBooking?.refCode}? 
-            การดำเนินการนี้ไม่สามารถย้อนกลับได้
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowCancelConfirm(false)} disabled={isSaving}>ไม่ยกเลิก</Button>
-          <Button onClick={handleConfirmCancel} color="error" variant="contained" disabled={isSaving}>
-            {isSaving ? <CircularProgress size={20} color="inherit" /> : 'ยืนยันการยกเลิก'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+            {/* Scrollable Content */}
+            <Box sx={{ flex: 1, overflowY: 'auto', p: 2.5 }}>
+              {editFormContent}
+            </Box>
+
+            {/* Sticky Footer */}
+            <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+              {editFormActions}
+            </Box>
+          </Box>
+        </Drawer>
+      ) : (
+        <Dialog 
+          open={isEditModalOpen} 
+          onClose={() => !isSaving && setIsEditModalOpen(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle sx={{ bgcolor: '#2D336B', color: '#fff' }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Typography variant="h6" fontWeight={700}>
+                แก้ไขข้อมูลการจอง ({selectedBooking?.refCode})
+              </Typography>
+              <IconButton onClick={() => setIsEditModalOpen(false)} size="small" sx={{ color: '#fff' }} disabled={isSaving}>
+                <CloseIcon />
+              </IconButton>
+            </Stack>
+          </DialogTitle>
+          <DialogContent sx={{ mt: 2 }} dividers>
+            {editFormContent}
+          </DialogContent>
+          <DialogActions sx={{ p: 2, bgcolor: '#f5f5f5' }}>
+            {editFormActions}
+          </DialogActions>
+        </Dialog>
+      )}
+
+      {/* Cancel Confirmation UI */}
+      {isMobile ? (
+        <Drawer
+          anchor="bottom"
+          open={showCancelConfirm}
+          onClose={() => !isSaving && setShowCancelConfirm(false)}
+          sx={{
+            "& .MuiDrawer-paper": {
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+            },
+          }}
+        >
+          <Box sx={{ p: 3 }}>
+            <Typography variant="h6" fontWeight={600} gutterBottom>
+              ยืนยันการยกเลิกการจอง
+            </Typography>
+            <Typography sx={{ mb: 3 }}>
+              คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการจองหมายเลข {selectedBooking?.refCode}? 
+              การดำเนินการนี้ไม่สามารถย้อนกลับได้
+            </Typography>
+            <Stack spacing={1.5}>
+              <Button onClick={handleConfirmCancel} color="error" variant="contained" disabled={isSaving} fullWidth>
+                {isSaving ? <CircularProgress size={20} color="inherit" /> : 'ยืนยันการยกเลิกการจอง'}
+              </Button>
+              <Button onClick={() => setShowCancelConfirm(false)} disabled={isSaving} fullWidth>
+                ไม่ยกเลิก
+              </Button>
+            </Stack>
+          </Box>
+        </Drawer>
+      ) : (
+        <Dialog open={showCancelConfirm} onClose={() => !isSaving && setShowCancelConfirm(false)}>
+          <DialogTitle>ยืนยันการยกเลิกการจอง</DialogTitle>
+          <DialogContent>
+            <Typography>
+              คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการจองหมายเลข {selectedBooking?.refCode}? 
+              การดำเนินการนี้ไม่สามารถย้อนกลับได้
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowCancelConfirm(false)} disabled={isSaving}>ไม่ยกเลิก</Button>
+            <Button onClick={handleConfirmCancel} color="error" variant="contained" disabled={isSaving}>
+              {isSaving ? <CircularProgress size={20} color="inherit" /> : 'ยืนยันการยกเลิก'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </CalendarContainer>
   );
 };

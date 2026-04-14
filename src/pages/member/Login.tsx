@@ -79,7 +79,7 @@ function Login() {
             border: `1px solid #B03052`,
             borderRadius: 4,
             p: 3,
-            width: isMobile ? "90vw" : 400,
+            width: isMobile ? '90vw' : 400,
             mt: 4,
           }}
         >

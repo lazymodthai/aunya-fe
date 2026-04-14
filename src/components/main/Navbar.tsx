@@ -185,8 +185,6 @@ const Navbar = () => {
         </Paper>
       )}
 
-      {/* Add padding at the bottom of the page to prevent content from being hidden behind the bottom bar */}
-      {isMobile && <Box sx={{ height: "56px" }} />}
     </>
   );
 };
