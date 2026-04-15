@@ -1,5 +1,5 @@
 import './App.css'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import Box from '@mui/material/Box'
@@ -20,6 +20,8 @@ import KaraokeIcon from './assets/icons/karaoke.svg'
 import TreesIcon from './assets/icons/trees.svg'
 import BilliardIcon from './assets/icons/billiard.svg'
 import Room from '@pages/Room'
+import VisitorAPI from '@apis/visitor'
+import { useEffect, useState } from 'react'
 import UnderConstruction from '@pages/UnderConstruction'
 import ManangeBooking from '@pages/ManangeBooking'
 import AdminPage from '@pages/member/AdminPage'
@@ -86,6 +88,24 @@ function App() {
   const paddingBottom = isMobile ? 10 : 12;
 
   const { userData } = useSelector(userSelector)
+  const location = useLocation();
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const trackVisit = async () => {
+      try {
+        if (!sessionStorage.getItem('_v')) {
+          const { data } = await VisitorAPI.ping();
+          setVisitorCount(data.count);
+          sessionStorage.setItem('_v', '1');
+        } else {
+          const { data } = await VisitorAPI.getCount();
+          setVisitorCount(data.count);
+        }
+      } catch { /* ignore */ }
+    };
+    trackVisit();
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
@@ -136,6 +156,13 @@ function App() {
 
           </Routes>
         </Box>
+        {isMobile && visitorCount !== null && location.pathname === '/' && (
+          <Box sx={{ textAlign: 'center', py: 1, pb: 11, bgcolor: 'transparent' }}>
+            <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: 11 }}>
+              ผู้เข้าชมทั้งหมด {visitorCount.toLocaleString()} ครั้ง
+            </Typography>
+          </Box>
+        )}
         {!isMobile && (
           <Box
             sx={{
@@ -205,6 +232,11 @@ function App() {
                 <Typography variant="body2" sx={{ opacity: 0.8 }}>
                   © 2024 {PROPERTY.nameThFull} - All rights reserved
                 </Typography>
+                {visitorCount !== null && (
+                  <Typography variant="caption" sx={{ opacity: 0.5, mt: 0.5, display: 'block' }}>
+                    ผู้เข้าชมทั้งหมด {visitorCount.toLocaleString()} ครั้ง
+                  </Typography>
+                )}
               </Box>
             </Box>
           </Box>

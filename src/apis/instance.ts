@@ -99,3 +99,13 @@ const instancePropertyInfo = axios.create({
 export class InstancePropertyInfoAPI {
   static api = instancePropertyInfo;
 }
+
+const instanceVisitor = axios.create({
+  baseURL: import.meta.env.VITE_BASE_URL || 'https://api.aunyapoolvilla.com/',
+  timeout: 10000,
+  headers: { Accept: 'application/json' },
+});
+
+export class InstanceVisitorAPI {
+  static api = instanceVisitor;
+}
