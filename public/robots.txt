@@ -3,11 +3,12 @@
 
 User-agent: *
 Allow: /
+Allow: /booking
+Allow: /room
+Allow: /map
 Disallow: /member/
+Disallow: /manage
 Disallow: /api/
 
 # Sitemap
 Sitemap: https://www.aunyapoolvilla.com/sitemap.xml
-
-# Crawl-delay (optional, for politeness)
-Crawl-delay: 1
