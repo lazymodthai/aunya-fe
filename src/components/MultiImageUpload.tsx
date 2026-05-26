@@ -5,6 +5,7 @@ import { styled } from '@mui/material/styles';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
 import * as BrowserImageResizer from 'browser-image-resizer';
+import { useTranslation } from 'react-i18next';
 
 // --- Styled Components ---
 
@@ -110,12 +111,14 @@ interface MultiImageUploadProps {
 // --- Main Component ---
 const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
   label,
-  addPhotoText = 'แนบสลิป',
+  addPhotoText,
   maxImages = 5,
   onImagesChange,
   initialImages = [],
   minHeight,
 }) => {
+  const { t } = useTranslation();
+  const displayAddPhotoText = addPhotoText || t('multiUpload.addPhoto');
   const [images, setImages] = useState<ImageListType>([]);
   const [openModal, setOpenModal] = useState(false);
   const [modalImage, setModalImage] = useState<string | undefined>(undefined);
@@ -230,7 +233,7 @@ const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
               {imageList.length === 0 ? (
                 <InitialUploadBox sx={{minHeight: minHeight || '150px' }}>
                   <AddPhotoAlternateIcon sx={{ fontSize: 40 }} />
-                  <Typography sx={{ fontSize: 14 }}>{addPhotoText}</Typography>
+                  <Typography sx={{ fontSize: 14 }}>{displayAddPhotoText}</Typography>
                 </InitialUploadBox>
               ) : (
                 <>
@@ -271,9 +274,9 @@ const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
             {errors && (
               <Box sx={{ color: 'error.main', mt: 1 }}>
                 {errors.maxNumber && (
-                  <span>เลือกรูปภาพได้สูงสุด {maxImages} ภาพ</span>
+                  <span>{t('multiUpload.maxImages', { count: maxImages })}</span>
                 )}
-                {errors.acceptType && <span>ไฟล์ประเภทนี้ไม่ได้รับอนุญาต</span>}
+                {errors.acceptType && <span>{t('multiUpload.invalidType')}</span>}
               </Box>
             )}
           </Box>

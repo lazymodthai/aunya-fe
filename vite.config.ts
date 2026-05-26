@@ -29,9 +29,9 @@ export default defineConfig({
       'www.aunyapoolvilla.com',
       'aunyapoolvilla.com'
     ],
-    hmr: {
-      host: 'aunyapoolvilla.com',
-      protocol: 'wss'
-    }
+    // hmr: {
+    //   host: 'aunyapoolvilla.com',
+    //   protocol: 'wss'
+    // }
   }
 })

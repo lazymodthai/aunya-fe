@@ -5,6 +5,7 @@ import { FormatDate } from '@utils/date';
 import { CONTACTS } from '@configs/app-settings';
 import { useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
+import { useTranslation } from 'react-i18next';
 
 interface SuccessStepProps {
   refCode: string;
@@ -49,6 +50,7 @@ function SuccessStep({
   paidAmount,
   remainingAmount,
 }: SuccessStepProps) {
+  const { t, i18n } = useTranslation();
   const captureRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -101,11 +103,11 @@ function SuccessStep({
         <CheckCircleIcon sx={{ fontSize: 80, color: '#15a13aff' }} />
 
       <Typography sx={{ fontSize: 24, fontWeight: 600, color: '#15a13aff' }}>
-        จองห้องพักสำเร็จ!
+        {t('success.bookingSuccess')}
       </Typography>
 
       <Typography sx={{ fontSize: 14, color: '#7d7d7dff' }}>
-        ขอบคุณที่ใช้บริการ ระบบได้รับการชำระเงินของคุณเรียบร้อยแล้ว
+        {t('success.thankYou')}
       </Typography>
 
       {/* Divider */}
@@ -121,7 +123,7 @@ function SuccessStep({
           border: '2px dashed #0b538eff',
         }}
       >
-        <Typography sx={{ fontSize: 12, color: '#7d7d7dff', mb: 0.5 }}>รหัสอ้างอิง</Typography>
+        <Typography sx={{ fontSize: 12, color: '#7d7d7dff', mb: 0.5 }}>{t('success.refCode')}</Typography>
         <Typography sx={{ fontSize: 20, fontWeight: 600, color: '#0b538eff', letterSpacing: 2 }}>
           {refCode}
         </Typography>
@@ -129,15 +131,15 @@ function SuccessStep({
 
       {/* Booking Details */}
       <Box sx={{ width: '100%', textAlign: 'left', mt: 1 }}>
-        <Typography sx={{ fontSize: 16, fontWeight: 600, mb: 1.5 }}>รายละเอียดการจอง</Typography>
+        <Typography sx={{ fontSize: 16, fontWeight: 600, mb: 1.5 }}>{t('success.bookingDetails')}</Typography>
 
         <Grid container spacing={1}>
           <Grid size={6}>
-            <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>ชื่อผู้จอง</Typography>
+            <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>{t('dateSelection.customerName')}</Typography>
             <Typography sx={{ fontSize: 14, fontWeight: 500 }}>{name}</Typography>
           </Grid>
           <Grid size={6}>
-            <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>เบอร์โทรศัพท์</Typography>
+            <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>{t('dateSelection.phoneNumber')}</Typography>
             <Typography sx={{ fontSize: 14, fontWeight: 500 }}>{phoneNumber}</Typography>
           </Grid>
           <Grid size={6} sx={{ mt: 1 }}>
@@ -153,17 +155,17 @@ function SuccessStep({
             </Typography>
           </Grid>
           <Grid size={6} sx={{ mt: 1 }}>
-            <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>จำนวนคืน</Typography>
-            <Typography sx={{ fontSize: 14, fontWeight: 500 }}>{totalDate} คืน</Typography>
+            <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>{t('success.nightsLabel')}</Typography>
+            <Typography sx={{ fontSize: 14, fontWeight: 500 }}>{t('success.nightsCount', { count: totalDate })}</Typography>
           </Grid>
           <Grid size={6} sx={{ mt: 1 }}>
-            <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>ผู้ใหญ่</Typography>
-            <Typography sx={{ fontSize: 14, fontWeight: 500 }}>{guestNumber} คน</Typography>
+            <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>{t('success.guestLabel')}</Typography>
+            <Typography sx={{ fontSize: 14, fontWeight: 500 }}>{t('success.peopleCount', { count: guestNumber })}</Typography>
           </Grid>
           {!!childrenNumber && (
             <Grid size={6} sx={{ mt: 1 }}>
-              <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>เด็ก</Typography>
-              <Typography sx={{ fontSize: 14, fontWeight: 500 }}>{childrenNumber} คน</Typography>
+              <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>{t('success.childLabel')}</Typography>
+              <Typography sx={{ fontSize: 14, fontWeight: 500 }}>{t('success.peopleCount', { count: childrenNumber })}</Typography>
             </Grid>
           )}
         </Grid>
@@ -173,47 +175,47 @@ function SuccessStep({
 
       {/* Payment Summary */}
       <Box sx={{ width: '100%', textAlign: 'left' }}>
-        <Typography sx={{ fontSize: 16, fontWeight: 600, mb: 1.5 }}>สรุปค่าใช้จ่าย</Typography>
+        <Typography sx={{ fontSize: 16, fontWeight: 600, mb: 1.5 }}>{t('success.paymentSummary')}</Typography>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-          <Typography sx={{ fontSize: 14 }}>ค่าห้องพัก</Typography>
+          <Typography sx={{ fontSize: 14 }}>{t('success.roomChargeLabel')}</Typography>
           <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
-            {totalRoomPrice.toLocaleString('th-TH')} บาท
+            {totalRoomPrice.toLocaleString()} {t('success.thb')}
           </Typography>
         </Box>
 
         {!!additionGuestNumber && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography sx={{ fontSize: 14 }}>ที่นอนเสริม ({additionGuestNumber} ชุด)</Typography>
+            <Typography sx={{ fontSize: 14 }}>{t('confirmation.extraBedCharge', { count: additionGuestNumber })}</Typography>
             <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
-              {((additionGuestNumber || 0) * additionGuestNumberPrice).toLocaleString('th-TH')} บาท
+              {((additionGuestNumber || 0) * additionGuestNumberPrice).toLocaleString()} {t('success.thb')}
             </Typography>
           </Box>
         )}
 
         {!!additionTowel && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography sx={{ fontSize: 14 }}>ผ้าขนหนู+ผ้าเช็ดผม ({additionTowel} ชุด)</Typography>
+            <Typography sx={{ fontSize: 14 }}>{t('confirmation.extraTowelCharge', { count: additionTowel })}</Typography>
             <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
-              {((additionTowel || 0) * additionTowelPrice).toLocaleString('th-TH')} บาท
+              {((additionTowel || 0) * additionTowelPrice).toLocaleString()} {t('success.thb')}
             </Typography>
           </Box>
         )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
           <Typography sx={{ fontSize: 14 }}>
-            ค่ามัดจำ <span style={{ fontSize: 12, color: '#7d7d7dff' }}>(คืนหลัง Check-out)</span>
+            {t('success.depositLabel')} <span style={{ fontSize: 12, color: '#7d7d7dff' }}>{t('success.depositRefundInfo')}</span>
           </Typography>
           <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
-            {depositPrice.toLocaleString('th-TH')} บาท
+            {depositPrice.toLocaleString()} {t('success.thb')}
           </Typography>
         </Box>
 
         {discountAmount > 0 && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography sx={{ fontSize: 14, color: '#15a13aff' }}>ส่วนลด</Typography>
+            <Typography sx={{ fontSize: 14, color: '#15a13aff' }}>{t('confirmation.discountLabel')}</Typography>
             <Typography sx={{ fontSize: 14, fontWeight: 500, color: '#15a13aff' }}>
-              -{discountAmount.toLocaleString('th-TH')} บาท
+              -{discountAmount.toLocaleString()} {t('success.thb')}
             </Typography>
           </Box>
         )}
@@ -222,10 +224,10 @@ function SuccessStep({
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
-            {isOnlyDeposit ? 'ยอดชำระครั้งนี้ (มัดจำ)' : 'ยอดรวมทั้งสิ้น'}
+            {isOnlyDeposit ? t('confirmation.depositAmount') : t('confirmation.totalAmount')}
           </Typography>
           <Typography sx={{ fontSize: 22, fontWeight: 600, color: '#15a13aff' }}>
-            {paidAmount.toLocaleString('th-TH', {
+            {paidAmount.toLocaleString(i18n.language === 'en' ? 'en-US' : 'th-TH', {
               style: 'currency',
               currency: 'THB',
             })}
@@ -233,9 +235,9 @@ function SuccessStep({
         </Box>
         {isOnlyDeposit && remainingAmount > 0 && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-            <Typography sx={{ fontSize: 16, fontWeight: 600 }}>ยอดค้างชำระ (จ่ายตอน Check-in)</Typography>
+            <Typography sx={{ fontSize: 16, fontWeight: 600 }}>{t('confirmation.remainingAmount')}</Typography>
             <Typography sx={{ fontSize: 18, fontWeight: 600, color: '#ed6c02' }}>
-              {remainingAmount.toLocaleString('th-TH', {
+              {remainingAmount.toLocaleString(i18n.language === 'en' ? 'en-US' : 'th-TH', {
                 style: 'currency',
                 currency: 'THB',
               })}
@@ -259,10 +261,10 @@ function SuccessStep({
           }}
         >
           <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#ed6c02', mb: 0.5 }}>
-            กรุณาชำระยอดคงเหลือในวัน Check-in
+            {t('success.remainingInstructions')}
           </Typography>
           <Typography sx={{ fontSize: 13, color: '#7d7d7dff' }}>
-            ยอดค้างชำระ {remainingAmount.toLocaleString('th-TH')} บาท จะต้องชำระให้ครบก่อนเข้าพัก
+            {t('success.remainingText', { price: remainingAmount.toLocaleString() })}
           </Typography>
         </Box>
       )}
@@ -278,9 +280,9 @@ function SuccessStep({
         }}
       >
         <Typography sx={{ fontSize: 13, color: '#7d7d7dff', lineHeight: 1.6 }}>
-          📌 กรุณาเก็บรหัสอ้างอิงนี้ไว้เพื่อใช้สำหรับการติดต่อหรือสอบถามข้อมูล
+          {t('success.keepRefCode')}
           <br />
-          📞 หากมีข้อสงสัย กรุณาติดต่อ: {`${CONTACTS[0].phoneDisplay} ${CONTACTS[0].name}`}
+          {t('success.contactIfDoubt')}{`${CONTACTS[0].phoneDisplay} ${i18n.language === 'en' ? CONTACTS[0].nameEn : CONTACTS[0].name}`}
         </Typography>
       </Box>
       </Box>
@@ -298,7 +300,7 @@ function SuccessStep({
           width: '100%',
         }}
       >
-        {isSaving ? 'กำลังบันทึก...' : 'บันทึกภาพหลักฐาน'}
+        {isSaving ? t('success.saving') : t('success.saveReceipt')}
       </Button>
     </Box>
   );

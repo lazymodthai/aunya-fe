@@ -6,12 +6,14 @@ import Noti from '@components/Noti';
 import Loading from "@components/Loading";
 import PDPADialog from '@components/PDPADialog';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const textFieldStyle: SxProps = {
   borderRadius: 2
 }
 
 function Register() {
+  const { t } = useTranslation();
   const isMobile = useMediaQuery("(max-width:800px)");
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
@@ -37,22 +39,22 @@ function Register() {
     if (!email || !password || !verifyPassword || !firstName || !lastName || !phoneNumber) {
       setError(true)
       setErrorType('empty')
-      return setErrorMessage('กรุณากรอกข้อมูลให้ครบถ้วน')
+      return setErrorMessage(t('member.emptyFields'))
     }
     if (!acceptedPDPA) {
       setError(true)
       setErrorType('pdpa')
-      return setErrorMessage('กรุณายอมรับนโยบายคุ้มครองข้อมูลส่วนบุคคล')
+      return setErrorMessage(t('member.acceptPdpaError'))
     }
     if (!isValidEmail) {
       setError(true)
       setErrorType('email')
-      return setErrorMessage('รูปแบบอีเมลไม่ถูกต้อง')
+      return setErrorMessage(t('member.emailInvalid'))
     }
     if (password !== verifyPassword) {
       setError(true)
       setErrorType('password')
-      return setErrorMessage('รหัสผ่านไม่ตรงกัน')
+      return setErrorMessage(t('member.passwordMismatch'))
     }
     if (email === '' || password === '') return;
     try {
@@ -72,11 +74,11 @@ function Register() {
         setError(true)
         if (error.response.data.message === 'Email already exists') {
           setErrorType('email')
-          return setErrorMessage('อีเมลถูกใช้แล้ว')
+          return setErrorMessage(t('member.emailExists'))
         }
         if (error.response.data.message === 'Phone number already exists') {
           setErrorType('phoneNumber')
-          return setErrorMessage('เบอร์โทรศัพท์ถูกใช้แล้ว')
+          return setErrorMessage(t('member.phoneExists'))
         }
       }
     }
@@ -109,7 +111,7 @@ function Register() {
             width: 160,
           }}
         >
-          สมัครสมาชิก
+          {t('member.register')}
         </Typography>
         <TextField
           value={email}
@@ -121,7 +123,7 @@ function Register() {
             }
             setEmail(e.target.value)
           }}
-          label={"อีเมล"}
+          label={t('member.email')}
           type="email"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
@@ -131,7 +133,7 @@ function Register() {
         <TextField
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          label={"รหัสผ่าน"}
+          label={t('member.password')}
           type="password"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
@@ -141,7 +143,7 @@ function Register() {
         <TextField
           value={verifyPassword}
           onChange={(e) => setVerifyPassword(e.target.value)}
-          label={"รหัสผ่านอีกครั้ง"}
+          label={t('member.passwordConfirm')}
           type="password"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
@@ -151,7 +153,7 @@ function Register() {
         <TextField
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
-          label={"ชื่อ"}
+          label={t('member.firstName')}
           type="text"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
@@ -161,7 +163,7 @@ function Register() {
         <TextField
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
-          label={"นามสกุล"}
+          label={t('member.lastName')}
           type="text"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
@@ -171,7 +173,7 @@ function Register() {
         <TextField
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
-          label={"เบอร์โทรศัพท์"}
+          label={t('member.phone')}
           type="text"
           fullWidth
           slotProps={{ input: { sx: textFieldStyle } }}
@@ -187,7 +189,7 @@ function Register() {
           }
           label={
             <Typography variant="body2">
-              ฉันได้อ่านและยอมรับ{' '}
+              {t('dateSelection.acceptPdpaText')}
               <Link
                 component="button"
                 type="button"
@@ -197,7 +199,7 @@ function Register() {
                 }}
                 sx={{ fontWeight: 500 }}
               >
-                นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+                {t('dateSelection.pdpaLink')}
               </Link>
             </Typography>
           }
@@ -214,7 +216,7 @@ function Register() {
           onClick={handleRegister}
           disabled={email === '' || password === '' || !acceptedPDPA}
         >
-          สมัคร
+          {t('member.submitRegister')}
         </Button>
         <Button
           fullWidth
@@ -222,11 +224,11 @@ function Register() {
           sx={{ mt: -2, borderRadius: 2, height: 48 }}
           onClick={() => navigate('/member/login')}
         >
-          ย้อนกลับ
+          {t('booking.buttons.back')}
         </Button>
       </Grid>
       <Noti type={'error'} open={error} value={errorMessage} onClose={() => setError(false)} />
-      <Noti type={'success'} open={success} onClose={() => setSuccess(false)} value='สมัครสมาชิกสำเร็จ' />
+      <Noti type={'success'} open={success} onClose={() => setSuccess(false)} value={t('member.registerSuccess')} />
       <PDPADialog open={pdpaDialogOpen} onClose={() => setPdpaDialogOpen(false)} />
     </Grid>
   );

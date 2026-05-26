@@ -3,8 +3,10 @@ import { Close as CloseIcon } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import GalleryAPI, { GalleryImage } from '@apis/gallery';
 import { PROPERTY } from '@configs/app-settings';
+import { useTranslation } from 'react-i18next';
 
 function Room() {
+  const { t, i18n } = useTranslation();
   const isMobile = useMediaQuery('(max-width:800px)');
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,16 +35,16 @@ function Room() {
       {/* Header */}
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography sx={{ fontSize: 28, fontWeight: 700, color: '#2D336B' }}>
-          {PROPERTY.nameThFull}
+          {i18n.language === 'en' ? PROPERTY.nameEn : PROPERTY.nameThFull}
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
-          {PROPERTY.nameEn}
+          {i18n.language === 'en' ? PROPERTY.nameThFull : PROPERTY.nameEn}
         </Typography>
       </Box>
 
       {images.length === 0 ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh' }}>
-          <Typography color="text.secondary">ยังไม่มีรูปภาพ</Typography>
+          <Typography color="text.secondary">{t("room.noImages", "ยังไม่มีรูปภาพ")}</Typography>
         </Box>
       ) : (
         <>

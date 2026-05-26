@@ -22,6 +22,7 @@ import {
   Close as CloseIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // Define the type for the booking data
 export interface BookingData {
@@ -175,6 +176,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery("(max-width:940px)");
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation();
 
   const today = new Date();
 
@@ -321,9 +323,19 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
     return price.toLocaleString('th-TH');
   };
 
-  const dayNames = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+  const dayNames = i18n.language === 'en'
+    ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    : ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
 
   const getThaiMonthName = (month: number): string => {
+    if (i18n.language === 'en') {
+      const englishMonths = [
+        'January', 'February', 'March', 'April',
+        'May', 'June', 'July', 'August',
+        'September', 'October', 'November', 'December'
+      ];
+      return englishMonths[month];
+    }
     const thaiMonths = [
       'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน',
       'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม',
@@ -356,9 +368,9 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
   };
 
   const getStatusText = (dayData: BookingData): string => {
-    if (dayData.isMaintenance) return 'ปิดปรับปรุง';
-    if (dayData.status === 'Unavailable') return 'ไม่ว่าง';
-    return 'ว่าง';
+    if (dayData.isMaintenance) return t('calendar.maintenance');
+    if (dayData.status === 'Unavailable') return t('calendar.unavailable');
+    return t('calendar.available');
   };
 
   const getPrice = (dayData: BookingData): number => {
@@ -390,7 +402,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
 
         <Typography variant="h6" component="h2">
           {getThaiMonthName(currentDate.getMonth())}{" "}
-          {currentDate.getFullYear() + 543}
+          {i18n.language === 'en' ? currentDate.getFullYear() : currentDate.getFullYear() + 543}
         </Typography>
 
         <IconButton onClick={handleNextMonth} size="small" disabled={!canGoToNextMonth()}>
@@ -440,13 +452,13 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
 
               {!past && !hidePrice && !dayData.isMaintenance && dayData.status === 'Available' && (
                 <Price sx={{ width: '100%', textAlign: 'center' }}>
-                  {dayData.price > 0 ? formatPrice(dayData.price) : 'สอบถาม'}
+                  {dayData.price > 0 ? formatPrice(dayData.price) : t('calendar.inquiry')}
                 </Price>
               )}
 
               {!past && (dayData.status === "Unavailable" || dayData.isMaintenance) && (
                 <StatusIndicator isMaintenance={dayData.isMaintenance}>
-                  {dayData.isMaintenance ? "ปิด" : "ไม่ว่าง"}
+                  {dayData.isMaintenance ? t('calendar.closed') : t('calendar.unavailable')}
                 </StatusIndicator>
               )}
             </DayCell>
@@ -475,7 +487,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                 border: "1px solid #ddd",
               }}
             />
-            <Typography variant="caption">ไม่ว่าง</Typography>
+            <Typography variant="caption">{t('calendar.unavailable')}</Typography>
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", mr: 2, mb: 1 }}>
@@ -488,7 +500,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                 border: "1px solid #ddd",
               }}
             />
-            <Typography variant="caption">ปิดปรับปรุง</Typography>
+            <Typography variant="caption">{t('calendar.maintenance')}</Typography>
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", mr: 2, mb: 1 }}>
@@ -501,7 +513,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                 border: `1px solid ${theme.palette.primary.main}`,
               }}
             />
-            <Typography variant="caption">วันนี้</Typography>
+            <Typography variant="caption">{t('calendar.today')}</Typography>
           </Box>
         </Box>
       )}
@@ -527,7 +539,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                 alignItems: "center",
               }}
             >
-              <Typography variant="h6">รายละเอียดการจอง</Typography>
+              <Typography variant="h6">{t('calendar.bookingDetail')}</Typography>
               <IconButton onClick={handleClose} size="small">
                 <CloseIcon />
               </IconButton>
@@ -537,11 +549,11 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
               <>
                 <Typography variant="body1" sx={{ fontWeight: "bold" }}>
                   {parseInt(selectedDay.date.split('-')[2])} {getThaiMonthName(parseInt(selectedDay.date.split('-')[1]) - 1)}{" "}
-                  {parseInt(selectedDay.date.split('-')[0]) + 543}
+                  {i18n.language === 'en' ? parseInt(selectedDay.date.split('-')[0]) : parseInt(selectedDay.date.split('-')[0]) + 543}
                 </Typography>
 
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography variant="body1">สถานะ:</Typography>
+                  <Typography variant="body1">{t('calendar.status')}</Typography>
                   <Typography
                     variant="body1"
                     sx={{
@@ -554,7 +566,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                 </Box>
 
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography variant="body1">ราคา:</Typography>
+                  <Typography variant="body1">{t('calendar.price')}</Typography>
                   <Typography
                     variant="body1"
                     sx={{
@@ -562,7 +574,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                       color: "#000",
                     }}
                   >
-                    {getPrice(selectedDay) === 0 ? 'สอบถาม' : getPrice(selectedDay).toLocaleString("th-TH")}
+                    {getPrice(selectedDay) === 0 ? t('calendar.inquiry') : `${getPrice(selectedDay).toLocaleString()} ${t('success.thb')}`}
                   </Typography>
                 </Box>
 
@@ -581,7 +593,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                       height: '3rem'
                     }}
                   >
-                    {selectedDay.price === 0 ? 'สอบถาม' : 'จอง'}
+                    {selectedDay.price === 0 ? t('calendar.inquiry') : t('calendar.book')}
                   </Button>
                 )}
               </>
@@ -601,7 +613,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                 mb: 3,
               }}
             >
-              <Typography variant="h6">รายละเอียดการจอง</Typography>
+              <Typography variant="h6">{t('calendar.bookingDetail')}</Typography>
               <IconButton onClick={handleClose} size="small">
                 <CloseIcon />
               </IconButton>
@@ -611,13 +623,13 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
               <>
                 <Typography variant="body1" sx={{ fontWeight: "bold", mb: 2 }}>
                   {parseInt(selectedDay.date.split('-')[2])} {getThaiMonthName(parseInt(selectedDay.date.split('-')[1]) - 1)}{" "}
-                  {parseInt(selectedDay.date.split('-')[0]) + 543}
+                  {i18n.language === 'en' ? parseInt(selectedDay.date.split('-')[0]) : parseInt(selectedDay.date.split('-')[0]) + 543}
                 </Typography>
 
                 <Box
                   sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}
                 >
-                  <Typography variant="body1">สถานะ:</Typography>
+                  <Typography variant="body1">{t('calendar.status')}</Typography>
                   <Typography
                     variant="body1"
                     sx={{
@@ -631,7 +643,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                 <Box
                   sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}
                 >
-                  <Typography variant="body1">ราคา:</Typography>
+                  <Typography variant="body1">{t('calendar.price')}</Typography>
                   <Typography
                     variant="body1"
                     sx={{
@@ -639,7 +651,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                       color: '#000',
                     }}
                   >
-                    {getPrice(selectedDay).toLocaleString("th-TH")}
+                    {getPrice(selectedDay) === 0 ? t('calendar.inquiry') : `${getPrice(selectedDay).toLocaleString()} ${t('success.thb')}`}
                   </Typography>
                 </Box>
 
@@ -659,7 +671,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
                       height: '3rem'
                     }}
                   >
-                    {selectedDay.price === 0 ? 'สอบถาม' : 'จอง'}
+                    {selectedDay.price === 0 ? t('calendar.inquiry') : t('calendar.book')}
                   </Button>
                 )}
               </>
@@ -671,15 +683,15 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
         open={showInquiryAlert}
         onClose={() => setShowInquiryAlert(false)}
       >
-        <DialogTitle>แจ้งเตือน</DialogTitle>
+        <DialogTitle>{t('calendar.alertTitle')}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            โปรดสอบถามราคาก่อนทำการจอง
+            {t('calendar.alertContent')}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowInquiryAlert(false)} autoFocus>
-            ตกลง
+            {t('calendar.ok')}
           </Button>
         </DialogActions>
       </Dialog>

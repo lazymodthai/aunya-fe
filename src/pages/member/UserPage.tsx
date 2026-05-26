@@ -6,12 +6,14 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import BookingAPI, { MyBookingData } from '@apis/booking';
 import { parseLocalDate } from '@utils/date';
+import { useTranslation } from 'react-i18next';
 
 function UserPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { userData } = useSelector(userSelector);
   const [myBooking, setMyBooking] = useState<MyBookingData[]>([])
+  const { t, i18n } = useTranslation();
 
   const handleLogout = async () => {
     try {
@@ -67,16 +69,16 @@ function UserPage() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'Confirmed': return 'สำเร็จ';
-      case 'Pending': return 'รอการยืนยัน';
-      case 'Payment': return 'รอการชำระเงิน';
-      case 'Cancelled': return 'ยกเลิก';
+      case 'Confirmed': return t('booking.status.confirmed');
+      case 'Pending': return t('booking.status.pending');
+      case 'Payment': return t('booking.status.payment');
+      case 'Cancelled': return t('booking.status.cancelled');
       default: return status;
     }
   };
 
   const formatDate = (dateString: string) => {
-    return parseLocalDate(dateString).toLocaleDateString('th-TH', {
+    return parseLocalDate(dateString).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'th-TH', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -89,34 +91,34 @@ function UserPage() {
         <Box sx={{ width: '100%', maxWidth: 600, mb: 3 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h5" fontWeight={600}>
-              สวัสดี, {userData?.firstName || 'User'}
+              {t('member.welcome', { name: userData?.firstName || 'User' })}
             </Typography>
             <Button variant="outlined" color="error" size="small" onClick={handleLogout}>
-              ออกจากระบบ
+              {t('member.logout')}
             </Button>
           </Stack>
         </Box>
 
         <Box sx={{ width: '100%', maxWidth: 600 }}>
           <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            การจองของฉัน ({myBooking.length})
+            {t('member.myBookingsCount', { count: myBooking.length })}
           </Typography>
 
           {myBooking.length === 0 ? (
             <Card sx={{ borderRadius: 3 }}>
               <CardContent sx={{ textAlign: 'center', py: 4 }}>
-                <Typography color="text.secondary">ยังไม่มีการจอง</Typography>
+                <Typography color="text.secondary">{t('member.noBookingsYet')}</Typography>
               </CardContent>
             </Card>
           ) : (
             <Stack spacing={2}>
               {myBooking.map((booking) => (
                 <Card key={booking.id} sx={{ borderRadius: 3 }}>
-                  <CardContent>
+                   <CardContent>
                     <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 2 }}>
                       <Box>
                         <Typography variant="body2" color="text.secondary">
-                          รหัสการจอง
+                          {t('member.bookingCode')}
                         </Typography>
                         <Typography variant="subtitle1" fontWeight={600}>
                           {booking.refCode}
@@ -134,7 +136,7 @@ function UserPage() {
                     <Grid container spacing={2} sx={{ mt: 0.5 }}>
                       <Grid size={{ xs: 6 }}>
                         <Typography variant="body2" color="text.secondary">
-                          เช็คอิน
+                          {t('member.checkin')}
                         </Typography>
                         <Typography variant="body1" fontWeight={500}>
                           {formatDate(booking.checkinDate)}
@@ -142,7 +144,7 @@ function UserPage() {
                       </Grid>
                       <Grid size={{ xs: 6 }}>
                         <Typography variant="body2" color="text.secondary">
-                          เช็คเอาท์
+                          {t('member.checkout')}
                         </Typography>
                         <Typography variant="body1" fontWeight={500}>
                           {formatDate(booking.checkoutDate)}
@@ -150,19 +152,20 @@ function UserPage() {
                       </Grid>
                       <Grid size={{ xs: 6 }}>
                         <Typography variant="body2" color="text.secondary">
-                          ผู้ใหญ่ / เด็ก
+                          {t('member.guestsTitle')}
                         </Typography>
                         <Typography variant="body1" fontWeight={500}>
-                          {booking.guestNumber} คน{booking.childrenNumber ? ` + เด็ก ${booking.childrenNumber}` : ''}
+                          {booking.guestNumber} {t('success.peopleCount', { count: booking.guestNumber })}
+                          {booking.childrenNumber ? ` + ${t('success.childLabel')} ${booking.childrenNumber} ${t('success.peopleCount', { count: booking.childrenNumber })}` : ''}
                           {booking.additionGuestNumber ? ` (+${booking.additionGuestNumber})` : ''}
                         </Typography>
                       </Grid>
                       <Grid size={{ xs: 6 }}>
                         <Typography variant="body2" color="text.secondary">
-                          ราคารวม
+                          {t('card.totalPrice')}
                         </Typography>
                         <Typography variant="body1" fontWeight={600} color="primary">
-                          ฿{booking.totalPrice.toLocaleString()}
+                          {Number(booking.totalPrice).toLocaleString()} {t('success.thb')}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -171,7 +174,7 @@ function UserPage() {
 
                     <Box>
                       <Typography variant="body2" color="text.secondary">
-                        ผู้จอง: {booking.name} • {booking.phoneNumber}
+                        {t('member.guestNameLabel')}: {booking.name} • {booking.phoneNumber}
                       </Typography>
                     </Box>
                   </CardContent>

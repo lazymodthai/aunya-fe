@@ -46,8 +46,8 @@ export const BANK_ACCOUNT = '7790516787';
 // Contact
 // ──────────────────────────────────────────────
 export const CONTACTS = [
-  { name: 'คุณธนิก', phone: '0880844455', phoneDisplay: '088-084-4455' },
-  { name: 'คุณสุ', phone: '0831818502', phoneDisplay: '083-181-8502' },
+  { name: 'คุณธนิก', nameEn: 'Thanik', phone: '0880844455', phoneDisplay: '088-084-4455' },
+  { name: 'คุณสุ', nameEn: 'Su', phone: '0831818502', phoneDisplay: '083-181-8502' },
 ] as const;
 
 export const SOCIAL_LINKS = {

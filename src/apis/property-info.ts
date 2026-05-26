@@ -4,6 +4,7 @@ export interface PropertyInfoItem {
   id: string;
   category: 'general' | 'facilities' | 'policies';
   label: string;
+  labelEn: string | null;
   iconUrl: string | null;
   sortOrder: number;
 }

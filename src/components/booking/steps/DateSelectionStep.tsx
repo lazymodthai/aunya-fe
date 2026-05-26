@@ -5,6 +5,7 @@ import PDPADialog from '@components/PDPADialog';
 import { addDays } from 'date-fns';
 import { useState } from 'react';
 import { isValidThaiPhoneNumber } from '@utils/input';
+import { useTranslation } from 'react-i18next';
 
 interface DateSelectionStepProps {
   checkinDate: Date | null;
@@ -67,12 +68,13 @@ function DateSelectionStep({
   onPhoneNumberChange,
   onAcceptedPDPAChange,
 }: DateSelectionStepProps) {
+  const { t } = useTranslation();
   const [pdpaDialogOpen, setPdpaDialogOpen] = useState(false);
 
   return (
     <>
       <CustomDatePicker
-        label="เลือกวันที่ Check-in"
+        label={t("dateSelection.checkin", "เลือกวันที่ Check-in")}
         onChange={(e) => {
           onCheckinChange(e);
           onCheckoutChange(null);
@@ -84,7 +86,7 @@ function DateSelectionStep({
         maximumMonth={4}
       />
       <CustomDatePicker
-        label="เลือกวันที่ Check-out"
+        label={t("dateSelection.checkout", "เลือกวันที่ Check-out")}
         onChange={(e) => onCheckoutChange(e)}
         value={checkoutDate}
         sx={{ width: '100%' }}
@@ -94,7 +96,7 @@ function DateSelectionStep({
         disabledDates={disabledDates}
       />
       <NumberField
-        label="จำนวนผู้ใหญ่"
+        label={t("dateSelection.adults", "จำนวนผู้ใหญ่")}
         onChange={(e) => {
           const num = parseInt(e.target.value);
           const maxTotal = maxGuests + maxExtraBeds;
@@ -120,7 +122,7 @@ function DateSelectionStep({
         sx={{ width: '100%' }}
       />
       <NumberField
-        label="จำนวนเด็ก (ต่ำกว่า 8 ขวบ)"
+        label={t("dateSelection.children", "จำนวนเด็ก (ต่ำกว่า 8 ขวบ)")}
         onChange={(e) => {
           const num = parseInt(e.target.value);
           if (num < 0) {
@@ -137,7 +139,7 @@ function DateSelectionStep({
         sx={{ width: '100%' }}
       />
       <NumberField
-        label={`ที่นอนเสริม (ชุดละ ${additionGuestNumberPrice} บาท)`}
+        label={t("dateSelection.extraBed", { price: additionGuestNumberPrice })}
         onChange={(e) => {
           const num = parseInt(e.target.value);
           const minBeds = guestNumber && guestNumber > maxGuests ? guestNumber - maxGuests : 0;
@@ -162,7 +164,7 @@ function DateSelectionStep({
         sx={{ width: '100%' }}
       />
       <NumberField
-        label={`เพิ่มผ้าขนหนู+ผ้าเช็ดผม (ชุดละ ${additionTowelPrice} บาท)`}
+        label={t("dateSelection.extraTowel", { price: additionTowelPrice })}
         onChange={(e) => {
           const num = parseInt(e.target.value);
           if (num > maxTowels) {
@@ -176,7 +178,7 @@ function DateSelectionStep({
         sx={{ width: '100%' }}
       />
       <TextField
-        label="ชื่อผู้จอง"
+        label={t("dateSelection.customerName", "ชื่อผู้จอง")}
         variant="outlined"
         onChange={(e) => onNameChange(e.target.value)}
         value={name}
@@ -191,7 +193,7 @@ function DateSelectionStep({
         disabled={hasUserData}
       />
       <TextField
-        label="เบอร์โทรศัพท์มือถือ"
+        label={t("dateSelection.phoneNumber", "เบอร์โทรศัพท์มือถือ")}
         variant="outlined"
         onChange={(e) => {
           const value = e.target.value.replace(/\D/g, '');
@@ -210,7 +212,7 @@ function DateSelectionStep({
           },
         }}
         error={isInvalidPhoneNumber}
-        helperText={isInvalidPhoneNumber ? 'เบอร์โทรศัพท์ไม่ถูกต้อง' : ''}
+        helperText={isInvalidPhoneNumber ? t("dateSelection.invalidPhone", "เบอร์โทรศัพท์ไม่ถูกต้อง") : ''}
         disabled={hasUserData}
       />
 
@@ -224,7 +226,7 @@ function DateSelectionStep({
         }
         label={
           <Typography variant="body2">
-            ฉันได้อ่านและยอมรับ{' '}
+            {t("dateSelection.acceptPdpaText", "ฉันได้อ่านและยอมรับ")}{' '}
             <Link
               component="button"
               type="button"
@@ -234,7 +236,7 @@ function DateSelectionStep({
               }}
               sx={{ fontWeight: 500 }}
             >
-              นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+              {t("dateSelection.pdpaLink", "นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)")}
             </Link>
           </Typography>
         }

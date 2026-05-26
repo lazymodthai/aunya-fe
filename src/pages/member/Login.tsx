@@ -8,12 +8,14 @@ import { useNavigate } from 'react-router-dom';
 import { routes } from '@configs/route-config';
 import { useDispatch } from 'react-redux';
 import { setUser } from '@store/slices/userSlice';
+import { useTranslation } from 'react-i18next';
 
 const textFieldStyle: SxProps = {
   borderRadius: 2
 }
 
 function Login() {
+  const { t } = useTranslation();
   const isMobile = useMediaQuery("(max-width:800px)");
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
@@ -39,11 +41,11 @@ function Login() {
     } catch (error: any) {
       if (error.status === 400) {
         setError(true)
-        if (error.response.data.message[0] === 'email must be an email') return setErrorMessage('รูปแบบอีเมลไม่ถูกต้อง')
+        if (error.response.data.message[0] === 'email must be an email') return setErrorMessage(t('member.emailInvalid'))
       }
       if (error.status === 401) {
         setError(true)
-        return setErrorMessage('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
+        return setErrorMessage(t('member.credentialsInvalid'))
       }
     }
   }
@@ -92,7 +94,7 @@ function Login() {
               width: 120,
             }}
           >
-            เข้าสู่ระบบ
+            {t('member.login')}
           </Typography>
           <TextField
             value={email}
@@ -104,17 +106,17 @@ function Login() {
               }
               setEmail(e.target.value)
             }}
-            label={"อีเมล"}
+            label={t('member.email')}
             type="email"
             fullWidth
             slotProps={{ input: { sx: textFieldStyle } }}
             error={!isValidEmail}
-            helperText={!isValidEmail ? "รูปแบบอีเมลไม่ถูกต้อง" : ""}
+            helperText={!isValidEmail ? t('member.emailInvalid') : ""}
           />
           <TextField
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            label={"รหัสผ่าน"}
+            label={t('member.password')}
             type="password"
             fullWidth
             slotProps={{ input: { sx: textFieldStyle } }}
@@ -126,7 +128,7 @@ function Login() {
             onClick={handleLogin}
             disabled={email === '' || password === ''}
           >
-            เข้าสู่ระบบ
+            {t('member.login')}
           </Button>
           <Button
             fullWidth
@@ -134,11 +136,11 @@ function Login() {
             sx={{ mt: -2, borderRadius: 2, height: 48 }}
             onClick={() => navigate('/member/register')}
           >
-            สมัครสมาชิก
+            {t('member.register')}
           </Button>
         </Grid>}
       <Noti type={'error'} open={error} value={errorMessage} onClose={() => setError(false)} />
-      <Noti type={'success'} open={success} onClose={() => setSuccess(false)} value='เข้าสู่ระบบสำเร็จ' />
+      <Noti type={'success'} open={success} onClose={() => setSuccess(false)} value={t('member.loginSuccess')} />
     </Grid>
   );
 }

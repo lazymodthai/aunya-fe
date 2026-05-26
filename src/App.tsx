@@ -29,6 +29,7 @@ import UserPage from '@pages/member/UserPage'
 import { userSelector } from '@store/slices/userSlice'
 import { useSelector } from 'react-redux'
 import Booking from '@pages/Booking'
+import { useTranslation } from 'react-i18next'
 import.meta.env.MODE
 
 const bookingData = [
@@ -79,6 +80,7 @@ const theme = createTheme({
 });
 
 function App() {
+  const { t, i18n } = useTranslation();
   const isMobile = useMediaQuery("(max-width:800px)");
   const isDev = import.meta.env.MODE === 'development';
 
@@ -159,7 +161,7 @@ function App() {
         {isMobile && visitorCount !== null && location.pathname === '/' && (
           <Box sx={{ textAlign: 'center', py: 1, pb: 11, bgcolor: 'transparent' }}>
             <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: 11 }}>
-              ผู้เข้าชมทั้งหมด {visitorCount.toLocaleString()} ครั้ง
+              {t('footer.visitorCount', { count: visitorCount })}
             </Typography>
           </Box>
         )}
@@ -177,25 +179,24 @@ function App() {
               <Grid container spacing={4}>
                 <Grid size={4}>
                   <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                    {PROPERTY.nameThFull}
+                    {i18n.language === 'en' ? PROPERTY.nameEn : PROPERTY.nameThFull}
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1, lineHeight: 1.6 }}>
-                    {PROPERTY.nameEn}
+                    {i18n.language === 'en' ? PROPERTY.nameThFull : PROPERTY.nameEn}
                   </Typography>
                   <Typography variant="body2" sx={{ lineHeight: 1.6, opacity: 0.9 }}>
-                    บ้านพักตากอากาศที่มาพร้อมกับสิ่งอำนวยความสะดวกครบครัน
-                    เหมาะสำหรับการพักผ่อนกับครอบครัวและเพื่อนฝูง
+                    {t('footer.aboutDescription')}
                   </Typography>
                 </Grid>
 
                 <Grid size={4}>
                   <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                    ติดต่อเรา
+                    {t('footer.contactUs')}
                   </Typography>
                   {CONTACTS.map((c) => (
                     <Box key={c.phone} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                       <Box component={'img'} src={PhoneIcon} width={16} sx={{ filter: 'brightness(0) invert(1)' }} />
-                      <Typography variant="body2">{c.phoneDisplay} ({c.name})</Typography>
+                      <Typography variant="body2">{c.phoneDisplay} ({i18n.language === 'en' ? c.nameEn : c.name})</Typography>
                     </Box>
                   ))}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -206,23 +207,23 @@ function App() {
 
                 <Grid size={4}>
                   <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                    สิ่งอำนวยความสะดวกเด่น
+                    {t('footer.amenitiesTitle')}
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                     <Box component={'img'} src={PoolIcon} width={16} sx={{ filter: 'brightness(0) invert(1)' }} />
-                    <Typography variant="body2">สระว่ายน้ำระบบเกลือ</Typography>
+                    <Typography variant="body2">{t('footer.pool')}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                     <Box component={'img'} src={KaraokeIcon} width={16} sx={{ filter: 'brightness(0) invert(1)' }} />
-                    <Typography variant="body2">ลำโพง JBL Partybox</Typography>
+                    <Typography variant="body2">{t('footer.jbl')}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                     <Box component={'img'} src={TreesIcon} width={16} sx={{ filter: 'brightness(0) invert(1)' }} />
-                    <Typography variant="body2">ชั้นดาดฟ้าชมวิว 360°</Typography>
+                    <Typography variant="body2">{t('footer.rooftop')}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Box component={'img'} src={BilliardIcon} width={16} sx={{ filter: 'brightness(0) invert(1)' }} />
-                    <Typography variant="body2">โต๊ะพูล 7 ฟุต</Typography>
+                    <Typography variant="body2">{t('footer.poolTable')}</Typography>
                   </Box>
                 </Grid>
 
@@ -230,11 +231,11 @@ function App() {
 
               <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.2)', mt: 3, pt: 3, textAlign: 'center' }}>
                 <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                  © 2024 {PROPERTY.nameThFull} - All rights reserved
+                  {t('footer.allRightsReserved', { name: i18n.language === 'en' ? PROPERTY.nameEn : PROPERTY.nameThFull })}
                 </Typography>
                 {visitorCount !== null && (
                   <Typography variant="caption" sx={{ opacity: 0.5, mt: 0.5, display: 'block' }}>
-                    ผู้เข้าชมทั้งหมด {visitorCount.toLocaleString()} ครั้ง
+                    {t('footer.visitorCount', { count: visitorCount })}
                   </Typography>
                 )}
               </Box>

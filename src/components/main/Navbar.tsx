@@ -19,16 +19,17 @@ import MapIcon from '@mui/icons-material/Map';
 import BookOnlineIcon from '../../assets/icons/booking.png';
 import PersonIcon from '@mui/icons-material/Person';
 import { routes } from '../../configs/route-config';
+import { useTranslation } from "react-i18next";
 
 const menuItems = [
-  { label: "หน้าหลัก", icon: <HomeIcon />, path: routes.main },
-  { label: "ห้อง", icon: <BedroomParentIcon />, path: routes.room },
-  { label: "แผนที่", icon: <MapIcon />, path: "/map" },
-  { label: "สมาชิก", icon: <PersonIcon />, path: "/member/login" },
-  // { label: "จัดการ", icon: <PersonIcon />, path: routes.manage},
+  { key: "home", defaultLabel: "หน้าหลัก", icon: <HomeIcon />, path: routes.main },
+  { key: "room", defaultLabel: "ห้อง", icon: <BedroomParentIcon />, path: routes.room },
+  { key: "map", defaultLabel: "แผนที่", icon: <MapIcon />, path: "/map" },
+  { key: "member", defaultLabel: "สมาชิก", icon: <PersonIcon />, path: "/member/login" },
 ];
 
 const Navbar = () => {
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:800px)");
@@ -54,9 +55,7 @@ const Navbar = () => {
   };
 
   const handleBottomNavChange = (event: any, newValue: any) => {
-    // If the booking button is clicked (index 3)
     if (newValue === 3) {
-      // Handle booking action here
       console.log("Booking button clicked");
       return;
     }
@@ -69,17 +68,18 @@ const Navbar = () => {
         position="static"
         sx={{ bgcolor: "#2D336B", color: "black", boxShadow: 1 }}
       >
-        <Toolbar>
+        <Toolbar sx={{ position: "relative" }}>
           {/* Logo - always visible */}
           <Typography
             variant="h6"
             component="div"
             sx={{
               color: "#fff",
-              marginRight: "20px",
               fontWeight: "bold",
-              width: isMobile ? "100%" : "200px",
+              flexGrow: isMobile ? 1 : 0,
+              width: isMobile ? "auto" : "200px",
               textAlign: isMobile ? "center" : "left",
+              mr: isMobile ? "70px" : "20px",
             }}
           >
             Aunya Pool Villa
@@ -106,16 +106,73 @@ const Navbar = () => {
                 >
                   {menuItems.map((item) => (
                     <Tab
-                      key={item.label}
+                      key={item.key}
                       icon={item.icon}
                       iconPosition="start"
-                      label={item.label}
+                      label={t(`nav.${item.key}`, item.defaultLabel)}
                       component={Link}
                       to={item.path}
                     />
                   ))}
                 </Tabs>
               </Box>
+
+              {/* Language Selector Desktop */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  bgcolor: "rgba(255, 255, 255, 0.15)",
+                  borderRadius: "20px",
+                  padding: "2px",
+                  marginRight: "16px",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                }}
+              >
+                <Button
+                  size="small"
+                  onClick={() => i18n.changeLanguage("th")}
+                  sx={{
+                    borderRadius: "18px",
+                    bgcolor: i18n.language === "th" ? "#fff" : "transparent",
+                    color: i18n.language === "th" ? "#2D336B" : "#fff",
+                    fontWeight: "bold",
+                    minWidth: "45px",
+                    height: "28px",
+                    fontSize: "0.85rem",
+                    padding: "0 8px",
+                    minHeight: 0,
+                    lineHeight: 1,
+                    "&:hover": {
+                      bgcolor: i18n.language === "th" ? "#fff" : "rgba(255, 255, 255, 0.1)",
+                    },
+                  }}
+                >
+                  TH
+                </Button>
+                <Button
+                  size="small"
+                  onClick={() => i18n.changeLanguage("en")}
+                  sx={{
+                    borderRadius: "18px",
+                    bgcolor: i18n.language === "en" ? "#fff" : "transparent",
+                    color: i18n.language === "en" ? "#2D336B" : "#fff",
+                    fontWeight: "bold",
+                    minWidth: "45px",
+                    height: "28px",
+                    fontSize: "0.85rem",
+                    padding: "0 8px",
+                    minHeight: 0,
+                    lineHeight: 1,
+                    "&:hover": {
+                      bgcolor: i18n.language === "en" ? "#fff" : "rgba(255, 255, 255, 0.1)",
+                    },
+                  }}
+                >
+                  EN
+                </Button>
+              </Box>
+
               <Button
                 sx={{
                   bgcolor: "#FFF2F2",
@@ -128,9 +185,68 @@ const Navbar = () => {
                 }}
                 onClick={() => navigate('/booking')}
               >
-                จองเลย!
+                {t("nav.bookNow", "จองเลย!")}
               </Button>
             </>
+          )}
+
+          {/* Language Selector Mobile */}
+          {isMobile && (
+            <Box
+              sx={{
+                position: "absolute",
+                right: "16px",
+                display: "flex",
+                alignItems: "center",
+                bgcolor: "rgba(255, 255, 255, 0.15)",
+                borderRadius: "16px",
+                padding: "1px",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+              }}
+            >
+              <Button
+                size="small"
+                onClick={() => i18n.changeLanguage("th")}
+                sx={{
+                  borderRadius: "15px",
+                  bgcolor: i18n.language === "th" ? "#fff" : "transparent",
+                  color: i18n.language === "th" ? "#2D336B" : "#fff",
+                  fontWeight: "bold",
+                  minWidth: "32px",
+                  height: "22px",
+                  fontSize: "0.7rem",
+                  padding: 0,
+                  minHeight: 0,
+                  lineHeight: 1,
+                  "&:hover": {
+                    bgcolor: i18n.language === "th" ? "#fff" : "rgba(255, 255, 255, 0.1)",
+                  },
+                }}
+              >
+                TH
+              </Button>
+              <Button
+                size="small"
+                onClick={() => i18n.changeLanguage("en")}
+                sx={{
+                  borderRadius: "15px",
+                  bgcolor: i18n.language === "en" ? "#fff" : "transparent",
+                  color: i18n.language === "en" ? "#2D336B" : "#fff",
+                  fontWeight: "bold",
+                  minWidth: "32px",
+                  height: "22px",
+                  fontSize: "0.7rem",
+                  padding: 0,
+                  minHeight: 0,
+                  lineHeight: 1,
+                  "&:hover": {
+                    bgcolor: i18n.language === "en" ? "#fff" : "rgba(255, 255, 255, 0.1)",
+                  },
+                }}
+              >
+                EN
+              </Button>
+            </Box>
           )}
         </Toolbar>
       </AppBar>
@@ -155,8 +271,8 @@ const Navbar = () => {
           >
             {menuItems.map((item, index) => (
               <BottomNavigationAction
-                key={item.label}
-                label={item.label}
+                key={item.key}
+                label={t(`nav.${item.key}`, item.defaultLabel)}
                 icon={item.icon}
                 component={Link}
                 to={item.path}
@@ -169,7 +285,7 @@ const Navbar = () => {
               />
             ))}
             <BottomNavigationAction
-              label="จองเลย!"
+              label={t("nav.bookNow", "จองเลย!")}
               onClick={() => navigate('/booking')}
               icon={<Box component={'img'} src={BookOnlineIcon} width={24} />}
               sx={{
@@ -184,7 +300,6 @@ const Navbar = () => {
           </BottomNavigation>
         </Paper>
       )}
-
     </>
   );
 };

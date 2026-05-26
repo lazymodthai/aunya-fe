@@ -17,6 +17,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import PropertyInfoAPI from '@apis/property-info';
 import type { PropertyInfoItem } from '@apis/property-info';
 import { cacheDelete } from '@utils/cache';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   title: string;
@@ -27,6 +28,7 @@ interface Props {
 }
 
 function EditablePropertySection({ title, category, items, isAdmin, onItemsChange }: Props) {
+  const { i18n } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [newLabel, setNewLabel] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -225,7 +227,7 @@ function EditablePropertySection({ title, category, items, isAdmin, onItemsChang
                   color="#2D336B"
                   sx={{ flex: 1, lineHeight: 1.4 }}
                 >
-                  {item.label}
+                  {i18n.language === 'en' && item.labelEn ? item.labelEn : item.label}
                 </Typography>
               )}
 

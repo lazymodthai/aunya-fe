@@ -1,9 +1,11 @@
 import { Box, Button, Typography, useMediaQuery } from "@mui/material";
 import { Navigation } from "@mui/icons-material";
 import { LOCATION } from "@configs/app-settings";
+import { useTranslation } from "react-i18next";
 
 function Map() {
   const isMobile = useMediaQuery("(max-width:800px)");
+  const { t } = useTranslation()
 
   const handleNavigation = () => {
     const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${LOCATION.lat},${LOCATION.lng}`;
@@ -18,7 +20,7 @@ function Map() {
       justifyContent: 'center',
       alignItems: 'center'
     }}>
-      <Typography sx={{ fontSize: 24, fontWeight: 600, my: 2 }}>แผนที่</Typography>
+      <Typography sx={{ fontSize: 24, fontWeight: 600, my: 2 }}>{t("map.title", "แผนที่")}</Typography>
       <iframe
         src={LOCATION.googleMapsEmbed}
         width={isMobile ? "100%" : 600}
@@ -36,7 +38,7 @@ function Map() {
           onClick={handleNavigation}
           size="large"
         >
-          นำทางด้วย Google Maps
+          {t("map.button", "นำทางด้วย Google Maps")}
         </Button>
       </Box>
     </Box>

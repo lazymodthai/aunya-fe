@@ -1,6 +1,7 @@
 import { Box, Button, Typography } from '@mui/material'
 import { FormatDate, formatDateTime } from '@utils/date';
 import React from 'react'
+import { useTranslation } from 'react-i18next';
 
 interface BookingData {
     id: string
@@ -22,6 +23,7 @@ interface BookManagementCardProps {
 
 }
 function BookManagementCard({ bookingData, onClick }: BookManagementCardProps) {
+    const { t } = useTranslation();
     const ColorStatus = (status: string) => {
         switch (status) {
             case "Pending":
@@ -40,7 +42,7 @@ function BookManagementCard({ bookingData, onClick }: BookManagementCardProps) {
                     <Box key={index} sx={{ border: '1px solid #984444ff', p: 2, width: '350px', flexShrink: 0, flexGrow: 0 }}>
                         <Box display="flex" gap={2} mb={1}>
                             <Typography variant="body2" sx={{ fontWeight: 600, minWidth: '100px' }}>
-                                เลขอ้างอิง:
+                                {t('card.refCode')}
                             </Typography>
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                 {item.roomId}
@@ -48,7 +50,7 @@ function BookManagementCard({ bookingData, onClick }: BookManagementCardProps) {
                         </Box>
                         <Box display="flex" gap={2} mb={1}>
                             <Typography variant="body2" sx={{ fontWeight: 600, minWidth: '100px' }}>
-                                วันเข้าพัก:
+                                {t('card.checkin')}
                             </Typography>
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                 {FormatDate(item.checkinDate)}
@@ -56,7 +58,7 @@ function BookManagementCard({ bookingData, onClick }: BookManagementCardProps) {
                         </Box>
                         <Box display="flex" gap={2} mb={1}>
                             <Typography variant="body2" sx={{ fontWeight: 600, minWidth: '100px' }}>
-                                วันออกพัก:
+                                {t('card.checkout')}
                             </Typography>
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                 {FormatDate(item.checkoutDate)}
@@ -64,15 +66,15 @@ function BookManagementCard({ bookingData, onClick }: BookManagementCardProps) {
                         </Box>
                         <Box display="flex" gap={2} mb={1}>
                             <Typography variant="body2" sx={{ fontWeight: 600, minWidth: '100px' }}>
-                                ผู้ใหญ่:
+                                {t('card.adults')}
                             </Typography>
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                {item.guestNumber} คน{item.childrenNumber ? ` + เด็ก ${item.childrenNumber}` : ''}
+                                {t('card.peopleCount', { count: item.guestNumber })}{item.childrenNumber ? t('card.extraBedCount', { child: item.childrenNumber }) : ''}
                             </Typography>
                         </Box>
                         <Box display="flex" gap={2} mb={1}>
                             <Typography variant="body2" sx={{ fontWeight: 600, minWidth: '100px' }}>
-                                ผู้เข้าพักเพิ่ม:
+                                {t('card.extraGuests')}
                             </Typography>
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                 {item.additionGuestNumber ?? '-'}
@@ -80,7 +82,7 @@ function BookManagementCard({ bookingData, onClick }: BookManagementCardProps) {
                         </Box>
                         <Box display="flex" gap={2} mb={1}>
                             <Typography variant="body2" sx={{ fontWeight: 600, minWidth: '100px' }}>
-                                ชื่อ:
+                                {t('card.name')}
                             </Typography>
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                 {item.name}
@@ -88,7 +90,7 @@ function BookManagementCard({ bookingData, onClick }: BookManagementCardProps) {
                         </Box>
                         <Box display="flex" gap={2} mb={1}>
                             <Typography variant="body2" sx={{ fontWeight: 600, minWidth: '100px' }}>
-                                เบอร์โทร:
+                                {t('card.phone')}
                             </Typography>
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                 {item.phoneNumber}
@@ -96,29 +98,29 @@ function BookManagementCard({ bookingData, onClick }: BookManagementCardProps) {
                         </Box>
                         <Box display="flex" gap={2} mb={1}>
                             <Typography variant="body2" sx={{ fontWeight: 600, minWidth: '100px' }}>
-                                ราคารวม:
+                                {t('card.totalPrice')}
                             </Typography>
                             <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                {item.totalPrice} บาท
+                                {item.totalPrice} {t('success.thb')}
                             </Typography>
                         </Box>
                         <Box display="flex" gap={2} alignItems={"center"}>
                             <Typography variant="body2" sx={{ fontWeight: 600, minWidth: '100px' }}>
-                                สถานะ:
+                                {t('card.status')}
                             </Typography>
                             <Box sx={{ backgroundColor: ColorStatus(item.status),p:1, borderRadius: '24px' }} display={"flex"} alignItems={"center"} justifyContent={"center"}>
                                 {item.status}
                             </Box>
                             {item.status === "Pending" && (
                                 <Button variant="contained" color="primary" onClick={() => onClick(item.id)} sx={{ borderRadius: '24px' }}>
-                                    confirm
+                                    {t('booking.buttons.confirm')}
                                 </Button>
                             )}
                         </Box>
                         {item.remark && (
                             <Box display="flex" gap={2} mt={1}>
                                 <Typography variant="body2" sx={{ fontWeight: 600, minWidth: '100px', color: 'text.secondary' }}>
-                                    หมายเหตุ:
+                                    {t('card.remark')}
                                 </Typography>
                                 <Typography variant="body2" sx={{ fontWeight: 600, color: 'error.main' }}>
                                     {item.remark}

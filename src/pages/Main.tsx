@@ -20,6 +20,7 @@ import {
 } from "@configs/app-settings"
 import { useSelector } from "react-redux"
 import { userSelector } from "@store/slices/userSlice"
+import { useTranslation } from "react-i18next"
 
 interface BookingData {
   date: string;
@@ -30,6 +31,7 @@ interface BookingData {
 }
 
 function Main() {
+  const { t, i18n } = useTranslation()
   const isMobile = useMediaQuery("(max-width:800px)")
   const { userData } = useSelector(userSelector)
   const isAdmin = userData?.isAdmin ?? false
@@ -120,7 +122,7 @@ function Main() {
                   variant="body2"
                   sx={{ fontWeight: 500, color: "#77B3D4" }}
                 >
-                  {!isMobile ? c.phoneDisplay : c.name}
+                  {!isMobile ? c.phoneDisplay : (i18n.language === 'en' ? c.nameEn : c.name)}
                 </Typography>
               </Box>
             ))}
@@ -178,7 +180,7 @@ function Main() {
             padding={2}
           >
             <EditablePropertySection
-              title="ข้อมูลทั่วไป"
+              title={t("main.generalInfo", "ข้อมูลทั่วไป")}
               category="general"
               items={generalItems}
               isAdmin={isAdmin}
@@ -193,7 +195,7 @@ function Main() {
             padding={2}
           >
             <Grid size={12} mb={2}>
-              <Typography variant="h5">ปฏิทินวันว่าง</Typography>
+              <Typography variant="h5">{t("main.availabilityCalendar", "ปฏิทินวันว่าง")}</Typography>
             </Grid>
             <BookingCalendar
               bookingData={bookingData}
@@ -212,7 +214,7 @@ function Main() {
             padding={2}
           >
             <EditablePropertySection
-              title="สิ่งอำนวยความสะดวก"
+              title={t("main.facilities", "สิ่งอำนวยความสะดวก")}
               category="facilities"
               items={facilityItems}
               isAdmin={isAdmin}
@@ -221,7 +223,7 @@ function Main() {
 
             <Box mt={4}>
               <EditablePropertySection
-                title="ข้อกำหนดการเข้าพัก"
+                title={t("main.policies", "ข้อกำหนดการเข้าพัก")}
                 category="policies"
                 items={policyItems}
                 isAdmin={isAdmin}

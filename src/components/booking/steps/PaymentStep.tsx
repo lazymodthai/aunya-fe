@@ -5,6 +5,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import QRPayment from '@components/booking/QRPayment';
 import { useClipboard } from 'use-clipboard-copy';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface PaymentStepProps {
   totalRoomPrice: number;
@@ -41,6 +42,7 @@ function PaymentStep({
   paidAmount,
   remainingAmount,
 }: PaymentStepProps) {
+  const { t, i18n } = useTranslation();
   const [copying, setCopying] = useState(false);
   const clipboard = useClipboard();
 
@@ -52,47 +54,47 @@ function PaymentStep({
 
   return (
     <>
-      <Typography sx={{ fontSize: 18, fontWeight: 600 }}>ยอดชำระของท่าน</Typography>
+      <Typography sx={{ fontSize: 18, fontWeight: 600 }}>{t("payment.yourPayment", "ยอดชำระของท่าน")}</Typography>
 
       <Typography>
-        ค่าห้องพัก {totalRoomPrice.toLocaleString('th-TH')} บาท
+        {t("payment.roomChargeDisplay", { price: totalRoomPrice.toLocaleString() })}
       </Typography>
       <Typography>
-        {`เสริมที่นอน ${((additionGuestNumber || 0) * additionGuestNumberPrice).toLocaleString('th-TH')} บาท`}
+        {t("payment.extraBedChargeDisplay", { price: ((additionGuestNumber || 0) * additionGuestNumberPrice).toLocaleString() })}
       </Typography>
       <Typography>
-        {`เซ็ตผ้าขนหนู+ผ้าเช็ดผม(เพิ่มเติม) ${((additionTowel || 0) * additionTowelPrice).toLocaleString('th-TH')} บาท`}
+        {t("payment.extraTowelChargeDisplay", { price: ((additionTowel || 0) * additionTowelPrice).toLocaleString() })}
       </Typography>
       <Typography>
-        {`ค่ามัดจำ ${depositPrice.toLocaleString('th-TH')} บาท `}
-        <span style={{ color: '#939393ff' }}>(คืนหลัง Check-out)</span>
+        {t("payment.depositChargeDisplay", { price: depositPrice.toLocaleString() })}{' '}
+        <span style={{ color: '#939393ff' }}>{t("payment.depositRefundable", "(คืนหลัง Check-out)")}</span>
       </Typography>
 
       {/* Discount */}
       {discountAmount > 0 && (
         <Typography sx={{ color: '#15a13aff', fontWeight: 600 }}>
-          ส่วนลด: -{discountAmount.toLocaleString('th-TH')} บาท
+          {t("payment.discountLabel", "ส่วนลด")}: -{discountAmount.toLocaleString()} {t("success.thb")}
         </Typography>
       )}
 
       <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
-        {isOnlyDeposit ? 'ยอดชำระครั้งนี้ (มัดจำ):' : 'รวมยอดชำระทั้งสิ้น:'}
+        {isOnlyDeposit ? t("payment.paymentDueDeposit", "ยอดชำระครั้งนี้ (มัดจำ):") : t("payment.paymentDueTotal", "รวมยอดชำระทั้งสิ้น:")}
       </Typography>
       <Typography sx={{ fontSize: 24, fontWeight: 600, color: '#15a13aff', mt: -2 }}>
-        {paidAmount.toLocaleString('th-TH', {
+        {paidAmount.toLocaleString(i18n.language === 'en' ? 'en-US' : 'th-TH', {
           style: 'currency',
           currency: 'THB',
         })}
       </Typography>
       {isOnlyDeposit && remainingAmount > 0 && (
         <Typography sx={{ fontSize: 16, fontWeight: 600, color: '#ed6c02' }}>
-          ยอดค้างชำระ (จ่ายตอน Check-in): {remainingAmount.toLocaleString('th-TH', { style: 'currency', currency: 'THB' })}
+          {t("payment.remainingAmountDisplay", { price: remainingAmount.toLocaleString() })}
         </Typography>
       )}
       <Divider />
-      <Typography sx={{ fontSize: 18, fontWeight: 600 }}>ช่องทางชำระเงิน:</Typography>
+      <Typography sx={{ fontSize: 18, fontWeight: 600 }}>{t("payment.paymentChannel", "ช่องทางชำระเงิน:")}</Typography>
       <Typography sx={{ alignItems: 'center', display: 'flex', gap: 1 }}>
-        ธนาคาร:{' '}
+        {t("payment.bank", "ธนาคาร:")}{' '}
         <Box
           component={'img'}
           src={
@@ -103,10 +105,10 @@ function PaymentStep({
         <span style={{ fontWeight: 600, color: '#00A3E3' }}>{bankName}</span>
       </Typography>
       <Typography sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        ชื่อบัญชี: <span style={{ fontWeight: 600, color: '#00A3E3' }}>{QRname}</span>
+        {t("payment.accountName", "ชื่อบัญชี:")} <span style={{ fontWeight: 600, color: '#00A3E3' }}>{QRname}</span>
       </Typography>
       <Typography sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        หมายเลขบัญชี:{' '}
+        {t("payment.accountNumber", "หมายเลขบัญชี:")}{' '}
         <span style={{ fontWeight: 600, color: '#00A3E3' }}>{formatAccountNumber(bankAccount)}</span>
         <Box
           onClick={handleCopy}
@@ -130,10 +132,10 @@ function PaymentStep({
           ) : (
             <ContentCopyIcon sx={{ width: 18, height: 18, color: '#7d7d7dff' }} />
           )}
-          {copying ? `คัดลอกแล้ว` : `คัดลอก`}
+          {copying ? t("payment.copied", "คัดลอกแล้ว") : t("payment.copy", "คัดลอก")}
         </Box>
       </Typography>
-      <Typography sx={{ fontSize: 18, fontWeight: 600 }}>หรือโอนผ่าน QR Payment:</Typography>
+      <Typography sx={{ fontSize: 18, fontWeight: 600 }}>{t("payment.qrPayment", "หรือโอนผ่าน QR Payment:")}</Typography>
       <Box
         sx={{
           display: 'flex',

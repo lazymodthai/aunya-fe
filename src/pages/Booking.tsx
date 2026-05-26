@@ -45,6 +45,8 @@ import SlipUploadStep from '@components/booking/steps/SlipUploadStep';
 import SuccessStep from '@components/booking/steps/SuccessStep';
 import { BookingStatus } from '@constants/booking.enum';
 
+import { useTranslation } from 'react-i18next';
+
 type Props = {
   bookingData: any;
 };
@@ -57,6 +59,7 @@ const bankAccount = BANK_ACCOUNT;
 const roomId = ROOM_ID;
 
 function Booking(props: Props) {
+  const { t } = useTranslation();
   const isMobile = useMediaQuery('(max-width:800px)');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -106,7 +109,12 @@ function Booking(props: Props) {
   const [actualDeposit, setActualDeposit] = useState<number>(depositPrice);
   const [acceptedPDPA, setAcceptedPDPA] = useState<boolean>(false);
 
-  const steps = ['เลือกวันเข้าพัก', 'ยืนยันรายการ', 'ชำระเงิน', 'ใบเสร็จ'];
+  const steps = [
+    t('booking.steps.dates', 'เลือกวันเข้าพัก'),
+    t('booking.steps.confirm', 'ยืนยันรายการ'),
+    t('booking.steps.payment', 'ชำระเงิน'),
+    t('booking.steps.receipt', 'ใบเสร็จ'),
+  ];
 
   const isStepSkipped = (step: number) => skipped.has(step);
 
@@ -417,7 +425,7 @@ function Booking(props: Props) {
     <Grid container direction={'column'} gap={2} width={isMobile ? '100%' : 600}>
       {loading && <Loading />}
       <Grid textAlign={'center'}>
-        <Typography sx={{ fontSize: 24 }}>จองห้องพัก</Typography>
+        <Typography sx={{ fontSize: 24 }}>{t("booking.title", "จองห้องพัก")}</Typography>
       </Grid>
       <Stepper activeStep={step} sx={{ mt: 2 }}>
         {steps.map((label, index) => {
@@ -458,7 +466,7 @@ function Booking(props: Props) {
               startIcon={<ArrowBackIosIcon />}
               sx={{ height: 50, borderRadius: 2 }}
             >
-              ย้อนกลับ
+              {t("booking.buttons.back", "ย้อนกลับ")}
             </Button>
           </Grid>
         )}
@@ -474,7 +482,11 @@ function Booking(props: Props) {
               (!checkinDate || !checkoutDate || !guestNumber || !name || !phoneNumber || isInvalidPhoneNumber || !acceptedPDPA)
             }
           >
-            {step === 4 ? 'กลับหน้าหลัก' : step === steps.length - 1 ? 'ยืนยัน' : 'ถัดไป'}
+            {step === 4
+              ? t("booking.buttons.backToHome", "กลับหน้าหลัก")
+              : step === steps.length - 1
+              ? t("booking.buttons.confirm", "ยืนยัน")
+              : t("booking.buttons.next", "ถัดไป")}
           </Button>
         </Grid>
       </Grid>
