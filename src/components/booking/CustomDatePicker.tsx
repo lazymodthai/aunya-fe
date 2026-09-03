@@ -22,6 +22,7 @@ type Props = {
   disabledDates?: string[] // format: YYYY-MM-DD
   checkInDate?: Date | null
   maximumMonth?: number
+  size?: 'small' | 'medium'
 }
 
 const CustomDatePicker = (props: Props) => {
@@ -205,6 +206,7 @@ const CustomDatePicker = (props: Props) => {
         }}
         slotProps={{
           textField: {
+            size: props.size,
             onClick: () => setOpen(true),
             inputProps: { readOnly: true, },
             onFocus: (e: any) => { e.target.blur(); setOpen(true); },

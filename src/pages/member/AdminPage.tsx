@@ -202,16 +202,16 @@ function AdminPage() {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', width: '100%' }}>
       {/* Header */}
-      <Box sx={{ bgcolor: 'white', borderBottom: '1px solid #e0e0e0', px: 2, py: 1.5 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" maxWidth={800} mx="auto">
-          <Typography variant="h6" fontWeight={600}>
+      <Box sx={{ bgcolor: 'white', borderBottom: '1px solid #e0e0e0', px: { xs: 2, sm: 3 }, py: 1.5 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" maxWidth={1040} mx="auto">
+          <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
             Admin Panel
           </Typography>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Typography variant="body2" color="text.secondary">
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <Typography variant="body2" color="text.secondary" fontWeight={500}>
               {userData?.firstName}
             </Typography>
-            <Button variant="outlined" color="error" size="small" onClick={handleLogout}>
+            <Button variant="outlined" color="error" size="small" onClick={handleLogout} sx={{ borderRadius: 2 }}>
               ออกจากระบบ
             </Button>
           </Stack>
@@ -227,7 +227,7 @@ function AdminPage() {
           position: 'sticky',
           top: { xs: '56px', sm: '64px' },
           zIndex: 1000,
-          boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
         }}
       >
         <Tabs
@@ -237,7 +237,7 @@ function AdminPage() {
           scrollButtons={false}
           allowScrollButtonsMobile
           sx={{
-            maxWidth: 800,
+            maxWidth: 1040,
             mx: 'auto',
             '& .MuiTabs-scroller': {
               '&::-webkit-scrollbar': { display: 'none' },
@@ -266,8 +266,8 @@ function AdminPage() {
       )}
 
       {/* Content */}
-      <Box sx={{ py: 3, px: 2 }}>
-        <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+      <Box sx={{ pt: 3, pb: { xs: 3, sm: 6 }, px: { xs: 1.5, sm: 3 } }}>
+        <Box sx={{ maxWidth: 1040, mx: 'auto' }}>
           {/* Tab 0: Summary */}
           {activeTab === 0 && (
             <SummaryTab />

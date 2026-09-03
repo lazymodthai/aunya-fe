@@ -109,6 +109,8 @@ function App() {
     trackVisit();
   }, []);
 
+  const isAdminPage = location.pathname.startsWith('/member/admin') || location.pathname.startsWith('/member/user');
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -117,7 +119,7 @@ function App() {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: 'rgba(255, 255, 255, 0.87)'
+        bgcolor: '#f5f5f5'
       }}>
         <Box sx={{
           position: 'fixed',
@@ -130,13 +132,13 @@ function App() {
         </Box>
         <Box sx={{
           flex: 1,
-          padding: padding,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'flex-start',
-          pt: paddingTop,
-          pb: paddingBottom,
           width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          pt: isAdminPage ? { xs: '56px', sm: '64px' } : { xs: '72px', sm: '88px' },
+          px: isAdminPage ? 0 : { xs: 1.5, sm: 2.5 },
+          pb: isAdminPage ? { xs: 8, sm: 0 } : { xs: 8, sm: 4 },
           boxSizing: 'border-box',
         }}>
           <Routes>
