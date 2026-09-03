@@ -169,9 +169,8 @@ function UserPage() {
                           {t('member.guestsTitle')}
                         </Typography>
                         <Typography variant="body1" fontWeight={500}>
-                          {booking.guestNumber} {t('success.peopleCount', { count: booking.guestNumber })}
-                          {booking.childrenNumber ? ` + ${t('success.childLabel')} ${booking.childrenNumber} ${t('success.peopleCount', { count: booking.childrenNumber })}` : ''}
-                          {booking.additionGuestNumber ? ` (+${booking.additionGuestNumber})` : ''}
+                          {t('success.peopleCount', { count: booking.guestNumber })}
+                          {booking.childrenNumber ? ` + ${t('success.childLabel')} ${t('success.peopleCount', { count: booking.childrenNumber })}` : ''}
                         </Typography>
                       </Grid>
                       <Grid size={{ xs: 6 }}>

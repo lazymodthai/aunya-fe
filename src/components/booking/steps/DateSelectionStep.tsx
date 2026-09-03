@@ -13,10 +13,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import CustomDatePicker from '@components/booking/CustomDatePicker';
+import CustomDateRangePicker from '@components/booking/CustomDateRangePicker';
 import NumberField from '@components/booking/NumberField';
 import PDPADialog from '@components/PDPADialog';
-import { addDays } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { COUNTRY_CODES, isValidPhoneNumber } from '@utils/input';
 import { useTranslation } from 'react-i18next';
@@ -150,39 +149,24 @@ function DateSelectionStep({
           <span>📅</span> {t("booking.steps.dates", "เลือกวันเข้าพัก")}
           {nights > 0 && (
             <Chip
-              label={`${nights} ${t("success.nightsCount", { count: nights })}`}
+              label={t("success.nightsCount", { count: nights })}
               size="small"
-              sx={{ bgcolor: 'rgba(176, 48, 82, 0.1)', color: '#B03052', fontWeight: 600, ml: 'auto' }}
+              sx={{ bgcolor: 'rgba(176, 48, 82, 0.1)', color: '#B03052', fontWeight: 700, ml: 'auto' }}
             />
           )}
         </Typography>
 
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <CustomDatePicker
-              label={t("dateSelection.checkin", "เลือกวันที่ Check-in")}
-              onChange={(e) => {
-                onCheckinChange(e);
-                onCheckoutChange(null);
-              }}
-              value={checkinDate}
-              sx={{ width: '100%' }}
-              disabledDates={disabledDates}
-              maximumMonth={advanceBookingMonths || 6}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <CustomDatePicker
-              label={t("dateSelection.checkout", "เลือกวันที่ Check-out")}
-              onChange={(e) => onCheckoutChange(e)}
-              value={checkoutDate}
-              sx={{ width: '100%' }}
-              minDate={addDays(checkinDate || new Date(), 1)}
-              checkInDate={checkinDate}
-              disabledDates={disabledDates}
-            />
-          </Grid>
-        </Grid>
+        <CustomDateRangePicker
+          checkinDate={checkinDate}
+          checkoutDate={checkoutDate}
+          onChange={(checkin, checkout) => {
+            onCheckinChange(checkin);
+            onCheckoutChange(checkout);
+          }}
+          disabledDates={disabledDates}
+          disabledDateRange={disabledDateRange}
+          maximumMonth={advanceBookingMonths || 6}
+        />
       </Box>
 
       {/* Section 2: Guests & Add-ons */}
@@ -396,10 +380,10 @@ function DateSelectionStep({
       {/* Section 4: PDPA Acceptance */}
       <Box
         sx={{
-          p: 1.5,
+          p: { xs: 1.2, sm: 1.5 },
           bgcolor: '#f8fafc',
           borderRadius: 3,
-          border: '1px solid #f1f5f9',
+          border: '1px solid #e2e8f0',
         }}
       >
         <FormControlLabel
@@ -407,29 +391,58 @@ function DateSelectionStep({
             <Checkbox
               checked={acceptedPDPA}
               onChange={(e) => onAcceptedPDPAChange(e.target.checked)}
-              color="primary"
+              sx={{
+                color: '#cbd5e1',
+                '&.Mui-checked': { color: '#B03052' },
+                p: 0.5,
+                mr: 0.8,
+              }}
             />
           }
           label={
-            <Typography variant="body2" color="#475569">
+            <Typography
+              component="span"
+              variant="body2"
+              sx={{
+                fontSize: { xs: '0.82rem', sm: '0.88rem' },
+                color: '#475569',
+                lineHeight: 1.45,
+                display: 'inline',
+              }}
+            >
               {t("dateSelection.acceptPdpaText", "ฉันได้อ่านและยอมรับ")}{' '}
               <Link
                 component="button"
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   setPdpaDialogOpen(true);
                 }}
-                sx={{ fontWeight: 600, color: '#B03052' }}
+                sx={{
+                  fontWeight: 600,
+                  color: '#B03052',
+                  fontSize: 'inherit',
+                  display: 'inline',
+                  textAlign: 'left',
+                  verticalAlign: 'baseline',
+                  p: 0,
+                  m: 0,
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  '&:hover': { color: '#8e2340' },
+                }}
               >
                 {t("dateSelection.pdpaLink", "นโยบายคุ้มครองข้อมูลส่วนบุคคล (PDPA)")}
               </Link>
             </Typography>
           }
           sx={{
-            alignItems: 'flex-start',
+            alignItems: 'center',
             m: 0,
-            '& .MuiCheckbox-root': { pt: 0, pr: 1 },
+            width: '100%',
           }}
         />
       </Box>

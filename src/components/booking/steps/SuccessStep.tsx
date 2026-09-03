@@ -3,6 +3,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { FormatDate } from '@utils/date';
+import { formatDisplayPhoneNumber } from '@utils/input';
 import { CONTACTS, PROPERTY } from '@configs/app-settings';
 import { useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
@@ -127,45 +128,59 @@ function SuccessStep({
           {t('success.thankYou')}
         </Typography>
 
-        {/* Reference Code Card */}
+        {/* Reference Code Card (1-Click Copy) */}
         <Box
+          onClick={handleCopyRef}
           sx={{
             width: '100%',
-            bgcolor: 'rgba(176, 48, 82, 0.04)',
-            p: 2,
+            bgcolor: copied ? '#f0fdf4' : 'rgba(176, 48, 82, 0.04)',
+            py: 2,
+            px: 2.5,
             borderRadius: 3,
-            border: '2px dashed #B03052',
+            border: '2px dashed',
+            borderColor: copied ? '#16a34a' : '#B03052',
             mb: 2.5,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            cursor: 'pointer',
+            textAlign: 'center',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              bgcolor: copied ? '#f0fdf4' : 'rgba(176, 48, 82, 0.08)',
+              transform: 'translateY(-1px)',
+              boxShadow: '0 4px 12px rgba(176, 48, 82, 0.12)',
+            },
           }}
         >
-          <Box sx={{ textAlign: 'left' }}>
-            <Typography variant="caption" color="text.secondary" display="block">
-              {t('success.refCode')}
-            </Typography>
-            <Typography variant="h6" fontWeight={800} color="#B03052" letterSpacing={1.5}>
+          <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" sx={{ mb: 0.5 }}>
+            {t('success.refCode')}
+          </Typography>
+          <Stack direction="row" justifyContent="center" alignItems="center" spacing={1}>
+            <Typography
+              variant="h5"
+              fontWeight={800}
+              sx={{
+                color: copied ? '#15803d' : '#B03052',
+                letterSpacing: 1.5,
+                fontFamily: 'monospace',
+                fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                userSelect: 'all',
+              }}
+            >
               {refCode}
             </Typography>
-          </Box>
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={handleCopyRef}
-            startIcon={<ContentCopyIcon sx={{ fontSize: 14 }} />}
+            <ContentCopyIcon sx={{ fontSize: 18, color: copied ? '#15803d' : '#B03052', opacity: 0.7 }} />
+          </Stack>
+          <Typography
+            variant="caption"
             sx={{
-              borderRadius: 2,
-              borderColor: '#B03052',
-              color: '#B03052',
-              fontSize: '0.75rem',
+              display: 'block',
+              mt: 0.5,
+              fontSize: '0.72rem',
               fontWeight: 600,
-              py: 0.5,
-              px: 1.5,
+              color: copied ? '#16a34a' : '#94a3b8',
             }}
           >
-            {copied ? t('payment.copied', 'คัดลอกแล้ว') : t('payment.copy', 'คัดลอก')}
-          </Button>
+            {copied ? `✨ ${t('payment.copied', 'คัดลอกแล้ว')}` : `(แตะที่รหัสเพื่อคัดลอก / Click to copy)`}
+          </Typography>
         </Box>
 
         {/* Booking Details Card */}
@@ -181,7 +196,7 @@ function SuccessStep({
             </Grid>
             <Grid size={{ xs: 6, sm: 6 }}>
               <Typography variant="caption" color="text.secondary">{t('dateSelection.phoneNumber')}</Typography>
-              <Typography variant="body2" fontWeight={600} color="#1e293b">{phoneNumber}</Typography>
+              <Typography variant="body2" fontWeight={600} color="#1e293b">{formatDisplayPhoneNumber(phoneNumber)}</Typography>
             </Grid>
 
             <Grid size={{ xs: 6, sm: 6 }}>
@@ -200,8 +215,8 @@ function SuccessStep({
             <Grid size={{ xs: 6, sm: 6 }}>
               <Typography variant="caption" color="text.secondary">{t('success.guestLabel')}</Typography>
               <Typography variant="body2" fontWeight={600}>
-                {guestNumber} {t('success.peopleCount', { count: guestNumber })}
-                {childrenNumber ? ` + ${t('success.childLabel')} ${childrenNumber}` : ''}
+                {t('success.peopleCount', { count: guestNumber })}
+                {childrenNumber ? ` + ${t('success.childLabel')} ${t('success.peopleCount', { count: childrenNumber })}` : ''}
               </Typography>
             </Grid>
           </Grid>
@@ -278,10 +293,10 @@ function SuccessStep({
         </Box>
 
         {/* Contact info reminder */}
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.6 }}>
-          📌 {t('success.keepRefCode')}
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.6, mt: 1 }}>
+          {t('success.keepRefCode')}
           <br />
-          📞 {t('success.contactIfDoubt')}{CONTACTS[0].phoneDisplay} ({i18n.language === 'en' ? CONTACTS[0].nameEn : CONTACTS[0].name})
+          {t('success.contactIfDoubt')}{CONTACTS[0].phoneDisplay} ({i18n.language === 'en' ? CONTACTS[0].nameEn : CONTACTS[0].name})
         </Typography>
       </Box>
 

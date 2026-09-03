@@ -28,6 +28,38 @@ export const formatPhoneNumber = (phoneNumber:string) => {
   return phoneNumber.slice(0, 2) + '*-***' + phoneNumber.slice(6);
 }
 
+export const formatDisplayPhoneNumber = (phone: string): string => {
+  if (!phone) return '';
+  const cleaned = phone.trim();
+
+  // If Thai number with +66 (e.g. +66880844455 or +66 88 084 4455)
+  if (cleaned.startsWith('+66')) {
+    const raw = cleaned.replace('+66', '').replace(/\D/g, '');
+    const local = raw.startsWith('0') ? raw : `0${raw}`;
+    if (local.length === 10) {
+      return `${local.slice(0, 3)}-${local.slice(3, 6)}-${local.slice(6)}`;
+    }
+    if (local.length === 9) {
+      return `${local.slice(0, 2)}-${local.slice(2, 5)}-${local.slice(5)}`;
+    }
+    return local;
+  }
+
+  // If Thai local 10 digits (e.g. 0640576557 or 0880844455)
+  const digitsOnly = cleaned.replace(/\D/g, '');
+  if (/^0\d{9}$/.test(digitsOnly)) {
+    return `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6)}`;
+  }
+
+  // If Thai local 9 digits (e.g. 021234567)
+  if (/^0\d{8}$/.test(digitsOnly)) {
+    return `${digitsOnly.slice(0, 2)}-${digitsOnly.slice(2, 5)}-${digitsOnly.slice(5)}`;
+  }
+
+  // If international number (starts with +)
+  return cleaned;
+};
+
 export interface CountryCodeItem {
   code: string;
   country: string;

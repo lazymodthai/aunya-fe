@@ -7,11 +7,13 @@ import {
   Divider,
   FormControlLabel,
   Grid,
+  Paper,
   Stack,
   TextField,
   Typography,
 } from '@mui/material';
 import { FormatDate } from '@utils/date';
+import { formatDisplayPhoneNumber } from '@utils/input';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import PricesAPI, { DiscountCode, PriceDetail } from '@apis/prices';
@@ -222,17 +224,23 @@ function ConfirmationStep({
           <Grid size={{ xs: 6, sm: 6 }}>
             <Typography variant="caption" color="text.secondary">{t("member.guestsTitle", "ผู้เข้าพัก")}</Typography>
             <Typography variant="body2" fontWeight={600} color="#1e293b">
-              {guestNumber} {t("success.peopleCount", { count: guestNumber })}
-              {childrenNumber ? ` + ${t("success.childLabel")} ${childrenNumber}` : ''}
-              {additionGuestNumber ? ` (+${additionGuestNumber})` : ''}
+              {t("success.peopleCount", { count: guestNumber })}
+              {childrenNumber ? ` + ${t("success.childLabel")} ${t("success.peopleCount", { count: childrenNumber })}` : ''}
             </Typography>
           </Grid>
 
           <Grid size={12}>
-            <Divider sx={{ my: 0.5, borderColor: '#e2e8f0' }} />
-            <Typography variant="caption" color="text.secondary" display="block">
-              {t("dateSelection.customerName")}: <span style={{ fontWeight: 600, color: '#1e293b' }}>{name}</span> • {t("dateSelection.phoneNumber")}: <span style={{ fontWeight: 600, color: '#1e293b' }}>{phoneNumber}</span>
-            </Typography>
+            <Divider sx={{ my: 0.8, borderColor: '#e2e8f0' }} />
+            <Stack spacing={0.8} sx={{ mt: 0.5 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="caption" color="text.secondary">{t("dateSelection.customerName")}</Typography>
+                <Typography variant="body2" fontWeight={700} color="#1e293b">{name}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="caption" color="text.secondary">{t("dateSelection.phoneNumber")}</Typography>
+                <Typography variant="body2" fontWeight={700} color="#1e293b">{formatDisplayPhoneNumber(phoneNumber)}</Typography>
+              </Box>
+            </Stack>
           </Grid>
         </Grid>
       </Box>
@@ -398,24 +406,46 @@ function ConfirmationStep({
           <Divider sx={{ my: 1 }} />
 
           {/* Amount Due Calculation */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 1 }}>
             <Typography variant="subtitle1" fontWeight={700} color="#1e293b">
               {isOnlyDeposit ? t("confirmation.depositAmount", "ยอดชำระตอนนี้ (มัดจำ)") : t("confirmation.totalAmount", "ยอดรวมทั้งสิ้น")}
             </Typography>
-            <Typography variant="h6" fontWeight={700} color="#15a13aff">
+            <Typography variant="h6" fontWeight={800} color="#15a13aff" sx={{ fontSize: { xs: '1.25rem', sm: '1.35rem' } }}>
               {(isOnlyDeposit ? actualDeposit : totalPrice).toLocaleString('th-TH', { style: 'currency', currency: 'THB' })}
             </Typography>
           </Box>
 
           {isOnlyDeposit && (
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: '#fffbeb', p: 1.5, borderRadius: 2, border: '1px solid #fef3c7' }}>
-              <Typography variant="caption" fontWeight={600} color="#b45309">
-                {t("confirmation.remainingAmount", "ยอดค้างชำระ (จ่ายตอน Check-in)")}
-              </Typography>
-              <Typography variant="body2" fontWeight={700} color="#b45309">
-                {(totalPrice - actualDeposit).toLocaleString('th-TH')} {t("success.thb")}
-              </Typography>
-            </Box>
+            <Paper
+              variant="outlined"
+              sx={{
+                bgcolor: '#fffbeb',
+                py: 1.2,
+                px: { xs: 1.5, sm: 2 },
+                borderRadius: 2.5,
+                borderColor: '#fde68a',
+                mt: 0.5,
+              }}
+            >
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  color="#b45309"
+                  sx={{ fontSize: { xs: '0.82rem', sm: '0.88rem' }, pr: 1 }}
+                >
+                  {t("confirmation.remainingAmount", "ยอดค้างชำระ (จ่ายตอน Check-in)")}
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  fontWeight={800}
+                  color="#b45309"
+                  sx={{ fontSize: { xs: '0.95rem', sm: '1.05rem' }, whiteSpace: 'nowrap' }}
+                >
+                  {(totalPrice - actualDeposit).toLocaleString('th-TH')} {t("success.thb")}
+                </Typography>
+              </Box>
+            </Paper>
           )}
         </Stack>
       </Box>
