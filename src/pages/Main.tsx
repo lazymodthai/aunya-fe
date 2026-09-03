@@ -40,13 +40,13 @@ function Main() {
   const [generalItems, setGeneralItems] = useState<PropertyInfoItem[]>([])
   const [facilityItems, setFacilityItems] = useState<PropertyInfoItem[]>([])
   const [policyItems, setPolicyItems] = useState<PropertyInfoItem[]>([])
+  const [advanceBookingMonths, setAdvanceBookingMonths] = useState(6)
 
-  const getPriceByMonth = async (month: number) => {
-    if (month < 0 || month > 11) return;
+  const getPriceByMonth = async (month: number, year: number = new Date().getFullYear()) => {
     try {
       const { data } = await PricesAPI.getPrices({
         month: month + 1,
-        year: new Date().getFullYear(),
+        year: year,
         roomId: ROOM_ID
       });
       setBookingData(data.prices);
@@ -56,8 +56,10 @@ function Main() {
   };
 
   useEffect(() => {
-    getPriceByMonth(new Date().getMonth())
-    fetchAppSettings()
+    getPriceByMonth(new Date().getMonth(), new Date().getFullYear())
+    fetchAppSettings().then((s) => {
+      setAdvanceBookingMonths(s.advanceBookingMonths);
+    })
     loadPropertyInfo()
   }, [])
 
@@ -199,7 +201,8 @@ function Main() {
             </Grid>
             <BookingCalendar
               bookingData={bookingData}
-              onChangeMonth={(val) => getPriceByMonth(val)}
+              onChangeMonth={(month, year) => getPriceByMonth(month, year)}
+              futureMonthRange={advanceBookingMonths}
               disablePast
             />
           </Grid>

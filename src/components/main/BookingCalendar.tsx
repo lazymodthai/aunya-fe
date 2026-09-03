@@ -35,7 +35,7 @@ export interface BookingData {
 // Props for the BookingCalendar component
 interface BookingCalendarProps {
   bookingData: BookingData[];
-  onChangeMonth: (val: number) => void;
+  onChangeMonth: (month: number, year?: number) => void;
   /** Initial month to display (0-11), defaults to current month */
   startMonth?: number;
   /** Initial year to display, defaults to current year */
@@ -242,16 +242,18 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
 
   // Handle month navigation
   const handlePreviousMonth = () => {
-    onChangeMonth(currentDate.getMonth() - 1);
     if (canGoToPreviousMonth()) {
-      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+      const prevDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+      setCurrentDate(prevDate);
+      onChangeMonth(prevDate.getMonth(), prevDate.getFullYear());
     }
   };
 
   const handleNextMonth = () => {
-    onChangeMonth(currentDate.getMonth() + 1);
     if (canGoToNextMonth()) {
-      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+      const nextDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+      setCurrentDate(nextDate);
+      onChangeMonth(nextDate.getMonth(), nextDate.getFullYear());
     }
   };
 

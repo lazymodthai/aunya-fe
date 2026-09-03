@@ -17,6 +17,7 @@ export interface BookingPayload {
   customerId?: string;
   discount?: number;
   isOnlyDeposit?: boolean;
+  depositAmount?: number;
   paidAmount?: number;
   remainingAmount?: number;
   additionTowel: number;
@@ -96,6 +97,7 @@ interface MyBookingData {
   }
   remark: string;
   additionTowel: number;
+  depositAmount?: number;
 }
 
 export interface SummaryResponse {

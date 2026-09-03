@@ -1,7 +1,5 @@
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
+  Alert,
   Box,
   Button,
   Card,
@@ -14,14 +12,29 @@ import {
   FormControl,
   Grid,
   IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
+  Paper,
   Select,
   Stack,
   TextField,
   Typography,
 } from '@mui/material';
-import { Close as CloseIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
+import {
+  Close as CloseIcon,
+  Search as SearchIcon,
+  Phone as PhoneIcon,
+  ReceiptLong as ReceiptIcon,
+  CalendarToday as CalendarIcon,
+  Person as PersonIcon,
+  Hotel as HotelIcon,
+  CheckCircle as CheckIcon,
+  HourglassEmpty as PendingIcon,
+  Login as LoginIcon,
+  Logout as LogoutIcon,
+  Clear as ClearIcon,
+} from '@mui/icons-material';
 import { MyBookingData } from '@apis/booking';
 import { BookingStatus } from '@constants/booking.enum';
 import { useMemo, useState } from 'react';
@@ -36,29 +49,31 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
   const [slipModalOpen, setSlipModalOpen] = useState(false);
   const [selectedSlips, setSelectedSlips] = useState<{ fileUrl: string }[]>([]);
 
-  // Filter state
+  // Filter & Search states
   const currentDate = new Date();
   const [filterMonth, setFilterMonth] = useState<number | 'all'>(currentDate.getMonth() + 1);
   const [filterYear, setFilterYear] = useState<number>(currentDate.getFullYear());
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Thai month names for filter dropdown
+  // Thai month names
   const thaiMonths = [
-    { value: 1, label: 'มกราคม' },
-    { value: 2, label: 'กุมภาพันธ์' },
-    { value: 3, label: 'มีนาคม' },
-    { value: 4, label: 'เมษายน' },
-    { value: 5, label: 'พฤษภาคม' },
-    { value: 6, label: 'มิถุนายน' },
-    { value: 7, label: 'กรกฎาคม' },
-    { value: 8, label: 'สิงหาคม' },
-    { value: 9, label: 'กันยายน' },
-    { value: 10, label: 'ตุลาคม' },
-    { value: 11, label: 'พฤศจิกายน' },
-    { value: 12, label: 'ธันวาคม' },
+    { value: 1, label: 'ม.ค. (มกราคม)' },
+    { value: 2, label: 'ก.พ. (กุมภาพันธ์)' },
+    { value: 3, label: 'มี.ค. (มีนาคม)' },
+    { value: 4, label: 'เม.ย. (เมษายน)' },
+    { value: 5, label: 'พ.ค. (พฤษภาคม)' },
+    { value: 6, label: 'มิ.ย. (มิถุนายน)' },
+    { value: 7, label: 'ก.ค. (กรกฎาคม)' },
+    { value: 8, label: 'ส.ค. (สิงหาคม)' },
+    { value: 9, label: 'ก.ย. (กันยายน)' },
+    { value: 10, label: 'ต.ค. (ตุลาคม)' },
+    { value: 11, label: 'พ.ย. (พฤศจิกายน)' },
+    { value: 12, label: 'ธ.ค. (ธันวาคม)' },
   ];
 
-  // Generate year options (current year ± 2 years)
-  const yearOptions = Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - 2 + i);
+  // Year options (current year ± 3 years)
+  const yearOptions = Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - 1 + i);
 
   const handleOpenSlipModal = (slips: { fileUrl: string }[]) => {
     setSelectedSlips(slips);
@@ -96,11 +111,11 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
       case 'Pending':
         return 'รอการยืนยัน';
       case 'Payment':
-        return 'รอการชำระเงิน';
+        return 'รอชำระเงิน';
       case 'Cancelled':
-        return 'ยกเลิก';
+        return 'ยกเลิกแล้ว';
       case 'CheckedIn':
-        return 'เข้าพักแล้ว';
+        return 'เข้าพักอยู่';
       case 'CheckedOut':
         return 'เช็คเอาท์แล้ว';
       default:
@@ -108,77 +123,108 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDateShort = (dateString: string) => {
     return parseLocalDate(dateString).toLocaleDateString('th-TH', {
-      year: 'numeric',
-      month: 'short',
       day: 'numeric',
+      month: 'short',
+      year: '2-digit',
     });
   };
 
   const formatDateFull = (dateString: string) => {
-    // Parse date string directly to avoid timezone issues
     const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day); // Create local date (month is 0-indexed)
-
+    const date = new Date(year, month - 1, day);
     const thaiDays = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
     const thaiMonths = [
-      'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน',
-      'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม',
-      'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+      'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+      'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
     ];
     return `วัน${thaiDays[date.getDay()]}ที่ ${day} ${thaiMonths[month - 1]} ${year + 543}`;
   };
 
-  // Get today's date key
-  const getTodayDateKey = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  const getNightCount = (checkin: string, checkout: string) => {
+    const d1 = parseLocalDate(checkin);
+    const d2 = parseLocalDate(checkout);
+    const diffTime = Math.abs(d2.getTime() - d1.getTime());
+    return Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
   };
 
-  const todayDateKey = getTodayDateKey();
+  // Today key
+  const today = new Date();
+  const todayDateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-  // Currently checked-in bookings (show at the very top until checked out)
+  // Currently Checked-In Bookings
   const checkedInBookings = useMemo(() => {
-    return allBookings?.filter((booking) => booking.status === 'CheckedIn') || [];
+    return allBookings?.filter((b) => b.status === 'CheckedIn') || [];
   }, [allBookings]);
 
-  // Today's confirmed bookings (check-in today with Confirmed status)
+  // Today's Confirmed Bookings (due for check-in today)
   const todayBookings = useMemo(() => {
-    return allBookings?.filter((booking) => {
-      const date = parseLocalDate(booking.checkinDate);
+    return allBookings?.filter((b) => {
+      const date = parseLocalDate(b.checkinDate);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       const dateKey = `${year}-${month}-${day}`;
-      return dateKey === todayDateKey && booking.status === 'Confirmed';
+      return dateKey === todayDateKey && b.status === 'Confirmed';
     }) || [];
   }, [allBookings, todayDateKey]);
 
-  // Check if there's already a checked-in guest (disable check-in for others)
   const hasCheckedInGuest = checkedInBookings.length > 0;
 
-  // Group bookings by check-in date, sorted by most recent first (with filter)
+  // Status counts for filter tabs
+  const statusCounts = useMemo(() => {
+    const counts = {
+      all: 0,
+      pending: 0,
+      checkedIn: 0,
+      confirmed: 0,
+      checkedOut: 0,
+      cancelled: 0,
+    };
+    allBookings?.forEach((b) => {
+      counts.all++;
+      if (b.status === 'Pending' || b.status === 'Payment') counts.pending++;
+      else if (b.status === 'CheckedIn') counts.checkedIn++;
+      else if (b.status === 'Confirmed') counts.confirmed++;
+      else if (b.status === 'CheckedOut') counts.checkedOut++;
+      else if (b.status === 'Cancelled') counts.cancelled++;
+    });
+    return counts;
+  }, [allBookings]);
+
+  // Filtered and Grouped Bookings
   const groupedBookings = useMemo(() => {
     const groups: { [date: string]: MyBookingData[] } = {};
 
     allBookings?.forEach((booking) => {
-      // Filter out cancelled bookings
-      if (booking.status === 'Cancelled') return;
-
-      // Convert to local date to get correct date key (avoid UTC timezone issue)
       const date = parseLocalDate(booking.checkinDate);
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
       const day = String(date.getDate()).padStart(2, '0');
       const dateKey = `${year}-${String(month).padStart(2, '0')}-${day}`;
 
-      // Apply filter
+      // Filter by Year
       if (filterYear !== year) return;
+
+      // Filter by Month
       if (filterMonth !== 'all' && filterMonth !== month) return;
+
+      // Filter by Status Tab
+      if (statusFilter === 'pending' && !(booking.status === 'Pending' || booking.status === 'Payment')) return;
+      if (statusFilter === 'checkedIn' && booking.status !== 'CheckedIn') return;
+      if (statusFilter === 'confirmed' && booking.status !== 'Confirmed') return;
+      if (statusFilter === 'checkedOut' && booking.status !== 'CheckedOut') return;
+      if (statusFilter === 'cancelled' && booking.status !== 'Cancelled') return;
+
+      // Filter by Search Query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchName = booking.name?.toLowerCase().includes(q);
+        const matchPhone = booking.phoneNumber?.includes(q);
+        const matchRef = booking.refCode?.toLowerCase().includes(q);
+        if (!matchName && !matchPhone && !matchRef) return;
+      }
 
       if (!groups[dateKey]) {
         groups[dateKey] = [];
@@ -193,570 +239,501 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
     return sortedDates.map((date) => ({
       date,
       bookings: groups[date],
-      pendingCount: groups[date].filter(b => b.status === 'Pending' || b.status === 'Payment').length,
     }));
-  }, [allBookings, filterMonth, filterYear]);
+  }, [allBookings, filterMonth, filterYear, statusFilter, searchQuery]);
 
-  // Count filtered bookings
-  const filteredBookingsCount = useMemo(() => {
-    return groupedBookings.reduce((acc, group) => acc + group.bookings.length, 0);
+  const totalFilteredCount = useMemo(() => {
+    return groupedBookings.reduce((acc, g) => acc + g.bookings.length, 0);
   }, [groupedBookings]);
 
-  const PaymentInfo = ({ booking }: { booking: MyBookingData }) => (
-    <>
-      {booking.isOnlyDeposit && booking.remainingAmount > 0 ? (
-        <Grid size={{ xs: 6 }}>
-          <Typography variant="body2" color="text.secondary">
-            ชำระแล้ว
-          </Typography>
-          <Typography variant="body1" fontWeight={600} color="success.main">
-            ฿{booking.paidAmount?.toLocaleString()}
-          </Typography>
-          <Typography variant="body2" fontWeight={600} sx={{ color: '#ed6c02' }}>
-            ค้างชำระ: ฿{booking.remainingAmount?.toLocaleString()}
-          </Typography>
-        </Grid>
-      ) : (
-        <Grid size={{ xs: 6 }}>
-          <Typography variant="body2" color="text.secondary">
-            ราคารวม
-          </Typography>
-          <Typography variant="body1" fontWeight={600} color="primary">
-            ฿{booking.totalPrice.toLocaleString()}
-          </Typography>
-        </Grid>
-      )}
-    </>
-  );
+  // Main Compact Booking Card Component
+  const MobileBookingCard = ({ booking }: { booking: MyBookingData }) => {
+    const [additionalPayment, setAdditionalPayment] = useState<number>(booking.remainingAmount || 0);
+    const hasRemaining = booking.isOnlyDeposit && booking.remainingAmount > 0;
+    const isTodayArrival = todayDateKey === booking.checkinDate?.split('T')[0] && booking.status === 'Confirmed';
+    const isCheckedIn = booking.status === 'CheckedIn';
+    const isPending = booking.status === 'Pending' || booking.status === 'Payment';
+    const nights = getNightCount(booking.checkinDate, booking.checkoutDate);
 
-  const BookingCard = ({ booking }: { booking: MyBookingData }) => (
-    <Card sx={{ borderRadius: 2, mb: 2 }}>
-      <CardContent>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              รหัสการจอง
+    return (
+      <Paper
+        elevation={0}
+        sx={{
+          p: { xs: 1.5, sm: 2 },
+          borderRadius: 2.5,
+          border: '1px solid',
+          borderColor: isCheckedIn ? 'primary.main' : isTodayArrival ? 'success.main' : '#e0e0e0',
+          bgcolor: isCheckedIn ? '#f0f7ff' : isTodayArrival ? '#f4faf6' : '#ffffff',
+          mb: 1.5,
+          transition: 'all 0.2s ease',
+        }}
+      >
+        {/* Top Bar: Ref Code & Status & Slip */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="subtitle2" fontWeight={700} sx={{ color: '#333', fontSize: { xs: '0.85rem', sm: '0.95rem' } }}>
+              #{booking.refCode}
             </Typography>
-            <Typography variant="subtitle1" fontWeight={600}>
-              {booking.refCode}
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            {booking.files?.slips && booking.files.slips.length > 0 && (
-              <Chip
-                label={"ดูสลิป"}
-                color="default"
-                size="small"
-                clickable
-                onClick={() => handleOpenSlipModal(booking.files.slips)}
-              />
-            )}
-            <Chip label={getStatusText(booking.status)} color={getStatusColor(booking.status) as any} size="small" />
-          </Box>
+            <Chip
+              label={getStatusText(booking.status)}
+              color={getStatusColor(booking.status) as any}
+              size="small"
+              sx={{ height: 22, fontSize: '0.75rem', fontWeight: 600 }}
+            />
+          </Stack>
+
+          {booking.files?.slips && booking.files.slips.length > 0 && (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<ReceiptIcon sx={{ fontSize: 16 }} />}
+              onClick={() => handleOpenSlipModal(booking.files.slips)}
+              sx={{
+                height: 26,
+                fontSize: '0.75rem',
+                py: 0,
+                px: 1,
+                textTransform: 'none',
+                borderRadius: 1.5,
+              }}
+            >
+              สลิป ({booking.files.slips.length})
+            </Button>
+          )}
         </Stack>
 
-        <Divider sx={{ my: 1.5 }} />
+        {/* Date Row: Visual Stay Dates */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            bgcolor: isCheckedIn ? '#e1effe' : isTodayArrival ? '#e8f5e9' : '#f8f9fa',
+            p: 1,
+            borderRadius: 2,
+            mb: 1.2,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+            <CalendarIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+            <Typography variant="body2" fontWeight={700} sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem' } }}>
+              {formatDateShort(booking.checkinDate)} <span style={{ color: '#888', fontWeight: 400 }}>➔</span> {formatDateShort(booking.checkoutDate)}
+            </Typography>
+          </Box>
+          <Chip
+            label={`${nights} คืน`}
+            size="small"
+            sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700, bgcolor: '#ffffff', border: '1px solid #ddd' }}
+          />
+        </Box>
 
-        <Grid container spacing={1.5}>
-          <Grid size={{ xs: 6 }}>
-            <Typography variant="body2" color="text.secondary">
-              เช็คอิน
+        {/* Guest & Contact Info */}
+        <Grid container spacing={1} sx={{ mb: 1 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, color: '#222', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <PersonIcon sx={{ fontSize: 16, color: 'text.secondary' }} /> {booking.name}
             </Typography>
-            <Typography variant="body1" fontWeight={500}>
-              {formatDate(booking.checkinDate)}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.3, ml: 2.5 }}>
+              <PhoneIcon sx={{ fontSize: 14, color: 'primary.main' }} />
+              <a
+                href={`tel:${booking.phoneNumber}`}
+                style={{
+                  color: '#1976d2',
+                  textDecoration: 'none',
+                  fontWeight: 600,
+                  fontSize: '0.8125rem',
+                }}
+              >
+                {booking.phoneNumber}
+              </a>
+            </Box>
           </Grid>
-          <Grid size={{ xs: 6 }}>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <Typography variant="body2" color="text.secondary">
-              เช็คเอาท์
+              👥 ผู้เข้าพัก: <strong>{booking.guestNumber} ท่าน</strong> {booking.childrenNumber ? `(เด็ก ${booking.childrenNumber})` : ''}
             </Typography>
-            <Typography variant="body1" fontWeight={500}>
-              {formatDate(booking.checkoutDate)}
-            </Typography>
+            {/* Addons */}
+            {(!!booking.additionGuestNumber || !!booking.additionTowel) && (
+              <Typography variant="caption" sx={{ color: '#555', display: 'block', mt: 0.2 }}>
+                ✨ {booking.additionGuestNumber ? `ที่นอนเสริม ${booking.additionGuestNumber} ชุด ` : ''}
+                {booking.additionTowel ? `ผ้าเช็ดตัว ${booking.additionTowel} ผืน` : ''}
+              </Typography>
+            )}
           </Grid>
-          <Grid size={{ xs: 6 }}>
-            <Typography variant="body2" color="text.secondary">
-              ผู้เข้าพัก
-            </Typography>
-            <Typography variant="body1" fontWeight={500}>
-              {booking.guestNumber} คน{booking.childrenNumber ? ` + เด็ก ${booking.childrenNumber}` : ''}
-            </Typography>
-          </Grid>
-          <PaymentInfo booking={booking} />
         </Grid>
 
-        {(!!booking.additionGuestNumber || !!booking.additionTowel) && (
-          <Box sx={{ mt: 1.5, p: 1.5, bgcolor: '#f5f5f5', borderRadius: 2 }}>
-            <Typography variant="subtitle2" color="primary.main" gutterBottom>
-              รายการเพิ่มเติม:
+        {/* Price & Deposit Summary */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            p: 1,
+            bgcolor: '#fafafa',
+            borderRadius: 1.5,
+            border: '1px dashed #e0e0e0',
+          }}
+        >
+          <Typography variant="caption" color="text.secondary">
+            ยอดชำระ:
+          </Typography>
+          {hasRemaining ? (
+            <Box sx={{ textAlign: 'right' }}>
+              <Typography variant="body2" sx={{ fontWeight: 700, color: 'success.main', display: 'inline', mr: 1 }}>
+                มัดจำ ฿{booking.paidAmount?.toLocaleString()}
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 700, color: '#ed6c02', display: 'inline' }}>
+                (ค้าง ฿{booking.remainingAmount?.toLocaleString()})
+              </Typography>
+            </Box>
+          ) : (
+            <Typography variant="body2" fontWeight={700} color="primary.main">
+              ฿{booking.totalPrice?.toLocaleString()} {booking.isOnlyDeposit ? '(มัดจำเต็ม)' : '(จ่ายเต็ม)'}
             </Typography>
-            <Stack spacing={0.5}>
-              {!!booking.additionGuestNumber && (
-                <Typography variant="body2" fontWeight={600}>
-                  • ที่นอนเสริม: {booking.additionGuestNumber} ชุด
-                </Typography>
-              )}
-              {!!booking.additionTowel && (
-                <Typography variant="body2" fontWeight={600}>
-                  • ผ้าเช็ดตัวเพิ่ม: {booking.additionTowel} ชุด
-                </Typography>
-              )}
-            </Stack>
-          </Box>
-        )}
+          )}
+        </Box>
 
-        <Divider sx={{ my: 1.5 }} />
-
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          ผู้จอง: {booking.name} - {booking.phoneNumber}
-        </Typography>
-
+        {/* Remarks (if any) */}
         {booking.remark && (
-          <Box sx={{ mt: 1, p: 1, bgcolor: 'rgba(211, 47, 47, 0.05)', borderRadius: 1, border: '1px solid rgba(211, 47, 47, 0.1)' }}>
-            <Typography variant="caption" fontWeight={600} color="error.main" display="block">
-              หมายเหตุ:
-            </Typography>
-            <Typography variant="body2" color="error.main">
-              {booking.remark}
+          <Box sx={{ mt: 1, p: 0.8, bgcolor: '#fff8e1', borderRadius: 1.5, border: '1px solid #ffe082' }}>
+            <Typography variant="caption" sx={{ color: '#b78103', fontWeight: 600 }}>
+              📝 หมายเหตุ: {booking.remark}
             </Typography>
           </Box>
         )}
 
-        {(booking.status === 'Pending' || booking.status === 'Payment') && (
-          <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+        {/* Action Buttons for Pending / Payment */}
+        {isPending && (
+          <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
             <Button
               variant="contained"
               color="success"
               size="small"
+              startIcon={<CheckIcon />}
               fullWidth
               onClick={() => onStatusChange(booking, BookingStatus.CONFIRMED)}
+              sx={{ textTransform: 'none', fontWeight: 600 }}
             >
-              ยืนยัน
+              ยืนยันการจอง
             </Button>
             <Button
               variant="outlined"
               color="error"
               size="small"
+              startIcon={<CloseIcon />}
               fullWidth
               onClick={() => onStatusChange(booking, BookingStatus.CANCELLED)}
+              sx={{ textTransform: 'none', fontWeight: 600 }}
             >
               ยกเลิก
             </Button>
           </Stack>
         )}
-      </CardContent>
-    </Card>
-  );
 
-  // Booking card for checked-in guests (with Check Out button)
-  const CheckedInBookingCard = ({ booking }: { booking: MyBookingData }) => (
-    <Card sx={{ borderRadius: 2, mb: 2, border: '2px solid', borderColor: 'primary.main' }}>
-      <CardContent>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              รหัสการจอง
-            </Typography>
-            <Typography variant="subtitle1" fontWeight={600}>
-              {booking.refCode}
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            {booking.files?.slips && booking.files.slips.length > 0 && (
-              <Chip
-                label={"ดูสลิป"}
-                color="default"
-                size="small"
-                clickable
-                onClick={() => handleOpenSlipModal(booking.files.slips)}
-              />
-            )}
-            <Chip label={getStatusText(booking.status)} color={getStatusColor(booking.status) as any} size="small" />
-          </Box>
-        </Stack>
-
-        <Divider sx={{ my: 1.5 }} />
-
-        <Grid container spacing={1.5}>
-          <Grid size={{ xs: 6 }}>
-            <Typography variant="body2" color="text.secondary">
-              เช็คอิน
-            </Typography>
-            <Typography variant="body1" fontWeight={500}>
-              {formatDate(booking.checkinDate)}
-            </Typography>
-          </Grid>
-          <Grid size={{ xs: 6 }}>
-            <Typography variant="body2" color="text.secondary">
-              เช็คเอาท์
-            </Typography>
-            <Typography variant="body1" fontWeight={500}>
-              {formatDate(booking.checkoutDate)}
-            </Typography>
-          </Grid>
-          <Grid size={{ xs: 6 }}>
-            <Typography variant="body2" color="text.secondary">
-              ผู้เข้าพัก
-            </Typography>
-            <Typography variant="body1" fontWeight={500}>
-              {booking.guestNumber} คน{booking.childrenNumber ? ` + เด็ก ${booking.childrenNumber}` : ''}
-            </Typography>
-          </Grid>
-          <PaymentInfo booking={booking} />
-        </Grid>
-
-        {(!!booking.additionGuestNumber || !!booking.additionTowel) && (
-          <Box sx={{ mt: 1.5, p: 1.5, bgcolor: '#f5f5f5', borderRadius: 2 }}>
-            <Typography variant="subtitle2" color="primary.main" gutterBottom>
-              รายการเพิ่มเติม:
-            </Typography>
-            <Stack spacing={0.5}>
-              {!!booking.additionGuestNumber && (
-                <Typography variant="body2" fontWeight={600}>
-                  • ที่นอนเสริม: {booking.additionGuestNumber} ชุด
+        {/* Action for Check-In today */}
+        {isTodayArrival && (
+          <Box sx={{ mt: 1.5 }}>
+            {hasRemaining && (
+              <Box sx={{ mb: 1, p: 1, bgcolor: '#fff3e0', borderRadius: 1.5 }}>
+                <Typography variant="caption" sx={{ color: '#ed6c02', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                  เก็บเงินส่วนที่เหลือ: ฿{booking.remainingAmount?.toLocaleString()} บาท
                 </Typography>
-              )}
-              {!!booking.additionTowel && (
-                <Typography variant="body2" fontWeight={600}>
-                  • ผ้าเช็ดตัวเพิ่ม: {booking.additionTowel} ชุด
-                </Typography>
-              )}
-            </Stack>
-          </Box>
-        )}
-
-        <Divider sx={{ my: 1.5 }} />
-
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          ผู้จอง: {booking.name} - {booking.phoneNumber}
-        </Typography>
-
-        {booking.remark && (
-          <Box sx={{ mt: 1, p: 1, bgcolor: 'rgba(211, 47, 47, 0.05)', borderRadius: 1, border: '1px solid rgba(211, 47, 47, 0.1)' }}>
-            <Typography variant="caption" fontWeight={600} color="error.main" display="block">
-              หมายเหตุ:
-            </Typography>
-            <Typography variant="body2" color="error.main">
-              {booking.remark}
-            </Typography>
-          </Box>
-        )}
-
-        <Button
-          variant="contained"
-          color="error"
-          size="small"
-          fullWidth
-          sx={{ mt: 2 }}
-          onClick={() => onStatusChange(booking, BookingStatus.CHECKED_OUT)}
-        >
-          Check Out
-        </Button>
-      </CardContent>
-    </Card>
-  );
-
-  // Booking card for today's bookings (with Check In button)
-  const TodayBookingCard = ({ booking, disabled }: { booking: MyBookingData; disabled: boolean }) => {
-    const [additionalPayment, setAdditionalPayment] = useState<number>(booking.remainingAmount || 0);
-    const hasRemaining = booking.isOnlyDeposit && booking.remainingAmount > 0;
-
-    return (
-      <Card sx={{ borderRadius: 2, mb: 2, opacity: disabled ? 0.6 : 1 }}>
-        <CardContent>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
-            <Box>
-              <Typography variant="body2" color="text.secondary">
-                รหัสการจอง
-              </Typography>
-              <Typography variant="subtitle1" fontWeight={600}>
-                {booking.refCode}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              {booking.files?.slips && booking.files.slips.length > 0 && (
-                <Chip
-                  label={"ดูสลิป"}
-                  color="default"
+                <TextField
+                  label="ยอดที่เก็บจริง (บาท)"
+                  type="number"
                   size="small"
-                  clickable
-                  onClick={() => handleOpenSlipModal(booking.files.slips)}
+                  fullWidth
+                  value={additionalPayment}
+                  onChange={(e) => setAdditionalPayment(Number(e.target.value))}
+                  slotProps={{ input: { inputProps: { min: 0 } } }}
                 />
-              )}
-              <Chip label={getStatusText(booking.status)} color={getStatusColor(booking.status) as any} size="small" />
-            </Box>
-          </Stack>
+              </Box>
+            )}
+            <Button
+              variant="contained"
+              color="success"
+              size="small"
+              startIcon={<LoginIcon />}
+              fullWidth
+              disabled={hasCheckedInGuest && !isCheckedIn}
+              onClick={() => onStatusChange(booking, BookingStatus.CHECKED_IN, hasRemaining ? additionalPayment : undefined)}
+              sx={{ textTransform: 'none', fontWeight: 600 }}
+            >
+              {hasCheckedInGuest && !isCheckedIn ? 'กรุณา Check Out ผู้เข้าพักปัจจุบันก่อน' : 'Check In ผู้เข้าพัก'}
+            </Button>
+          </Box>
+        )}
 
-          <Divider sx={{ my: 1.5 }} />
-
-          <Grid container spacing={1.5}>
-            <Grid size={{ xs: 6 }}>
-              <Typography variant="body2" color="text.secondary">
-                เช็คอิน
-              </Typography>
-              <Typography variant="body1" fontWeight={500}>
-                {formatDate(booking.checkinDate)}
-              </Typography>
-            </Grid>
-            <Grid size={{ xs: 6 }}>
-              <Typography variant="body2" color="text.secondary">
-                เช็คเอาท์
-              </Typography>
-              <Typography variant="body1" fontWeight={500}>
-                {formatDate(booking.checkoutDate)}
-              </Typography>
-            </Grid>
-            <Grid size={{ xs: 6 }}>
-              <Typography variant="body2" color="text.secondary">
-                ผู้เข้าพัก
-              </Typography>
-              <Typography variant="body1" fontWeight={500}>
-                {booking.guestNumber} คน{booking.childrenNumber ? ` + เด็ก ${booking.childrenNumber}` : ''}
-              </Typography>
-            </Grid>
-            <PaymentInfo booking={booking} />
-          </Grid>
-
-          {(!!booking.additionGuestNumber || !!booking.additionTowel) && (
-            <Box sx={{ mt: 1.5, p: 1.5, bgcolor: '#f5f5f5', borderRadius: 2 }}>
-              <Typography variant="subtitle2" color="primary.main" gutterBottom>
-                รายการเพิ่มเติม:
-              </Typography>
-              <Stack spacing={0.5}>
-                {!!booking.additionGuestNumber && (
-                  <Typography variant="body2" fontWeight={600}>
-                    • ที่นอนเสริม: {booking.additionGuestNumber} ชุด
-                  </Typography>
-                )}
-                {!!booking.additionTowel && (
-                  <Typography variant="body2" fontWeight={600}>
-                    • ผ้าเช็ดตัวเพิ่ม: {booking.additionTowel} ชุด
-                  </Typography>
-                )}
-              </Stack>
-            </Box>
-          )}
-
-          <Divider sx={{ my: 1.5 }} />
-
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            ผู้จอง: {booking.name} - {booking.phoneNumber}
-          </Typography>
-
-          {booking.remark && (
-            <Box sx={{ mt: 1, p: 1, bgcolor: 'rgba(211, 47, 47, 0.05)', borderRadius: 1, border: '1px solid rgba(211, 47, 47, 0.1)' }}>
-              <Typography variant="caption" fontWeight={600} color="error.main" display="block">
-                หมายเหตุ:
-              </Typography>
-              <Typography variant="body2" color="error.main">
-                {booking.remark}
-              </Typography>
-            </Box>
-          )}
-
-          {hasRemaining && (
-            <Box sx={{ mt: 1.5, p: 1.5, bgcolor: '#fff3e0', borderRadius: 2 }}>
-              <Typography variant="body2" fontWeight={600} sx={{ color: '#ed6c02', mb: 1 }}>
-                ยอดค้างชำระ: ฿{booking.remainingAmount?.toLocaleString()}
-              </Typography>
-              <TextField
-                label="ยอดที่เก็บจริง (บาท)"
-                type="number"
-                size="small"
-                fullWidth
-                value={additionalPayment}
-                onChange={(e) => setAdditionalPayment(Number(e.target.value))}
-                slotProps={{ input: { inputProps: { min: 0 } } }}
-              />
-            </Box>
-          )}
-
+        {/* Action for Check-Out */}
+        {isCheckedIn && (
           <Button
             variant="contained"
-            color="primary"
+            color="error"
             size="small"
+            startIcon={<LogoutIcon />}
             fullWidth
-            sx={{ mt: 2 }}
-            disabled={disabled}
-            onClick={() => onStatusChange(booking, BookingStatus.CHECKED_IN, hasRemaining ? additionalPayment : undefined)}
+            sx={{ mt: 1.5, textTransform: 'none', fontWeight: 600 }}
+            onClick={() => onStatusChange(booking, BookingStatus.CHECKED_OUT)}
           >
-            {disabled ? 'กรุณา Check Out ก่อน' : 'Check In'}
+            Check Out ผู้เข้าพัก
           </Button>
-        </CardContent>
-      </Card>
+        )}
+      </Paper>
     );
   };
 
   return (
     <Box>
-      <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-        การจองทั้งหมด ({allBookings.length})
-      </Typography>
+      {/* Title & Quick Stats */}
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+        <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
+          การจองทั้งหมด
+        </Typography>
+        <Chip
+          label={`${allBookings.length} รายการ`}
+          color="primary"
+          size="small"
+          sx={{ fontWeight: 700 }}
+        />
+      </Stack>
 
-      {/* Currently Checked-In Guests (show at top until checked out) */}
-      {checkedInBookings.length > 0 && (
-        <Card sx={{ borderRadius: 3, mb: 3, bgcolor: 'primary.50', border: '2px solid', borderColor: 'primary.main' }}>
-          <CardContent>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" fontWeight={600} color="primary.main">
-                ผู้เข้าพักปัจจุบัน
-              </Typography>
-              <Chip
-                label={`${checkedInBookings.length} รายการ`}
-                size="small"
-                color="primary"
-              />
-            </Stack>
-            <Stack spacing={0}>
-              {checkedInBookings.map((booking) => (
-                <CheckedInBookingCard key={booking.id} booking={booking} />
-              ))}
-            </Stack>
-          </CardContent>
-        </Card>
-      )}
+      {/* 1. Status Filter Pills (Horizontal Scrollable) */}
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 0.8,
+          overflowX: 'auto',
+          pb: 1,
+          mb: 1.5,
+          '&::-webkit-scrollbar': { display: 'none' },
+        }}
+      >
+        <Chip
+          label={`ทั้งหมด (${statusCounts.all})`}
+          clickable
+          color={statusFilter === 'all' ? 'primary' : 'default'}
+          variant={statusFilter === 'all' ? 'filled' : 'outlined'}
+          onClick={() => setStatusFilter('all')}
+          size="small"
+          sx={{ fontWeight: 600 }}
+        />
+        <Chip
+          label={`⏳ รอยืนยัน (${statusCounts.pending})`}
+          clickable
+          color={statusCounts.pending > 0 ? (statusFilter === 'pending' ? 'warning' : 'warning') : 'default'}
+          variant={statusFilter === 'pending' ? 'filled' : 'outlined'}
+          onClick={() => setStatusFilter('pending')}
+          size="small"
+          sx={{ fontWeight: 600 }}
+        />
+        <Chip
+          label={`🏨 เข้าพักอยู่ (${statusCounts.checkedIn})`}
+          clickable
+          color={statusCounts.checkedIn > 0 ? (statusFilter === 'checkedIn' ? 'primary' : 'primary') : 'default'}
+          variant={statusFilter === 'checkedIn' ? 'filled' : 'outlined'}
+          onClick={() => setStatusFilter('checkedIn')}
+          size="small"
+          sx={{ fontWeight: 600 }}
+        />
+        <Chip
+          label={`✅ ยืนยันแล้ว (${statusCounts.confirmed})`}
+          clickable
+          color={statusFilter === 'confirmed' ? 'success' : 'default'}
+          variant={statusFilter === 'confirmed' ? 'filled' : 'outlined'}
+          onClick={() => setStatusFilter('confirmed')}
+          size="small"
+          sx={{ fontWeight: 600 }}
+        />
+        <Chip
+          label={`🚪 เช็คเอาท์ (${statusCounts.checkedOut})`}
+          clickable
+          color={statusFilter === 'checkedOut' ? 'default' : 'default'}
+          variant={statusFilter === 'checkedOut' ? 'filled' : 'outlined'}
+          onClick={() => setStatusFilter('checkedOut')}
+          size="small"
+          sx={{ fontWeight: 600 }}
+        />
+      </Box>
 
-      {/* Today's Confirmed Bookings */}
-      {todayBookings.length > 0 && (
-        <Card sx={{ borderRadius: 3, mb: 3, bgcolor: 'success.50', border: '1px solid', borderColor: 'success.200' }}>
-          <CardContent>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" fontWeight={600} color="success.main">
-                การจองวันนี้
-              </Typography>
-              <Chip
-                label={`${todayBookings.length} รายการ`}
-                size="small"
-                color="success"
-              />
-            </Stack>
-            {hasCheckedInGuest && (
-              <Typography variant="body2" color="warning.main" sx={{ mb: 2 }}>
-                * กรุณา Check Out ผู้เข้าพักปัจจุบันก่อนจึงจะ Check In ได้
-              </Typography>
-            )}
-            <Stack spacing={0}>
-              {todayBookings.map((booking) => (
-                <TodayBookingCard key={booking.id} booking={booking} disabled={hasCheckedInGuest} />
-              ))}
-            </Stack>
-          </CardContent>
-        </Card>
-      )}
+      {/* 2. Compact Search & Date Filter Bar */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 1.5,
+          borderRadius: 2.5,
+          border: '1px solid #e0e0e0',
+          mb: 2,
+          bgcolor: '#fafafa',
+        }}
+      >
+        <Stack spacing={1.2}>
+          {/* Search Input */}
+          <TextField
+            placeholder="ค้นหาชื่อผู้จอง, รหัส, เบอร์โทร..."
+            size="small"
+            fullWidth
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
+                  </InputAdornment>
+                ),
+                endAdornment: searchQuery ? (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => setSearchQuery('')}>
+                      <ClearIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </InputAdornment>
+                ) : null,
+              },
+            }}
+            sx={{ bgcolor: '#fff', borderRadius: 2 }}
+          />
 
-      {/* Filter Section */}
-      <Card sx={{ borderRadius: 3, mb: 2 }}>
-        <CardContent sx={{ py: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>เดือน</InputLabel>
+          {/* Month & Year Selectors */}
+          <Stack direction="row" spacing={1}>
+            <FormControl size="small" sx={{ flex: 1 }}>
+              <InputLabel id="booking-month-filter-label">เดือน</InputLabel>
               <Select
+                labelId="booking-month-filter-label"
                 value={filterMonth}
                 label="เดือน"
                 onChange={(e) => setFilterMonth(e.target.value as number | 'all')}
+                sx={{ bgcolor: '#fff' }}
               >
-                <MenuItem value="all">ทั้งหมด</MenuItem>
-                {thaiMonths.map((month) => (
-                  <MenuItem key={month.value} value={month.value}>
-                    {month.label}
+                <MenuItem value="all">ทุกเดือน</MenuItem>
+                {thaiMonths.map((m) => (
+                  <MenuItem key={m.value} value={m.value}>
+                    {m.label}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
-            <FormControl size="small" sx={{ minWidth: 100 }}>
-              <InputLabel>ปี</InputLabel>
+
+            <FormControl size="small" sx={{ width: 110 }}>
+              <InputLabel id="booking-year-filter-label">ปี</InputLabel>
               <Select
+                labelId="booking-year-filter-label"
                 value={filterYear}
                 label="ปี"
-                onChange={(e) => setFilterYear(e.target.value as number)}
+                onChange={(e) => setFilterYear(Number(e.target.value))}
+                sx={{ bgcolor: '#fff' }}
               >
-                {yearOptions.map((year) => (
-                  <MenuItem key={year} value={year}>
-                    {year + 543}
+                {yearOptions.map((y) => (
+                  <MenuItem key={y} value={y}>
+                    {y + 543}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
-            <Chip
-              label={`${filteredBookingsCount} รายการ`}
-              size="small"
-              color="default"
-              variant="outlined"
-            />
           </Stack>
-        </CardContent>
-      </Card>
-
-      {filteredBookingsCount === 0 ? (
-        <Card sx={{ borderRadius: 3 }}>
-          <CardContent sx={{ textAlign: 'center', py: 4 }}>
-            <Typography color="text.secondary">ไม่มีการจองในช่วงเวลาที่เลือก</Typography>
-          </CardContent>
-        </Card>
-      ) : (
-        <Stack spacing={1}>
-          {groupedBookings.map(({ date, bookings, pendingCount }) => (
-            <Accordion
-              key={date}
-              sx={{
-                borderRadius: '12px !important',
-                '&:before': { display: 'none' },
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                '&.Mui-expanded': {
-                  margin: '8px 0 !important',
-                },
-              }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                sx={{
-                  borderRadius: '12px',
-                  '&.Mui-expanded': {
-                    borderBottomLeftRadius: 0,
-                    borderBottomRightRadius: 0,
-                  },
-                }}
-              >
-                <Stack direction="row" spacing={2} alignItems="center" sx={{ width: '100%', pr: 2 }}>
-                  <Typography fontWeight={600}>
-                    {formatDateFull(date)}
-                  </Typography>
-                  {pendingCount > 0 && (
-                    <Chip
-                      label={`${pendingCount} รอดำเนินการ`}
-                      size="small"
-                      color="warning"
-                    />
-                  )}
-                </Stack>
-              </AccordionSummary>
-              <AccordionDetails sx={{ pt: 0 }}>
-                <Stack spacing={0}>
-                  {bookings.map((booking) => (
-                    <BookingCard key={booking.id} booking={booking} />
-                  ))}
-                </Stack>
-              </AccordionDetails>
-            </Accordion>
-          ))}
         </Stack>
+      </Paper>
+
+      {/* 3. Highlight: Currently Checked-In Guest */}
+      {checkedInBookings.length > 0 && statusFilter === 'all' && !searchQuery && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle2" fontWeight={700} color="primary.main" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <HotelIcon fontSize="small" /> ผู้เข้าพักปัจจุบัน ({checkedInBookings.length})
+          </Typography>
+          {checkedInBookings.map((b) => (
+            <MobileBookingCard key={`checkedin-${b.id}`} booking={b} />
+          ))}
+        </Box>
       )}
 
-      {/* Slip Viewer Modal */}
+      {/* 4. Highlight: Today's Confirmed Arrivals */}
+      {todayBookings.length > 0 && statusFilter === 'all' && !searchQuery && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle2" fontWeight={700} color="success.main" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <LoginIcon fontSize="small" /> เช็คอินวันนี้ ({todayBookings.length})
+          </Typography>
+          {todayBookings.map((b) => (
+            <MobileBookingCard key={`today-${b.id}`} booking={b} />
+          ))}
+        </Box>
+      )}
+
+      {/* 5. Main Booking Feed List */}
+      {totalFilteredCount === 0 ? (
+        <Paper
+          elevation={0}
+          sx={{
+            p: 4,
+            textAlign: 'center',
+            borderRadius: 3,
+            border: '1px dashed #ccc',
+            bgcolor: '#fafafa',
+          }}
+        >
+          <Typography variant="body1" fontWeight={600} color="text.secondary" gutterBottom>
+            ไม่พบรายการจองตามเงื่อนไขที่เลือก
+          </Typography>
+          <Typography variant="caption" color="text.secondary" display="block">
+            ลองปรับเปลี่ยนเดือน, ปี หรือคำค้นหา
+          </Typography>
+        </Paper>
+      ) : (
+        <Box>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, fontWeight: 600 }}>
+            แสดงผล {totalFilteredCount} รายการ:
+          </Typography>
+          {groupedBookings.map(({ date, bookings }) => (
+            <Box key={date} sx={{ mb: 2 }}>
+              {/* Sticky / Clean Date Header */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  bgcolor: '#f5f5f5',
+                  py: 0.8,
+                  px: 1.5,
+                  borderRadius: 2,
+                  mb: 1,
+                  borderLeft: '4px solid #1976d2',
+                }}
+              >
+                <Typography variant="subtitle2" fontWeight={700} sx={{ color: '#222', fontSize: '0.85rem' }}>
+                  {formatDateFull(date)}
+                </Typography>
+                <Chip
+                  label={`${bookings.length} รายการ`}
+                  size="small"
+                  sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }}
+                />
+              </Box>
+
+              {/* Booking Cards for this Date */}
+              <Stack spacing={0}>
+                {bookings.map((booking) => (
+                  <MobileBookingCard key={booking.id} booking={booking} />
+                ))}
+              </Stack>
+            </Box>
+          ))}
+        </Box>
+      )}
+
+      {/* Slip Lightbox Dialog */}
       <Dialog
         open={slipModalOpen}
         onClose={handleCloseSlipModal}
-        maxWidth="md"
+        maxWidth="xs"
         fullWidth
       >
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6" fontWeight={600}>สลีปการชำระเงิน</Typography>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2 }}>
+          <Typography variant="subtitle1" fontWeight={700}>สลิปการชำระเงิน</Typography>
           <IconButton onClick={handleCloseSlipModal} size="small">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ py: 1 }}>
+        <DialogContent dividers sx={{ p: 2 }}>
+          <Stack spacing={2}>
             {selectedSlips.map((slip, index) => (
               <Box key={index} sx={{ textAlign: 'center' }}>
                 <img
@@ -764,9 +741,10 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
                   alt={`สลิป ${index + 1}`}
                   style={{
                     maxWidth: '100%',
-                    maxHeight: '500px',
+                    maxHeight: '450px',
                     objectFit: 'contain',
-                    borderRadius: '8px'
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                   }}
                 />
               </Box>

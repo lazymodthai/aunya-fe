@@ -26,6 +26,7 @@ interface DateSelectionStepProps {
   maxChildren: number;
   maxExtraBeds: number;
   maxTowels: number;
+  advanceBookingMonths?: number;
   acceptedPDPA: boolean;
   onCheckinChange: (date: Date | null) => void;
   onCheckoutChange: (date: Date | null) => void;
@@ -57,6 +58,7 @@ function DateSelectionStep({
   maxChildren,
   maxExtraBeds,
   maxTowels,
+  advanceBookingMonths,
   acceptedPDPA,
   onCheckinChange,
   onCheckoutChange,
@@ -83,7 +85,7 @@ function DateSelectionStep({
         sx={{ width: '100%' }}
         // disabledDateRange={disabledDateRange}
         disabledDates={disabledDates}
-        maximumMonth={4}
+        maximumMonth={advanceBookingMonths || 6}
       />
       <CustomDatePicker
         label={t("dateSelection.checkout", "เลือกวันที่ Check-out")}

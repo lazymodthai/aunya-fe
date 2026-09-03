@@ -25,6 +25,9 @@ export const DEFAULT_TOWEL_COUNT = 10;
 /** จำนวนเด็กสูงสุด — overridable by API key: maxChildren */
 export const DEFAULT_MAX_CHILDREN = 3;
 
+/** จำนวนเดือนที่เปิดให้จองล่วงหน้า — overridable by API key: advanceBookingMonths */
+export const DEFAULT_ADVANCE_BOOKING_MONTHS = 6;
+
 /** เงินมัดจำปกติ (บาท/คืน) */
 export const DEPOSIT_PRICE = 2000;
 
@@ -105,6 +108,7 @@ export interface AppSettings {
   maxChildren: number;
   extraBedCount: number;
   towelCount: number;
+  advanceBookingMonths: number;
 }
 
 export async function fetchAppSettings(): Promise<AppSettings> {
@@ -115,6 +119,7 @@ export async function fetchAppSettings(): Promise<AppSettings> {
     maxChildren: DEFAULT_MAX_CHILDREN,
     extraBedCount: DEFAULT_EXTRA_BED_COUNT,
     towelCount: DEFAULT_TOWEL_COUNT,
+    advanceBookingMonths: DEFAULT_ADVANCE_BOOKING_MONTHS,
   };
 
   try {
@@ -128,6 +133,7 @@ export async function fetchAppSettings(): Promise<AppSettings> {
       maxChildren: Number(map.get('maxChildren')) || defaults.maxChildren,
       extraBedCount: Number(map.get('extraBedCount')) || defaults.extraBedCount,
       towelCount: Number(map.get('towelCount')) || defaults.towelCount,
+      advanceBookingMonths: Number(map.get('advanceBookingMonths')) || defaults.advanceBookingMonths,
     };
   } catch (err) {
     console.error('Failed to load app settings, using defaults:', err);

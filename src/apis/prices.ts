@@ -24,6 +24,26 @@ export default class PricesAPI extends InstancePricesAPI {
     return this.api.post(`${path}/reset`, payload);
   }
 
+  static getGeneratedYears(roomId: string): Promise<{ data: { message: string; years: number[] }; headers: RawAxiosResponseHeaders; }> {
+    return this.api.get(`${path}/generated-years/${roomId}`);
+  }
+
+  static getYearPriceSummaries(roomId: string): Promise<{ data: { message: string; summaries: YearPriceSummary[] }; headers: RawAxiosResponseHeaders; }> {
+    return this.api.get(`${path}/summaries/${roomId}`);
+  }
+
+  static fetchBotHolidays(year: number): Promise<{ data: { success: boolean; message: string; holidays: { date: string; description: string }[] }; headers: RawAxiosResponseHeaders; }> {
+    return this.api.get(`${path}/bot-holidays/${year}`);
+  }
+
+  static getYearHolidaysFromDB(roomId: string, year: number): Promise<{ data: { message: string; holidays: { date: string; price: number; description: string }[] }; headers: RawAxiosResponseHeaders; }> {
+    return this.api.get(`${path}/holidays/${roomId}/${year}`);
+  }
+
+  static syncHolidays(payload: { roomId: string; year: number; holidayPrice?: number }): Promise<{ data: { success: boolean; message: string; updatedCount: number }; headers: RawAxiosResponseHeaders; }> {
+    return this.api.post(`${path}/sync-holidays`, payload);
+  }
+
   //Discount code
   static generateDiscountCode(payload: GenerateDiscountCodePayload): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
     return this.api.post(`${path}/generate-discount-code`, payload);
@@ -98,7 +118,22 @@ interface PriceCalculateResponse {
 }
 
 export interface PriceDetail {
-  date: string
-  price: number
+  date: string;
+  price: number;
+}
+
+export interface YearPriceSummary {
+  year: number;
+  minWeekdayPrice: number;
+  maxWeekdayPrice: number;
+  avgWeekdayPrice: number;
+  minWeekendPrice: number;
+  maxWeekendPrice: number;
+  avgWeekendPrice: number;
+  minHolidayPrice: number;
+  maxHolidayPrice: number;
+  avgHolidayPrice: number;
+  holidayCount: number;
+  totalDays: number;
 }
 

@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import CheckIcon from '@mui/icons-material/Check';
-import { format } from 'date-fns';
+import { format, differenceInCalendarDays } from 'date-fns';
 import { parseLocalDate } from '@utils/date';
 import BookingAPI, { BookingPayload } from '@apis/booking';
 import PricesAPI, { DiscountCode, PriceDetail } from '@apis/prices';
@@ -29,6 +29,7 @@ import {
   DEFAULT_EXTRA_BED_COUNT,
   DEFAULT_TOWEL_COUNT,
   DEFAULT_MAX_CHILDREN,
+  DEFAULT_ADVANCE_BOOKING_MONTHS,
   DEPOSIT_PRICE,
   PROMPTPAY_QR_CODE,
   PROMPTPAY_NAME,
@@ -72,6 +73,7 @@ function Booking(props: Props) {
   const [maxChildren, setMaxChildren] = useState(DEFAULT_MAX_CHILDREN);
   const [maxExtraBeds, setMaxExtraBeds] = useState(DEFAULT_EXTRA_BED_COUNT);
   const [maxTowels, setMaxTowels] = useState(DEFAULT_TOWEL_COUNT);
+  const [advanceBookingMonths, setAdvanceBookingMonths] = useState(DEFAULT_ADVANCE_BOOKING_MONTHS);
 
   // Form State
   const [checkinDate, setCheckinDate] = useState<Date | null>(null);
@@ -151,6 +153,7 @@ function Booking(props: Props) {
       setMaxChildren(s.maxChildren);
       setMaxExtraBeds(s.extraBedCount);
       setMaxTowels(s.towelCount);
+      setAdvanceBookingMonths(s.advanceBookingMonths);
     });
   }, []);
 
@@ -171,7 +174,7 @@ function Booking(props: Props) {
 
   useEffect(() => {
     if (checkinDate && checkoutDate) {
-      setTotalDate(checkoutDate.getDate() - checkinDate.getDate());
+      setTotalDate(Math.max(1, differenceInCalendarDays(checkoutDate, checkinDate)));
     }
   }, [checkinDate, checkoutDate]);
 
@@ -202,6 +205,7 @@ function Booking(props: Props) {
       customerId: userData.id,
       discount: discountAmount,
       isOnlyDeposit: isOnlyDeposit,
+      depositAmount: actualDeposit,
       paidAmount: currentPaidAmount,
       remainingAmount: currentRemainingAmount,
       additionTowel: additionTowel || 0,
@@ -328,6 +332,7 @@ function Booking(props: Props) {
             maxChildren={maxChildren}
             maxExtraBeds={maxExtraBeds}
             maxTowels={maxTowels}
+            advanceBookingMonths={advanceBookingMonths}
             acceptedPDPA={acceptedPDPA}
             onCheckinChange={setCheckinDate}
             onCheckoutChange={setCheckoutDate}

@@ -1,11 +1,18 @@
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Card,
   CardContent,
+  Chip,
   CircularProgress,
+  Divider,
   FormControl,
   Grid,
+  IconButton,
   InputLabel,
+  LinearProgress,
   MenuItem,
   Paper,
   Select,
@@ -18,17 +25,34 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import {
+  TrendingUp as TrendingUpIcon,
+  AccountBalanceWallet as WalletIcon,
+  CalendarMonth as CalendarIcon,
+  People as PeopleIcon,
+  Bed as BedIcon,
+  ExpandMore as ExpandMoreIcon,
+  Hotel as HotelIcon,
+  Percent as DiscountIcon,
+  Assessment as BarChartIcon,
+} from '@mui/icons-material';
+import { useEffect, useMemo, useState } from 'react';
 import BookingAPI, { SummaryResponse } from '@apis/booking';
 
 function SummaryTab() {
   const [loading, setLoading] = useState(true);
   const [summaryData, setSummaryData] = useState<SummaryResponse | null>(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [expandedMonth, setExpandedMonth] = useState<number | null>(null);
 
   const thaiMonths = [
     'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
     'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+  ];
+
+  const thaiMonthsShort = [
+    'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+    'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
   ];
 
   const yearOptions = Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i);
@@ -49,44 +73,36 @@ function SummaryTab() {
     fetchSummary(selectedYear);
   }, [selectedYear]);
 
+  // Max monthly revenue for progress bar calculation
+  const maxMonthlyRevenue = useMemo(() => {
+    if (!summaryData || !summaryData.monthly) return 1;
+    const max = Math.max(...summaryData.monthly.map(m => m.revenue));
+    return max > 0 ? max : 1;
+  }, [summaryData]);
+
   if (loading && !summaryData) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+        <CircularProgress size={36} />
       </Box>
     );
   }
 
-  const StatCard = ({ title, value, subtitle, color }: { title: string; value: string | number; subtitle?: string; color?: string }) => (
-    <Card sx={{ height: '100%', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-      <CardContent>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
-          {title}
-        </Typography>
-        <Typography variant="h5" fontWeight={700} color={color || 'primary.main'}>
-          {value}
-        </Typography>
-        {subtitle && (
-          <Typography variant="caption" color="text.secondary">
-            {subtitle}
-          </Typography>
-        )}
-      </CardContent>
-    </Card>
-  );
-
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography variant="h6" fontWeight={600}>
-          สรุปยอดการจอง
+      {/* Header & Year Selector */}
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+        <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
+          สรุปยอดรายได้
         </Typography>
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>ปี</InputLabel>
+        <FormControl size="small" sx={{ width: 115 }}>
+          <InputLabel id="summary-year-label">ปี</InputLabel>
           <Select
+            labelId="summary-year-label"
             value={selectedYear}
             label="ปี"
             onChange={(e) => setSelectedYear(e.target.value as number)}
+            sx={{ borderRadius: 2 }}
           >
             {yearOptions.map((year) => (
               <MenuItem key={year} value={year}>
@@ -98,123 +114,322 @@ function SummaryTab() {
       </Stack>
 
       {summaryData && (
-        <Stack spacing={4}>
-          {/* Yearly Overview */}
-          <Box>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-              ภาพรวมปี {selectedYear + 543}
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <StatCard
-                  title="รายได้ทั้งหมด"
-                  value={`฿${summaryData.yearly.revenue.toLocaleString()}`}
-                  subtitle={`จากรายได้ห้องพัก ฿${summaryData.yearly.rentRevenue.toLocaleString()}`}
-                />
+        <Stack spacing={2.5}>
+          {/* 1. Hero Annual Card (Modern Dark Card) */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2, sm: 2.5 },
+              borderRadius: 3,
+              background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+              color: '#ffffff',
+              boxShadow: '0 4px 20px rgba(15, 23, 42, 0.15)',
+            }}
+          >
+            <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+              <Box>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 500, letterSpacing: 0.5 }}>
+                  รายได้ตลอดปี {selectedYear + 543} (ไม่รวมมัดจำ)
+                </Typography>
+                <Typography
+                  variant="h4"
+                  fontWeight={800}
+                  sx={{
+                    color: '#f8fafc',
+                    fontSize: { xs: '1.75rem', sm: '2.25rem' },
+                    my: 0.5,
+                    letterSpacing: -0.5,
+                  }}
+                >
+                  ฿{summaryData.yearly.revenue.toLocaleString()}
+                </Typography>
+              </Box>
+              <Chip
+                label={`ปี ${selectedYear + 543}`}
+                size="small"
+                sx={{ bgcolor: 'rgba(255, 255, 255, 0.12)', color: '#ffffff', fontWeight: 600, fontSize: '0.75rem' }}
+              />
+            </Stack>
+
+            {/* Quick Metrics Bar inside Hero Card */}
+            <Grid container spacing={1} sx={{ mt: 1, pt: 1.5, borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <Grid size={{ xs: 4 }}>
+                <Typography variant="caption" sx={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>
+                  ค่าห้องพัก
+                </Typography>
+                <Typography sx={{ fontWeight: 700, fontSize: { xs: '0.8rem', sm: '0.95rem' }, color: '#e2e8f0' }}>
+                  ฿{summaryData.yearly.rentRevenue.toLocaleString()}
+                </Typography>
               </Grid>
-              <Grid size={{ xs: 6, sm: 4 }}>
-                <StatCard
-                  title="จำนวนการจอง"
-                  value={`${summaryData.yearly.bookingCount} ครั้ง`}
-                  subtitle={`รวมทั้งหมด ${summaryData.yearly.nightCount} คืน`}
-                  color="secondary.main"
-                />
+
+              <Grid size={{ xs: 4 }}>
+                <Typography variant="caption" sx={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>
+                  บริการเสริม
+                </Typography>
+                <Typography sx={{ fontWeight: 700, fontSize: { xs: '0.8rem', sm: '0.95rem' }, color: '#38bdf8' }}>
+                  ฿{(summaryData.yearly.extraBedRevenue + summaryData.yearly.extraTowelRevenue).toLocaleString()}
+                </Typography>
               </Grid>
-              <Grid size={{ xs: 6, sm: 4 }}>
-                <StatCard
-                  title="จำนวนผู้เข้าพัก"
-                  value={summaryData.yearly.guestCount}
-                  subtitle={`ผู้ใหญ่ ${summaryData.yearly.guestCount} เด็ก ${summaryData.yearly.childrenCount}`}
-                  color="success.main"
-                />
+
+              <Grid size={{ xs: 4 }}>
+                <Typography variant="caption" sx={{ color: '#94a3b8', display: 'block', fontSize: '0.7rem' }}>
+                  ส่วนลดที่ใช้
+                </Typography>
+                <Typography sx={{ fontWeight: 700, fontSize: { xs: '0.8rem', sm: '0.95rem' }, color: '#f87171' }}>
+                  -฿{summaryData.yearly.discountUsed.toLocaleString()}
+                </Typography>
               </Grid>
             </Grid>
-          </Box>
 
-          {/* Current Month Overview */}
+            {/* Sub-pills: Bookings & Guests */}
+            <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: 'wrap', gap: 0.8 }}>
+              <Chip
+                icon={<CalendarIcon sx={{ fontSize: '14px !important', color: '#cbd5e1 !important' }} />}
+                label={`${summaryData.yearly.bookingCount} การจอง (${summaryData.yearly.nightCount} คืน)`}
+                size="small"
+                sx={{ bgcolor: 'rgba(255, 255, 255, 0.08)', color: '#cbd5e1', fontSize: '0.75rem', height: 24 }}
+              />
+              <Chip
+                icon={<PeopleIcon sx={{ fontSize: '14px !important', color: '#cbd5e1 !important' }} />}
+                label={`${summaryData.yearly.guestCount} ผู้เข้าพัก (เด็ก ${summaryData.yearly.childrenCount})`}
+                size="small"
+                sx={{ bgcolor: 'rgba(255, 255, 255, 0.08)', color: '#cbd5e1', fontSize: '0.75rem', height: 24 }}
+              />
+            </Stack>
+          </Paper>
+
+          {/* 2. Current Month Card (เดือนปัจจุบัน) */}
           {summaryData.currentMonth && (
-            <Box>
-              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-                เดือนปัจจุบัน ({thaiMonths[summaryData.currentMonth.month - 1]})
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 4 }}>
-                  <StatCard
-                    title="รายได้เดือนนี้"
-                    value={`฿${summaryData.currentMonth.revenue.toLocaleString()}`}
-                    color="primary.dark"
-                  />
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 1.5, sm: 2 },
+                borderRadius: 2.5,
+                bgcolor: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+              }}
+            >
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                <Typography variant="subtitle2" fontWeight={700} sx={{ color: '#166534', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <TrendingUpIcon fontSize="small" /> เดือนปัจจุบัน ({thaiMonths[summaryData.currentMonth.month - 1]})
+                </Typography>
+                <Chip
+                  label={`${summaryData.currentMonth.bookingCount} จอง (${summaryData.currentMonth.nightCount} คืน)`}
+                  size="small"
+                  color="success"
+                  sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600 }}
+                />
+              </Stack>
+
+              <Grid container spacing={1.5} alignItems="center">
+                <Grid size={{ xs: 6 }}>
+                  <Typography variant="caption" sx={{ color: '#15803d', display: 'block' }}>
+                    รายได้ที่รับจริง (ไม่รวมมัดจำ)
+                  </Typography>
+                  <Typography variant="h6" fontWeight={800} color="success.main" sx={{ fontSize: { xs: '1.2rem', sm: '1.4rem' } }}>
+                    ฿{summaryData.currentMonth.revenue.toLocaleString()}
+                  </Typography>
                 </Grid>
-                <Grid size={{ xs: 6, sm: 4 }}>
-                  <StatCard
-                    title="การจองเดือนนี้"
-                    value={`${summaryData.currentMonth.bookingCount} ครั้ง`}
-                    subtitle={`รวมทั้งหมด ${summaryData.currentMonth.nightCount} คืน`}
-                    color="secondary.dark"
-                  />
-                </Grid>
-                <Grid size={{ xs: 6, sm: 4 }}>
-                  <StatCard
-                    title="รายได้ที่คาดหวัง"
-                    value={`฿${summaryData.currentMonth.potentialRevenue.toLocaleString()}`}
-                    subtitle="รวมที่ยังไม่ชำระ"
-                    color="warning.main"
-                  />
+                <Grid size={{ xs: 6 }}>
+                  <Typography variant="caption" color="text.secondary" display="block">
+                    รายได้ที่คาดหวัง (รวมค้างชำระ)
+                  </Typography>
+                  <Typography variant="body1" fontWeight={700} color="warning.main">
+                    ฿{summaryData.currentMonth.potentialRevenue.toLocaleString()}
+                  </Typography>
                 </Grid>
               </Grid>
-            </Box>
+
+              {/* Breakdown metrics for Current Month */}
+              <Grid container spacing={1} sx={{ mt: 1, pt: 1.2, borderTop: '1px dashed #bbf7d0' }}>
+                <Grid size={{ xs: 4 }}>
+                  <Typography variant="caption" sx={{ color: '#166534', display: 'block', fontSize: '0.7rem' }}>
+                    ค่าห้องพัก
+                  </Typography>
+                  <Typography sx={{ fontWeight: 700, fontSize: { xs: '0.8rem', sm: '0.9rem' }, color: '#15803d' }}>
+                    ฿{summaryData.currentMonth.rentRevenue.toLocaleString()}
+                  </Typography>
+                </Grid>
+
+                <Grid size={{ xs: 4 }}>
+                  <Typography variant="caption" sx={{ color: '#166534', display: 'block', fontSize: '0.7rem' }}>
+                    บริการเสริม
+                  </Typography>
+                  <Typography sx={{ fontWeight: 700, fontSize: { xs: '0.8rem', sm: '0.9rem' }, color: '#0284c7' }}>
+                    ฿{(summaryData.currentMonth.extraBedRevenue + summaryData.currentMonth.extraTowelRevenue).toLocaleString()}
+                  </Typography>
+                </Grid>
+
+                <Grid size={{ xs: 4 }}>
+                  <Typography variant="caption" sx={{ color: '#166534', display: 'block', fontSize: '0.7rem' }}>
+                    ส่วนลดที่ใช้
+                  </Typography>
+                  <Typography sx={{ fontWeight: 700, fontSize: { xs: '0.8rem', sm: '0.9rem' }, color: '#dc2626' }}>
+                    -฿{summaryData.currentMonth.discountUsed.toLocaleString()}
+                  </Typography>
+                </Grid>
+              </Grid>
+            </Paper>
           )}
 
-          {/* Monthly Table */}
-          <Box>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-              สรุปรายเดือน
-            </Typography>
-            <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.05)', overflowX: 'auto' }}>
-              <Table size="small">
-                <TableHead sx={{ bgcolor: '#f8f9fa' }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>เดือน</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>รายได้รวม</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>ค่าห้อง</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>เตียงเสริม</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>ผ้าเช็ดตัว</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>ส่วนลด</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>จำนวนจอง</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>จำนวนคืน</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {summaryData.monthly.map((m) => (
-                    <TableRow key={m.month} hover>
-                      <TableCell>{thaiMonths[m.month - 1]}</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                        ฿{m.revenue.toLocaleString()}
-                      </TableCell>
-                      <TableCell align="right">฿{m.rentRevenue.toLocaleString()}</TableCell>
-                      <TableCell align="right">฿{m.extraBedRevenue.toLocaleString()}</TableCell>
-                      <TableCell align="right">฿{m.extraTowelRevenue.toLocaleString()}</TableCell>
-                      <TableCell align="right" sx={{ color: 'error.main' }}>-฿{m.discountUsed.toLocaleString()}</TableCell>
-                      <TableCell align="right">{m.bookingCount}</TableCell>
-                      <TableCell align="right">{m.nightCount}</TableCell>
-                    </TableRow>
-                  ))}
-                  <TableRow sx={{ bgcolor: 'rgba(176, 48, 82, 0.05)' }}>
-                    <TableCell sx={{ fontWeight: 700 }}>รวมทั้งปี</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                      ฿{summaryData.yearly.revenue.toLocaleString()}
-                    </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700 }}>฿{summaryData.yearly.rentRevenue.toLocaleString()}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700 }}>฿{summaryData.yearly.extraBedRevenue.toLocaleString()}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700 }}>฿{summaryData.yearly.extraTowelRevenue.toLocaleString()}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, color: 'error.main' }}>-฿{summaryData.yearly.discountUsed.toLocaleString()}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700 }}>{summaryData.yearly.bookingCount}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700 }}>{summaryData.yearly.nightCount}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
+          {/* 3. Monthly Breakdown (12 Months Visual Cards & Progress List) */}
+          <Card sx={{ borderRadius: 3, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
+            <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <BarChartIcon color="primary" fontSize="small" /> สรุปรายได้รายเดือน (12 เดือน)
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                แตะที่แต่ละเดือนเพื่อดูรายละเอียดค่าห้อง, เตียงเสริม, ผ้าเช็ดตัว และส่วนลด
+              </Typography>
+
+              <Stack spacing={1}>
+                {summaryData.monthly.map((m) => {
+                  const isExpanded = expandedMonth === m.month;
+                  const percent = Math.round((m.revenue / maxMonthlyRevenue) * 100);
+                  const isCurrentMonth = summaryData.currentMonth?.month === m.month && selectedYear === new Date().getFullYear();
+
+                  return (
+                    <Paper
+                      key={m.month}
+                      variant="outlined"
+                      sx={{
+                        borderRadius: 2,
+                        borderColor: isCurrentMonth ? 'success.main' : isExpanded ? '#b03052' : '#eee',
+                        bgcolor: isCurrentMonth ? '#f9fdfa' : isExpanded ? '#fffafb' : '#ffffff',
+                        overflow: 'hidden',
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      {/* Month Row Bar */}
+                      <Box
+                        onClick={() => setExpandedMonth(isExpanded ? null : m.month)}
+                        sx={{
+                          p: { xs: 1.2, sm: 1.5 },
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: 1.5,
+                        }}
+                      >
+                        {/* Left: Month Name & Tag */}
+                        <Box sx={{ minWidth: { xs: 75, sm: 95 } }}>
+                          <Typography variant="body2" fontWeight={700} sx={{ color: isCurrentMonth ? 'success.main' : '#222' }}>
+                            {thaiMonthsShort[m.month - 1]} {isCurrentMonth ? '(ปัจจุบัน)' : ''}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#888', fontSize: '0.7rem' }}>
+                            {m.bookingCount > 0 ? `${m.bookingCount} จอง (${m.nightCount} คืน)` : 'ไม่มีจอง'}
+                          </Typography>
+                        </Box>
+
+                        {/* Center: Visual Progress Bar */}
+                        <Box sx={{ flex: 1, display: { xs: 'none', sm: 'block' } }}>
+                          <LinearProgress
+                            variant="determinate"
+                            value={percent}
+                            sx={{
+                              height: 8,
+                              borderRadius: 4,
+                              bgcolor: '#f1f5f9',
+                              '& .MuiLinearProgress-bar': {
+                                bgcolor: isCurrentMonth ? '#22c55e' : '#b03052',
+                                borderRadius: 4,
+                              },
+                            }}
+                          />
+                        </Box>
+
+                        {/* Right: Revenue & Arrow */}
+                        <Box sx={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Typography
+                            variant="body2"
+                            fontWeight={700}
+                            sx={{
+                              color: m.revenue > 0 ? (isCurrentMonth ? 'success.main' : '#b03052') : '#aaa',
+                              fontSize: { xs: '0.875rem', sm: '0.95rem' },
+                            }}
+                          >
+                            ฿{m.revenue.toLocaleString()}
+                          </Typography>
+                          <ExpandMoreIcon
+                            sx={{
+                              fontSize: 18,
+                              color: '#888',
+                              transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                              transition: 'transform 0.2s',
+                            }}
+                          />
+                        </Box>
+                      </Box>
+
+                      {/* Mobile Linear Bar under the row */}
+                      <Box sx={{ px: 1.2, pb: 0.5, display: { xs: 'block', sm: 'none' } }}>
+                        <LinearProgress
+                          variant="determinate"
+                          value={percent}
+                          sx={{
+                            height: 4,
+                            borderRadius: 2,
+                            bgcolor: '#f1f5f9',
+                            '& .MuiLinearProgress-bar': {
+                              bgcolor: isCurrentMonth ? '#22c55e' : '#b03052',
+                              borderRadius: 2,
+                            },
+                          }}
+                        />
+                      </Box>
+
+                      {/* Expanded Sub-details */}
+                      {isExpanded && (
+                        <Box sx={{ p: 1.5, pt: 1, bgcolor: '#f8fafc', borderTop: '1px solid #f1f5f9' }}>
+                          <Grid container spacing={1}>
+                            <Grid size={{ xs: 6, sm: 3 }}>
+                              <Typography variant="caption" color="text.secondary" display="block">
+                                ค่าห้องพัก
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600}>
+                                ฿{m.rentRevenue.toLocaleString()}
+                              </Typography>
+                            </Grid>
+                            <Grid size={{ xs: 6, sm: 3 }}>
+                              <Typography variant="caption" color="text.secondary" display="block">
+                                เตียงเสริม
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600} color="primary.main">
+                                ฿{m.extraBedRevenue.toLocaleString()}
+                              </Typography>
+                            </Grid>
+                            <Grid size={{ xs: 6, sm: 3 }}>
+                              <Typography variant="caption" color="text.secondary" display="block">
+                                ผ้าเช็ดตัวเพิ่ม
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600} color="primary.main">
+                                ฿{m.extraTowelRevenue.toLocaleString()}
+                              </Typography>
+                            </Grid>
+                            <Grid size={{ xs: 6, sm: 3 }}>
+                              <Typography variant="caption" color="text.secondary" display="block">
+                                ส่วนลดที่ใช้
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600} color="error.main">
+                                -฿{m.discountUsed.toLocaleString()}
+                              </Typography>
+                            </Grid>
+                            <Grid size={{ xs: 12 }}>
+                              <Divider sx={{ my: 0.5 }} />
+                              <Typography variant="caption" color="text.secondary">
+                                👥 ผู้เข้าพัก: {m.guestCount} คน (เด็ก {m.childrenCount} คน) • รายได้คาดหวัง: ฿{m.potentialRevenue.toLocaleString()}
+                              </Typography>
+                            </Grid>
+                          </Grid>
+                        </Box>
+                      )}
+                    </Paper>
+                  );
+                })}
+              </Stack>
+            </CardContent>
+          </Card>
         </Stack>
       )}
     </Box>
@@ -222,3 +437,4 @@ function SummaryTab() {
 }
 
 export default SummaryTab;
+
