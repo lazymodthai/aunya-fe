@@ -145,19 +145,19 @@ function Room() {
         >
           <Chip
             icon={<PlaceIcon sx={{ fontSize: '14px !important', color: '#b03052 !important' }} />}
-            label="นครศรีธรรมราช"
+            label={i18n.language === 'en' ? 'Nakhon Si Thammarat' : 'นครศรีธรรมราช'}
             size="small"
             sx={{ bgcolor: '#fdf2f4', color: '#b03052', fontWeight: 600, fontSize: '0.75rem' }}
           />
           <Chip
             icon={<PoolIcon sx={{ fontSize: '14px !important', color: '#0284c7 !important' }} />}
-            label="สระว่ายน้ำส่วนตัว & สไลเดอร์"
+            label={i18n.language === 'en' ? 'Private Pool' : 'สระว่ายน้ำส่วนตัว'}
             size="small"
             sx={{ bgcolor: '#f0f9ff', color: '#0284c7', fontWeight: 600, fontSize: '0.75rem' }}
           />
           <Chip
             icon={<KaraokeIcon sx={{ fontSize: '14px !important', color: '#16a34a !important' }} />}
-            label="คาราโอเกะ & ปิ้งย่าง"
+            label={i18n.language === 'en' ? 'Pool Table & Karaoke' : 'โต๊ะพูล & คาราโอเกะ'}
             size="small"
             sx={{ bgcolor: '#f0fdf4', color: '#16a34a', fontWeight: 600, fontSize: '0.75rem' }}
           />

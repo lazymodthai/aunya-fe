@@ -43,26 +43,49 @@ function SwiperPreview() {
   }
 
   return (
-    <Swiper
-      spaceBetween={30}
-      centeredSlides={true}
-      autoplay={{
-        delay: 2500,
-        disableOnInteraction: false,
+    <Box
+      sx={{
+        width: '100%',
+        height: { xs: 260, sm: 380, md: 460 },
+        borderRadius: { xs: 3, sm: 4 },
+        overflow: 'hidden',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.1)',
+        position: 'relative',
+        bgcolor: '#0f172a',
       }}
-      pagination={{
-        clickable: true,
-      }}
-      navigation={true}
-      modules={[Autoplay]}
     >
-      {images.map((img) => (
-        <SwiperSlide key={img.id} style={{ height: '50vh', backgroundColor: '#fff'}}>
-          <Box component={"img"} src={img.fileUrl} alt={img.alt} sx={{borderRadius: 2, bgcolor: '#fff'}}/>
-        </SwiperSlide>
-      ))}
-    </Swiper>
+      <Swiper
+        spaceBetween={0}
+        centeredSlides={true}
+        autoplay={{
+          delay: 3500,
+          disableOnInteraction: false,
+        }}
+        pagination={{
+          clickable: true,
+          dynamicBullets: true,
+        }}
+        modules={[Autoplay, Pagination]}
+        style={{ width: '100%', height: '100%' }}
+      >
+        {images.map((img) => (
+          <SwiperSlide key={img.id} style={{ width: '100%', height: '100%' }}>
+            <Box
+              component="img"
+              src={img.fileUrl}
+              alt={img.alt || 'Aunya Pool Villa'}
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </Box>
   );
 }
 
-export default SwiperPreview
+export default SwiperPreview;
