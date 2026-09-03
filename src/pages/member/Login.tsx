@@ -18,11 +18,13 @@ import {
   Visibility,
   VisibilityOff,
   LoginOutlined,
+  SearchOutlined,
 } from '@mui/icons-material';
 import AuthAPI from '@apis/auth';
 import { validateEmailRFC } from '@utils/validation';
 import Noti from '@components/Noti';
 import Loading from "@components/Loading";
+import TrackBookingModal from '@components/booking/TrackBookingModal';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -36,6 +38,7 @@ function Login() {
   const [error, setError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [openTrackModal, setOpenTrackModal] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -218,11 +221,36 @@ function Login() {
             </Stack>
           </Box>
 
-          <Divider sx={{ my: 3, color: '#94a3b8', fontSize: '0.8rem' }} />
+          <Divider sx={{ my: 2.5, color: '#94a3b8', fontSize: '0.8rem' }} />
 
-          {/* Footer Link to Register */}
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="body2" color="#64748b" sx={{ mb: 1 }}>
+          {/* Action Links */}
+          <Stack spacing={1.5} sx={{ textAlign: 'center' }}>
+            <Button
+              variant="outlined"
+              fullWidth
+              startIcon={<SearchOutlined />}
+              onClick={() => setOpenTrackModal(true)}
+              sx={{
+                borderRadius: 3,
+                py: 1.1,
+                borderColor: '#e2e8f0',
+                color: '#475569',
+                fontWeight: 600,
+                fontSize: '0.88rem',
+                textTransform: 'none',
+                bgcolor: '#f8fafc',
+                '&:hover': {
+                  bgcolor: '#f1f5f9',
+                  borderColor: '#cbd5e1',
+                  color: '#1e293b',
+                },
+              }}
+            >
+              {t('track.trackTitle', 'ค้นหาข้อมูลการจอง')}
+            </Button>
+
+            {/* Footer Link to Register */}
+            <Typography variant="body2" color="#64748b" sx={{ pt: 0.5 }}>
               {t('member.noAccount')}{' '}
               <Link
                 component="button"
@@ -238,10 +266,11 @@ function Login() {
                 {t('member.register')}
               </Link>
             </Typography>
-          </Box>
+          </Stack>
         </CardContent>
       </Card>
 
+      <TrackBookingModal open={openTrackModal} onClose={() => setOpenTrackModal(false)} />
       <Noti type={'error'} open={error} value={errorMessage} onClose={() => setError(false)} />
       <Noti type={'success'} open={success} onClose={() => setSuccess(false)} value={t('member.loginSuccess')} />
     </Box>

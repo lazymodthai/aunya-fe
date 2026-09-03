@@ -38,6 +38,10 @@ export default class BookingAPI extends InstanceBookingAPI {
     return this.api.get(`${path}/my-bookings`);
   }
 
+  static trackBooking(refCode: string, phoneNumber: string): Promise<{ data: { success: boolean; data: MyBookingData; message: string }; headers: RawAxiosResponseHeaders; }> {
+    return this.api.get(`${path}/track`, { params: { refCode, phoneNumber } });
+  }
+
   static getAllDisabledDate(): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
     return this.api.get(`${path}/disabled-dates`);
   }
