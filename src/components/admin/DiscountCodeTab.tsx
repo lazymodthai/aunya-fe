@@ -17,6 +17,7 @@ import {
   RadioGroup,
   Select,
   Stack,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -50,6 +51,8 @@ function DiscountCodeTab({ showNoti }: DiscountCodeTabProps) {
     discount: 0,
     discountPercentage: 0,
     count: 1,
+    hasExpiry: false,
+    expiresAt: '',
   });
 
   const fetchDiscountCodes = async () => {
@@ -69,6 +72,11 @@ function DiscountCodeTab({ showNoti }: DiscountCodeTabProps) {
     fetchDiscountCodes();
   }, []);
 
+  const isCodeExpired = (code: DiscountCode) => {
+    if (!code.expiresAt) return false;
+    return new Date() > new Date(code.expiresAt);
+  };
+
   const handleCreateDiscountCode = async () => {
     if (!createForm.code) {
       showNoti('error', 'กรุณากรอกโค้ดส่วนลด');
@@ -78,6 +86,16 @@ function DiscountCodeTab({ showNoti }: DiscountCodeTabProps) {
       showNoti('error', 'จำนวนโค้ดต้องมากกว่า 0');
       return;
     }
+    if (createForm.hasExpiry && !createForm.expiresAt) {
+      showNoti('error', 'กรุณาเลือกวันหมดอายุ หรือปิดตัวเลือกกำหนดวันหมดอายุ');
+      return;
+    }
+
+    let expiresAtISO: string | undefined = undefined;
+    if (createForm.hasExpiry && createForm.expiresAt) {
+      const expDate = new Date(`${createForm.expiresAt}T23:59:59.999`);
+      expiresAtISO = expDate.toISOString();
+    }
 
     try {
       await PricesAPI.generateDiscountCode({
@@ -85,10 +103,18 @@ function DiscountCodeTab({ showNoti }: DiscountCodeTabProps) {
         discount: discountType === 'amount' ? createForm.discount : undefined,
         discountPercentage: discountType === 'percentage' ? createForm.discountPercentage : undefined,
         count: createForm.count,
+        expiresAt: expiresAtISO,
       });
       showNoti('success', 'สร้างโค้ดส่วนลดสำเร็จ');
       setCreateDialog(false);
-      setCreateForm({ code: '', discount: 0, discountPercentage: 0, count: 1 });
+      setCreateForm({
+        code: '',
+        discount: 0,
+        discountPercentage: 0,
+        count: 1,
+        hasExpiry: false,
+        expiresAt: '',
+      });
       fetchDiscountCodes();
     } catch (error) {
       console.error('Error creating discount code:', error);
@@ -177,49 +203,81 @@ function DiscountCodeTab({ showNoti }: DiscountCodeTabProps) {
                     <TableCell><strong>โค้ด</strong></TableCell>
                     <TableCell><strong>ส่วนลด</strong></TableCell>
                     <TableCell><strong>จำนวน</strong></TableCell>
+                    <TableCell><strong>วันหมดอายุ</strong></TableCell>
                     <TableCell><strong>สถานะ</strong></TableCell>
                     <TableCell><strong>สร้างเมื่อ</strong></TableCell>
                     <TableCell><strong>ใช้เมื่อ</strong></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {discountCodes.map((code) => (
-                    <TableRow key={code.id}>
-                      <TableCell>
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography fontWeight={600} fontFamily="monospace">
-                            {code.code}
+                  {discountCodes.map((code) => {
+                    const expired = isCodeExpired(code);
+                    return (
+                      <TableRow key={code.id} sx={{ opacity: expired ? 0.7 : 1 }}>
+                        <TableCell>
+                          <Stack direction="row" alignItems="center" spacing={1}>
+                            <Typography fontWeight={600} fontFamily="monospace">
+                              {code.code}
+                            </Typography>
+                            <IconButton size="small" onClick={() => handleCopyCode(code.code)}>
+                              <CopyIcon fontSize="small" />
+                            </IconButton>
+                          </Stack>
+                        </TableCell>
+                        <TableCell>
+                          <Typography color="primary" fontWeight={500}>
+                            {getDiscountDisplay(code)}
                           </Typography>
-                          <IconButton size="small" onClick={() => handleCopyCode(code.code)}>
-                            <CopyIcon fontSize="small" />
-                          </IconButton>
-                        </Stack>
-                      </TableCell>
-                      <TableCell>
-                        <Typography color="primary" fontWeight={500}>
-                          {getDiscountDisplay(code)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>{code.count}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={code.count <= 0 ? 'หมด' : `เหลือ ${code.count}`}
-                          color={code.count <= 0 ? 'default' : 'success'}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" color="text.secondary">
-                          {formatDate(code.createdAt)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" color="text.secondary">
-                          {formatDate(code.usedAt)}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                        <TableCell>{code.count}</TableCell>
+                        <TableCell>
+                          {code.expiresAt ? (
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: expired ? '#ef4444' : '#1e293b',
+                                fontWeight: expired ? 600 : 400,
+                              }}
+                            >
+                              {formatDate(code.expiresAt)}
+                            </Typography>
+                          ) : (
+                            <Chip
+                              label="ไม่มีวันหมดอายุ"
+                              size="small"
+                              variant="outlined"
+                              sx={{
+                                color: '#059669',
+                                borderColor: '#a7f3d0',
+                                bgcolor: '#ecfdf5',
+                                fontSize: '0.75rem',
+                                fontWeight: 500,
+                              }}
+                            />
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {expired ? (
+                            <Chip label="หมดอายุ" color="error" size="small" sx={{ fontWeight: 600 }} />
+                          ) : code.count <= 0 ? (
+                            <Chip label="หมด" color="default" size="small" />
+                          ) : (
+                            <Chip label={`เหลือ ${code.count}`} color="success" size="small" sx={{ fontWeight: 600 }} />
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" color="text.secondary">
+                            {formatDate(code.createdAt)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" color="text.secondary">
+                            {formatDate(code.usedAt)}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -288,6 +346,53 @@ function DiscountCodeTab({ showNoti }: DiscountCodeTabProps) {
               inputProps={{ min: 1 }}
               helperText="จำนวนครั้งที่สามารถใช้โค้ดนี้ได้"
             />
+
+            {/* Expiration Date Section */}
+            <Box sx={{ p: 1.5, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={createForm.hasExpiry}
+                    onChange={(e) =>
+                      setCreateForm({
+                        ...createForm,
+                        hasExpiry: e.target.checked,
+                        expiresAt: e.target.checked ? createForm.expiresAt : '',
+                      })
+                    }
+                    color="primary"
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" fontWeight={600}>
+                      กำหนดวันหมดอายุ
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {createForm.hasExpiry
+                        ? 'ระบุวันที่ที่ต้องการให้โค้ดหมดอายุ'
+                        : 'หากไม่เลือกจะเป็น "ไม่มีวันหมดอายุ" (ใช้ได้ตลอดไป)'}
+                    </Typography>
+                  </Box>
+                }
+              />
+
+              {createForm.hasExpiry && (
+                <Box sx={{ mt: 1.5 }}>
+                  <TextField
+                    label="วันหมดอายุ"
+                    type="date"
+                    value={createForm.expiresAt}
+                    onChange={(e) => setCreateForm({ ...createForm, expiresAt: e.target.value })}
+                    fullWidth
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    inputProps={{ min: new Date().toISOString().split('T')[0] }}
+                    helperText="โค้ดจะหมดอายุเวลา 23:59 น. ของวันที่เลือก"
+                  />
+                </Box>
+              )}
+            </Box>
           </Stack>
         </DialogContent>
         <DialogActions>

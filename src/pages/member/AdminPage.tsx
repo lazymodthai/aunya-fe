@@ -225,9 +225,9 @@ function AdminPage() {
           backdropFilter: 'blur(8px)',
           borderBottom: '1px solid #e2e8f0',
           position: 'sticky',
-          top: 0,
-          zIndex: 100,
-          boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+          top: { xs: '56px', sm: '64px' },
+          zIndex: 1000,
+          boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
         }}
       >
         <Tabs

@@ -147,7 +147,10 @@ function ConfirmationStep({
     setDiscountError(null);
     try {
       const { data } = await PricesAPI.getDiscountDataByCode(discountCode);
-      if (data.count <= 0) {
+      if (data.expiresAt && new Date() > new Date(data.expiresAt)) {
+        setDiscountError(t('confirmation.codeExpired', 'โค้ดส่วนลดนี้หมดอายุแล้ว'));
+        setDiscountData(null);
+      } else if (data.count <= 0) {
         setDiscountError(t('confirmation.codeDepleted', 'โค้ดนี้ถูกใช้หมดแล้ว'));
         setDiscountData(null);
       } else {
@@ -155,7 +158,14 @@ function ConfirmationStep({
         setDiscountValidated(true);
       }
     } catch (error: any) {
-      setDiscountError(t('confirmation.codeInvalid', 'ไม่พบโค้ดส่วนลดนี้'));
+      const errMsg = error?.response?.data?.message;
+      if (errMsg && (errMsg.includes('หมดอายุ') || errMsg.includes('expired'))) {
+        setDiscountError(t('confirmation.codeExpired', 'โค้ดส่วนลดนี้หมดอายุแล้ว'));
+      } else if (errMsg && (errMsg.includes('หมดแล้ว') || errMsg.includes('depleted'))) {
+        setDiscountError(t('confirmation.codeDepleted', 'โค้ดนี้ถูกใช้หมดแล้ว'));
+      } else {
+        setDiscountError(t('confirmation.codeInvalid', 'ไม่พบโค้ดส่วนลดนี้'));
+      }
       setDiscountData(null);
     } finally {
       setIsValidatingDiscount(false);

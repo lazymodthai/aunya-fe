@@ -86,6 +86,7 @@ interface GenerateDiscountCodePayload {
   discount?: number; // ส่วนลด (บาท)
   discountPercentage?: number; // ส่วนลด (เปอร์เซนต์)
   count: number; // จำนวนโค้ด
+  expiresAt?: string | null; // วันหมดอายุ
 }
 
 export interface DiscountCodeResponse {
@@ -99,6 +100,7 @@ export interface DiscountCode {
   discount: string
   discountPercentage: string
   count: number
+  expiresAt?: string | null
   usedAt: any
   createdAt: string
   updatedAt: any
