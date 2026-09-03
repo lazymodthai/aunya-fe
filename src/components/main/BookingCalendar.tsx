@@ -14,12 +14,19 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  DialogActions
+  DialogActions,
+  Chip,
+  Stack,
 } from '@mui/material';
 import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
-  Close as CloseIcon
+  Close as CloseIcon,
+  CalendarMonth as CalendarMonthIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Build as BuildIcon,
+  ArrowForward as ArrowForwardIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -520,167 +527,210 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
         </Box>
       )}
 
-      {isMobile && (
-        <Drawer
-          anchor="bottom"
-          open={isDrawerOpen && !!selectedDay}
-          onClose={handleClose}
-          sx={{
-            "& .MuiDrawer-paper": {
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
-              bgcolor: "#fff",
-            },
-          }}
-        >
-          <DrawerContent>
-            <Box
+      {/* Render Mobile Drawer & Desktop Dialog with Unified Luxury Design */}
+      {(() => {
+        const renderDetailBody = (day: BookingData) => {
+          const isAvailable = day.status === 'Available';
+          const isMaintenance = day.isMaintenance || day.status === 'Maintenance';
+          const price = getPrice(day);
+          const dayNumber = parseInt(day.date.split('-')[2]);
+          const monthName = getThaiMonthName(parseInt(day.date.split('-')[1]) - 1);
+          const year = i18n.language === 'en' ? parseInt(day.date.split('-')[0]) : parseInt(day.date.split('-')[0]) + 543;
+
+          return (
+            <Stack spacing={2} sx={{ width: '100%', mt: 0.5 }}>
+              {/* Date & Status Card */}
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  bgcolor: isAvailable ? '#f0fdf4' : isMaintenance ? '#fffbeb' : '#fef2f2',
+                  borderColor: isAvailable ? '#bbf7d0' : isMaintenance ? '#fde68a' : '#fecaca',
+                }}
+              >
+                <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 2.5,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: isAvailable ? '#dcfce7' : isMaintenance ? '#fef3c7' : '#fee2e2',
+                      color: isAvailable ? '#15803d' : isMaintenance ? '#b45309' : '#b91c1c',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <CalendarMonthIcon sx={{ fontSize: 22 }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600} display="block">
+                      {t('calendar.date', 'วันที่')}
+                    </Typography>
+                    <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#1e293b', fontSize: '1.05rem', lineHeight: 1.2 }}>
+                      {dayNumber} {monthName} {year}
+                    </Typography>
+                  </Box>
+                </Stack>
+
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ pt: 0.5, borderTop: '1px solid', borderColor: isAvailable ? '#dcfce7' : isMaintenance ? '#fef3c7' : '#fee2e2' }}>
+                  <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                    {t('calendar.status', 'สถานะ')}
+                  </Typography>
+                  {isAvailable ? (
+                    <Chip
+                      icon={<CheckCircleIcon sx={{ fontSize: '15px !important', color: '#15803d !important' }} />}
+                      label="ว่าง (พร้อมให้จอง)"
+                      size="small"
+                      sx={{ bgcolor: '#dcfce7', color: '#15803d', fontWeight: 700, fontSize: '0.78rem', height: 26 }}
+                    />
+                  ) : isMaintenance ? (
+                    <Chip
+                      icon={<BuildIcon sx={{ fontSize: '15px !important', color: '#b45309 !important' }} />}
+                      label={t('calendar.maintenance', 'ปิดปรับปรุง')}
+                      size="small"
+                      sx={{ bgcolor: '#fef3c7', color: '#b45309', fontWeight: 700, fontSize: '0.78rem', height: 26 }}
+                    />
+                  ) : (
+                    <Chip
+                      icon={<CancelIcon sx={{ fontSize: '15px !important', color: '#b91c1c !important' }} />}
+                      label={t('calendar.unavailable', 'ติดจอง / ไม่ว่าง')}
+                      size="small"
+                      sx={{ bgcolor: '#fee2e2', color: '#b91c1c', fontWeight: 700, fontSize: '0.78rem', height: 26 }}
+                    />
+                  )}
+                </Stack>
+              </Paper>
+
+              {/* Price Highlight */}
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  bgcolor: '#ffffff',
+                  borderColor: '#e2e8f0',
+                  textAlign: 'center',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                }}
+              >
+                <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" sx={{ mb: 0.5 }}>
+                  {t('calendar.ratePerNight', 'ราคาสำหรับวันนี้')}
+                </Typography>
+                <Stack direction="row" justifyContent="center" alignItems="baseline" spacing={0.5}>
+                  <Typography
+                    variant="h4"
+                    fontWeight={800}
+                    sx={{ color: isAvailable ? '#b03052' : '#64748b', fontSize: '1.85rem' }}
+                  >
+                    {price === 0 ? t('calendar.inquiry', 'สอบถามราคา') : `฿${price.toLocaleString()}`}
+                  </Typography>
+                  {price > 0 && (
+                    <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                      / คืน
+                    </Typography>
+                  )}
+                </Stack>
+                <Typography variant="caption" sx={{ color: '#94a3b8', display: 'block', mt: 0.8, fontSize: '0.75rem' }}>
+                  ✨ พูลวิลล่าส่วนตัวทั้งหลัง • สระว่ายน้ำ • โต๊ะพูล • คาราโอเกะ
+                </Typography>
+              </Paper>
+
+              {/* CTA Button */}
+              {isAvailable ? (
+                <Button
+                  variant="contained"
+                  fullWidth
+                  onClick={price === 0 ? () => setShowInquiryAlert(true) : handleBookingClick}
+                  endIcon={<ArrowForwardIcon />}
+                  sx={{
+                    py: 1.2,
+                    borderRadius: 2.5,
+                    fontWeight: 700,
+                    fontSize: '1.05rem',
+                    bgcolor: '#b03052',
+                    boxShadow: '0 4px 14px rgba(176, 48, 82, 0.28)',
+                    '&:hover': { bgcolor: '#8e2340' },
+                  }}
+                >
+                  {price === 0 ? t('calendar.inquiry') : t('calendar.book', 'จองเลย')}
+                </Button>
+              ) : (
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  disabled
+                  sx={{ py: 1.2, borderRadius: 2.5, fontWeight: 600 }}
+                >
+                  {isMaintenance ? 'งดให้บริการ (ปิดปรับปรุง)' : 'ขออภัย วันนี้มีผู้จองแล้ว'}
+                </Button>
+              )}
+            </Stack>
+          );
+        };
+
+        if (isMobile) {
+          return (
+            <Drawer
+              anchor="bottom"
+              open={isDrawerOpen && !!selectedDay}
+              onClose={handleClose}
               sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
+                "& .MuiDrawer-paper": {
+                  borderTopLeftRadius: 24,
+                  borderTopRightRadius: 24,
+                  bgcolor: "#fff",
+                  p: 2.5,
+                  pb: 4,
+                  maxWidth: 500,
+                  mx: 'auto',
+                },
               }}
             >
-              <Typography variant="h6">{t('calendar.bookingDetail')}</Typography>
-              <IconButton onClick={handleClose} size="small">
-                <CloseIcon />
-              </IconButton>
-            </Box>
-
-            {selectedDay && (
-              <>
-                <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                  {parseInt(selectedDay.date.split('-')[2])} {getThaiMonthName(parseInt(selectedDay.date.split('-')[1]) - 1)}{" "}
-                  {i18n.language === 'en' ? parseInt(selectedDay.date.split('-')[0]) : parseInt(selectedDay.date.split('-')[0]) + 543}
+              <Box sx={{ width: 40, height: 4, bgcolor: '#e2e8f0', borderRadius: 2, mx: 'auto', mb: 1.5 }} />
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                <Typography variant="h6" fontWeight={700} sx={{ fontSize: '1.15rem', color: '#1e293b' }}>
+                  {t('calendar.bookingDetail')}
                 </Typography>
+                <IconButton onClick={handleClose} size="small" sx={{ color: '#94a3b8' }}>
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </Stack>
+              {selectedDay && renderDetailBody(selectedDay)}
+            </Drawer>
+          );
+        }
 
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography variant="body1">{t('calendar.status')}</Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontWeight: "bold",
-                      color: getStatusColor(selectedDay),
-                    }}
-                  >
-                    {getStatusText(selectedDay)}
-                  </Typography>
-                </Box>
-
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography variant="body1">{t('calendar.price')}</Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontWeight: "bold",
-                      color: "#000",
-                    }}
-                  >
-                    {getPrice(selectedDay) === 0 ? t('calendar.inquiry') : `${getPrice(selectedDay).toLocaleString()} ${t('success.thb')}`}
-                  </Typography>
-                </Box>
-
-                {selectedDay.status === "Available" && (
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    onClick={selectedDay.price === 0 ? () => setShowInquiryAlert(true) : handleBookingClick}
-                    sx={{
-                      fontSize: "24px",
-                      mt: 1,
-                      bgcolor: "#FFF2F2",
-                      color: "#B03052",
-                      border: `1px solid #B03052`,
-                      borderRadius: "12px",
-                      height: '3rem'
-                    }}
-                  >
-                    {selectedDay.price === 0 ? t('calendar.inquiry') : t('calendar.book')}
-                  </Button>
-                )}
-              </>
-            )}
-          </DrawerContent>
-        </Drawer>
-      )}
-
-      {!isMobile && (
-        <Modal open={isDrawerOpen && !!selectedDay} onClose={handleClose}>
-          <ModalContent sx={{ bgcolor: '#fff', borderRadius: '12px' }}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 3,
-              }}
-            >
-              <Typography variant="h6">{t('calendar.bookingDetail')}</Typography>
-              <IconButton onClick={handleClose} size="small">
-                <CloseIcon />
+        return (
+          <Dialog
+            open={isDrawerOpen && !!selectedDay}
+            onClose={handleClose}
+            maxWidth="xs"
+            fullWidth
+            PaperProps={{
+              sx: {
+                borderRadius: 3.5,
+                p: 1,
+                boxShadow: '0 20px 40px rgba(0,0,0,0.18)',
+              },
+            }}
+          >
+            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 0.5, pt: 1.5, px: 2 }}>
+              <Typography variant="h6" fontWeight={700} sx={{ fontSize: '1.15rem', color: '#1e293b' }}>
+                {t('calendar.bookingDetail')}
+              </Typography>
+              <IconButton onClick={handleClose} size="small" sx={{ color: '#94a3b8' }}>
+                <CloseIcon fontSize="small" />
               </IconButton>
-            </Box>
-
-            {selectedDay && (
-              <>
-                <Typography variant="body1" sx={{ fontWeight: "bold", mb: 2 }}>
-                  {parseInt(selectedDay.date.split('-')[2])} {getThaiMonthName(parseInt(selectedDay.date.split('-')[1]) - 1)}{" "}
-                  {i18n.language === 'en' ? parseInt(selectedDay.date.split('-')[0]) : parseInt(selectedDay.date.split('-')[0]) + 543}
-                </Typography>
-
-                <Box
-                  sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}
-                >
-                  <Typography variant="body1">{t('calendar.status')}</Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontWeight: "bold",
-                      color: getStatusColor(selectedDay),
-                    }}
-                  >
-                    {getStatusText(selectedDay)}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}
-                >
-                  <Typography variant="body1">{t('calendar.price')}</Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontWeight: "bold",
-                      color: '#000',
-                    }}
-                  >
-                    {getPrice(selectedDay) === 0 ? t('calendar.inquiry') : `${getPrice(selectedDay).toLocaleString()} ${t('success.thb')}`}
-                  </Typography>
-                </Box>
-
-                {selectedDay.status === "Available" && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    onClick={selectedDay.price === 0 ? () => setShowInquiryAlert(true) : handleBookingClick}
-                    sx={{
-                      fontSize: "24px",
-                      mt: 1,
-                      bgcolor: "#FFF2F2",
-                      color: "#B03052",
-                      border: `1px solid #B03052`,
-                      borderRadius: "12px",
-                      height: '3rem'
-                    }}
-                  >
-                    {selectedDay.price === 0 ? t('calendar.inquiry') : t('calendar.book')}
-                  </Button>
-                )}
-              </>
-            )}
-          </ModalContent>
-        </Modal>
-      )}
+            </DialogTitle>
+            <DialogContent sx={{ px: 2, py: 1.5 }}>
+              {selectedDay && renderDetailBody(selectedDay)}
+            </DialogContent>
+          </Dialog>
+        );
+      })()}
       <Dialog
         open={showInquiryAlert}
         onClose={() => setShowInquiryAlert(false)}
