@@ -86,34 +86,48 @@ function UserPage() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4, width: '100%' }}>
-      <Grid container direction="column" alignItems="center" sx={{ px: 2 }}>
-        <Box sx={{ width: '100%', maxWidth: 600, mb: 3 }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="h5" fontWeight={600}>
+    <Box sx={{ width: '100%', maxWidth: 760, mx: 'auto', px: { xs: 1.5, sm: 3 }, py: { xs: 2, sm: 4 } }}>
+      <Box sx={{ mb: 3 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Box>
+            <Typography variant="h5" fontWeight={700} color="#1e293b">
               {t('member.welcome', { name: userData?.firstName || 'User' })}
             </Typography>
-            <Button variant="outlined" color="error" size="small" onClick={handleLogout}>
-              {t('member.logout')}
-            </Button>
-          </Stack>
-        </Box>
+            <Typography variant="body2" color="text.secondary">
+              {t('member.myBookingsCount', { count: myBooking.length })}
+            </Typography>
+          </Box>
+          <Button
+            variant="outlined"
+            color="error"
+            size="small"
+            onClick={handleLogout}
+            sx={{ borderRadius: 2.5, px: 2 }}
+          >
+            {t('member.logout')}
+          </Button>
+        </Stack>
+      </Box>
 
-        <Box sx={{ width: '100%', maxWidth: 600 }}>
-          <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-            {t('member.myBookingsCount', { count: myBooking.length })}
-          </Typography>
-
-          {myBooking.length === 0 ? (
-            <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ textAlign: 'center', py: 4 }}>
-                <Typography color="text.secondary">{t('member.noBookingsYet')}</Typography>
-              </CardContent>
-            </Card>
-          ) : (
-            <Stack spacing={2}>
-              {myBooking.map((booking) => (
-                <Card key={booking.id} sx={{ borderRadius: 3 }}>
+      <Box sx={{ width: '100%' }}>
+        {myBooking.length === 0 ? (
+          <Card elevation={0} sx={{ borderRadius: 4, border: '1px solid #e2e8f0', p: 4, textAlign: 'center' }}>
+            <Typography color="text.secondary">{t('member.noBookingsYet')}</Typography>
+          </Card>
+        ) : (
+          <Stack spacing={2.5}>
+            {myBooking.map((booking) => (
+              <Card
+                key={booking.id}
+                elevation={0}
+                sx={{
+                  borderRadius: 4,
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+                  transition: 'transform 0.2s',
+                  '&:hover': { transform: 'translateY(-2px)' },
+                }}
+              >
                    <CardContent>
                     <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 2 }}>
                       <Box>
@@ -183,8 +197,7 @@ function UserPage() {
             </Stack>
           )}
         </Box>
-      </Grid>
-    </Box>
+      </Box>
   );
 }
 

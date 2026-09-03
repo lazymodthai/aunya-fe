@@ -115,6 +115,8 @@ function App() {
       <Box sx={{
         width: '100%',
         minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
         bgcolor: 'rgba(255, 255, 255, 0.87)'
       }}>
         <Box sx={{
@@ -127,9 +129,11 @@ function App() {
           <Navbar />
         </Box>
         <Box sx={{
+          flex: 1,
           padding: padding,
           display: 'flex',
           justifyContent: 'center',
+          alignItems: 'flex-start',
           pt: paddingTop,
           pb: paddingBottom,
           width: '100%',
@@ -167,11 +171,13 @@ function App() {
         )}
         {!isMobile && (
           <Box
+            component="footer"
             sx={{
-              width: '100vw',
+              width: '100%',
               bgcolor: "#2D336B",
               color: "#fff",
               padding: 4,
+              mt: 'auto',
               zIndex: 1000
             }}
           >
