@@ -1,10 +1,21 @@
-import { Checkbox, FormControlLabel, Link, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  Link,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from '@mui/material';
 import CustomDatePicker from '@components/booking/CustomDatePicker';
 import NumberField from '@components/booking/NumberField';
 import PDPADialog from '@components/PDPADialog';
 import { addDays } from 'date-fns';
-import { useState } from 'react';
-import { isValidThaiPhoneNumber } from '@utils/input';
+import { useState, useEffect } from 'react';
+import { COUNTRY_CODES, isValidPhoneNumber } from '@utils/input';
 import { useTranslation } from 'react-i18next';
 
 interface DateSelectionStepProps {
@@ -70,8 +81,61 @@ function DateSelectionStep({
   onPhoneNumberChange,
   onAcceptedPDPAChange,
 }: DateSelectionStepProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [pdpaDialogOpen, setPdpaDialogOpen] = useState(false);
+
+  // Helper to extract countryCode and localNumber from existing phoneNumber
+  const parsePhone = (phone: string) => {
+    if (!phone) return { code: '+66', local: '' };
+    if (phone.startsWith('+')) {
+      const sortedCodes = [...COUNTRY_CODES]
+        .filter((c) => c.code !== '+')
+        .sort((a, b) => b.code.length - a.code.length);
+      const matched = sortedCodes.find((c) => phone.startsWith(c.code));
+      if (matched) {
+        return { code: matched.code, local: phone.slice(matched.code.length) };
+      }
+      return { code: '+', local: phone.slice(1) };
+    }
+    return { code: '+66', local: phone };
+  };
+
+  const initial = parsePhone(phoneNumber);
+  const [countryCode, setCountryCode] = useState<string>(initial.code);
+  const [localNumber, setLocalNumber] = useState<string>(initial.local);
+
+  useEffect(() => {
+    const parsed = parsePhone(phoneNumber);
+    if (parsed.local !== localNumber || parsed.code !== countryCode) {
+      setCountryCode(parsed.code);
+      setLocalNumber(parsed.local);
+    }
+  }, [phoneNumber]);
+
+  const handleCountryCodeChange = (newCode: string) => {
+    setCountryCode(newCode);
+    const isValid = isValidPhoneNumber(newCode, localNumber);
+    const fullPhone = localNumber
+      ? (newCode === '+66'
+          ? localNumber
+          : (newCode === '+' ? `+${localNumber}` : `${newCode}${localNumber.replace(/^0+/, '')}`))
+      : '';
+    onPhoneNumberChange(fullPhone, !isValid);
+  };
+
+  const handleLocalNumberChange = (rawVal: string) => {
+    const cleaned = countryCode === '+' ? rawVal.replace(/[^\d+]/g, '') : rawVal.replace(/\D/g, '');
+    setLocalNumber(cleaned);
+    const isValid = isValidPhoneNumber(countryCode, cleaned);
+    const fullPhone = cleaned
+      ? (countryCode === '+66'
+          ? cleaned
+          : (countryCode === '+' ? `+${cleaned.replace(/^\+/, '')}` : `${countryCode}${cleaned.replace(/^0+/, '')}`))
+      : '';
+    onPhoneNumberChange(fullPhone, !isValid);
+  };
+
+  const selectedCountry = COUNTRY_CODES.find((c) => c.code === countryCode);
 
   return (
     <>
@@ -194,29 +258,60 @@ function DateSelectionStep({
         sx={{ width: '100%' }}
         disabled={hasUserData}
       />
-      <TextField
-        label={t("dateSelection.phoneNumber", "เบอร์โทรศัพท์มือถือ")}
-        variant="outlined"
-        onChange={(e) => {
-          const value = e.target.value.replace(/\D/g, '');
-          const isInvalid = hasUserData ? false : !isValidThaiPhoneNumber(value);
-          onPhoneNumberChange(value, isInvalid);
-        }}
-        value={phoneNumber}
-        sx={{ width: '100%' }}
-        slotProps={{
-          input: {
-            inputProps: {
-              maxLength: 10,
-              pattern: '[0-9]*',
-              inputMode: 'numeric',
+
+      {/* Phone Number Field with Country Code Dropdown (Flag + Code only) */}
+      <Box sx={{ width: '100%', display: 'flex', gap: 1 }}>
+        <FormControl sx={{ width: { xs: 105, sm: 115 }, flexShrink: 0 }} disabled={hasUserData}>
+          <Select
+            value={countryCode}
+            onChange={(e) => handleCountryCodeChange(e.target.value)}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 280,
+                },
+              },
+            }}
+            sx={{
+              '& .MuiSelect-select': {
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.6,
+                fontSize: { xs: '0.9rem', sm: '0.95rem' },
+                py: '15px',
+              },
+            }}
+          >
+            {COUNTRY_CODES.map((c) => (
+              <MenuItem key={c.code} value={c.code} sx={{ display: 'flex', gap: 1.2, fontSize: '0.9rem', py: 1 }}>
+                <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>{c.flag}</span>
+                <span style={{ fontWeight: 600 }}>{c.code}</span>
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <TextField
+          label={t("dateSelection.phoneNumber", "เบอร์โทรศัพท์มือถือ")}
+          variant="outlined"
+          onChange={(e) => handleLocalNumberChange(e.target.value)}
+          value={localNumber}
+          placeholder={selectedCountry?.example || '088 084 4455'}
+          sx={{ flex: 1 }}
+          slotProps={{
+            input: {
+              inputProps: {
+                maxLength: countryCode === '+66' ? 12 : 18,
+                pattern: '[0-9]*',
+                inputMode: 'numeric',
+              },
             },
-          },
-        }}
-        error={isInvalidPhoneNumber}
-        helperText={isInvalidPhoneNumber ? t("dateSelection.invalidPhone", "เบอร์โทรศัพท์ไม่ถูกต้อง") : ''}
-        disabled={hasUserData}
-      />
+          }}
+          error={isInvalidPhoneNumber}
+          helperText={isInvalidPhoneNumber ? t("dateSelection.invalidPhone", "เบอร์โทรศัพท์ไม่ถูกต้อง") : ''}
+          disabled={hasUserData}
+        />
+      </Box>
 
       {/* PDPA Acceptance */}
       <FormControlLabel

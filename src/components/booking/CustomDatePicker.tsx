@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { th } from 'date-fns/locale';
+import { th, enUS } from 'date-fns/locale';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { SxProps } from '@mui/material';
 import { parseLocalDate } from '@utils/date';
+import { useTranslation } from 'react-i18next';
 
 type DisabledDateRange = {
   checkinDate: string;
@@ -175,10 +176,13 @@ const CustomDatePicker = (props: Props) => {
     return false;
   };
 
+  const { i18n } = useTranslation();
+  const currentLocale = i18n.language === 'en' ? enUS : th;
+
   return (
     <LocalizationProvider
       dateAdapter={AdapterDateFns}
-      adapterLocale={th}
+      adapterLocale={currentLocale}
     >
       <DatePicker
         label={props.label}
@@ -195,8 +199,8 @@ const CustomDatePicker = (props: Props) => {
         maxDate={maxDate}
         shouldDisableDate={customShouldDisableDate}
         localeText={{
-          okButtonLabel: 'ตกลง',
-          cancelButtonLabel: 'ยกเลิก',
+          okButtonLabel: i18n.language === 'en' ? 'OK' : 'ตกลง',
+          cancelButtonLabel: i18n.language === 'en' ? 'Cancel' : 'ยกเลิก',
           toolbarTitle: props.label
         }}
         slotProps={{

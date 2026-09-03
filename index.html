@@ -28,28 +28,48 @@
   <!-- Preload critical resources -->
   <link rel="preload" as="image" href="https://www.aunyapoolvilla.com/og-image.jpg" />
 
-  <!-- Open Graph / Facebook -->
+  <!-- Open Graph / Facebook / LINE / WhatsApp -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://www.aunyapoolvilla.com/" />
-  <meta property="og:title" content="พูลวิลล่า นครศรีธรรมราช | อันหยา พูลวิลล่า สระส่วนตัว 3 ห้องนอน" />
+  <meta property="og:title" content="อันหยา พูลวิลล่า นครศรีธรรมราช | สระว่ายน้ำส่วนตัว โต๊ะพูล 7 ฟุต ลำโพง JBL" />
   <meta property="og:description"
-    content="พูลวิลล่า นครศรีธรรมราช สุดหรู 3 ห้องนอน 3 ห้องน้ำ สระว่ายน้ำส่วนตัวระบบเกลือ รองรับ 10+ คน ลำโพง JBL ชั้นดาดฟ้า 360° โต๊ะพูล เหมาะสำหรับครอบครัว ปาร์ตี้ สังสรรค์" />
-  <meta property="og:image" content="https://www.aunyapoolvilla.com/og-image.jpg" />
+    content="พูลวิลล่าส่วนตัว นครศรีธรรมราช สุดหรู 3 ห้องนอน สระว่ายน้ำระบบเกลือ โต๊ะพูล 7 ฟุต ลำโพง JBL Partybox ชั้นดาดฟ้า 360° เตาปิ้งย่าง BBQ รองรับ 8-12 ท่าน จองออนไลน์ โทร 088-084-4455" />
+  <meta property="og:image" content="/og-image.jpg" />
+  <meta property="og:image:url" content="/og-image.jpg" />
+  <meta property="og:image:secure_url" content="/og-image.jpg" />
+  <meta property="og:image:type" content="image/jpeg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="อันหยา พูลวิลล่า นครศรีธรรมราช สระว่ายน้ำส่วนตัว" />
+  <meta property="og:image:alt" content="อันหยา พูลวิลล่า นครศรีธรรมราช - Aunya Pool Villa" />
   <meta property="og:locale" content="th_TH" />
   <meta property="og:locale:alternate" content="en_US" />
-  <meta property="og:site_name" content="Aunya Pool Villa - พูลวิลล่า นครศรีธรรมราช" />
+  <meta property="og:site_name" content="อันหยา พูลวิลล่า นครศรีธรรมราช (Aunya Pool Villa)" />
 
-  <!-- Twitter -->
-  <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="https://www.aunyapoolvilla.com/" />
-  <meta property="twitter:title" content="พูลวิลล่า นครศรีธรรมราช | อันหยา พูลวิลล่า สระส่วนตัว" />
-  <meta property="twitter:description"
-    content="พูลวิลล่า นครศรีธรรมราช สุดหรู 3 ห้องนอน 3 ห้องน้ำ สระว่ายน้ำส่วนตัวระบบเกลือ รองรับ 10+ คน" />
-  <meta property="twitter:image" content="https://www.aunyapoolvilla.com/og-image.jpg" />
-  <meta property="twitter:image:alt" content="อันหยา พูลวิลล่า นครศรีธรรมราช" />
+  <!-- Twitter / X Cards -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://www.aunyapoolvilla.com/" />
+  <meta name="twitter:title" content="อันหยา พูลวิลล่า นครศรีธรรมราช | สระว่ายน้ำส่วนตัว โต๊ะพูล 7 ฟุต ลำโพง JBL" />
+  <meta name="twitter:description"
+    content="พูลวิลล่าส่วนตัว นครศรีธรรมราช สระว่ายน้ำระบบเกลือ โต๊ะพูล 7 ฟุต ลำโพง JBL Partybox ดาดฟ้า 360° เตาปิ้งย่าง BBQ รองรับ 8-12 ท่าน" />
+  <meta name="twitter:image" content="/og-image.jpg" />
+  <meta name="twitter:image:src" content="/og-image.jpg" />
+  <meta name="twitter:image:alt" content="อันหยา พูลวิลล่า นครศรีธรรมราช" />
+  <link rel="image_src" href="/og-image.jpg" />
+
+  <script>
+    (function () {
+      try {
+        var origin = window.location.origin;
+        if (origin && origin.startsWith('http')) {
+          var fullImgUrl = origin + '/og-image.jpg';
+          var metas = document.querySelectorAll('meta[property^="og:image"], meta[name^="twitter:image"]');
+          metas.forEach(function (el) {
+            el.setAttribute('content', fullImgUrl);
+          });
+        }
+      } catch (e) { }
+    })();
+  </script>
 
   <!-- Geo Tags -->
   <meta name="geo.region" content="TH-80" />
