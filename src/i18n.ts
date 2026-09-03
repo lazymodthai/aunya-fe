@@ -35,6 +35,7 @@ const resources = {
       },
       booking: {
         title: "จองห้องพัก",
+        badge: "อันหยา พูลวิลล่า • ระบบจองห้องพักออนไลน์",
         steps: {
           dates: "เลือกวันเข้าพัก",
           confirm: "ยืนยันรายการ",
@@ -321,6 +322,7 @@ const resources = {
       },
       booking: {
         title: "Book a Room",
+        badge: "Aunya Pool Villa • Online Reservation",
         steps: {
           dates: "Select Dates",
           confirm: "Confirm Booking",

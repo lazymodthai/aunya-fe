@@ -1,21 +1,26 @@
 import { QRCodeCanvas } from "qrcode.react";
 import { generatePromptPayPayload } from "../../utils/promptpay";
-import IconThaiQR from "../../assets/icons/icon-thaiqr.png"
+import IconThaiQR from "../../assets/icons/icon-thaiqr.png";
+
 type Props = {
   qrId: string;
   value: number;
+  size?: number;
 };
 
-function QRPayment(props:Props) {
+function QRPayment({ qrId, value, size = 200 }: Props) {
   return (
     <QRCodeCanvas
-      value={generatePromptPayPayload(props.qrId, props.value)}
+      value={generatePromptPayPayload(qrId, value)}
+      size={size}
+      level="M"
+      includeMargin={true}
       imageSettings={{
         src: IconThaiQR,
         x: undefined,
         y: undefined,
-        height: 24,
-        width: 24,
+        height: 28,
+        width: 28,
         opacity: 1,
         excavate: true,
       }}
@@ -24,3 +29,4 @@ function QRPayment(props:Props) {
 }
 
 export default QRPayment;
+

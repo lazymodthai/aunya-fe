@@ -12,28 +12,52 @@ type Props = {
 };
 
 function NumberField(props: Props) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only allow digits 0-9
+    const cleaned = e.target.value.replace(/\D/g, '');
+    e.target.value = cleaned;
+    props.onChange(e);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Prevent typing exponents, decimals, plus/minus
+    if (['e', 'E', '+', '-', '.', ','].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  const displayVal =
+    props.value === null || props.value === undefined || isNaN(Number(props.value))
+      ? ''
+      : props.value;
+
   return (
     <TextField
       label={props.label}
-      type="number"
+      type="tel"
       variant="outlined"
-      onChange={props.onChange}
+      onChange={handleChange}
+      onKeyDown={handleKeyDown}
       onBlur={props.onBlur}
-      onKeyUp={(e: any) => {
-        const charCode = e.which ? e.which : e.keyCode;
-        if (charCode < 48 || charCode > 57) {
-          e.preventDefault();
-        }
-      }}
-      value={props.value || ""}
+      value={displayVal}
       slotProps={{
         input: {
+          sx: {
+            borderRadius: 3,
+            '& input[type=number]::-webkit-inner-spin-button, & input[type=number]::-webkit-outer-spin-button': {
+              WebkitAppearance: 'none',
+              margin: 0,
+            },
+            '& input[type=number]': {
+              MozAppearance: 'textfield',
+            },
+          },
           inputProps: {
-            min: 1,
-            max: 20,
-            pattern: "[0-9]*",
-            inputMode: "numeric",
-            maxLength: 2
+            min: props.min || 0,
+            max: props.max || 20,
+            pattern: '[0-9]*',
+            inputMode: 'numeric',
+            maxLength: 2,
           },
         },
       }}

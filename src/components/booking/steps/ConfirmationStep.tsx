@@ -6,6 +6,7 @@ import {
   CircularProgress,
   Divider,
   FormControlLabel,
+  Grid,
   Stack,
   TextField,
   Typography,
@@ -63,7 +64,7 @@ function ConfirmationStep({
   onDiscountCodeChange,
   onPriceCalculated,
 }: ConfirmationStepProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isLoadingPrice, setIsLoadingPrice] = useState(true);
   const [isValidatingDiscount, setIsValidatingDiscount] = useState(false);
   const [roomPrices, setRoomPrices] = useState<PriceDetail[]>([]);
@@ -181,158 +182,234 @@ function ConfirmationStep({
   }
 
   return (
-    <>
-      <Typography sx={{ display: 'flex', gap: 1 }}>
-        {`Check-in: `}
-        <span style={{ color: '#0b538eff' }}>{t("confirmation.checkinDate", { date: FormatDate(checkinDate, 4) })}</span>
-      </Typography>
-      <Typography sx={{ display: 'flex', gap: 1 }}>
-        {`Check-out: `}
-        <span style={{ color: '#0b538eff' }}>{t("confirmation.checkoutDate", { date: FormatDate(checkoutDate, 4) })}</span>
-      </Typography>
-      <Typography sx={{ display: 'flex', gap: 1 }}>
-        {t("confirmation.totalNights", { nights })}
-      </Typography>
-      <Typography sx={{ display: 'flex', gap: 1 }}>
-        {t("confirmation.adultsCount", { count: guestNumber })}
-      </Typography>
-      {!!childrenNumber && (
-        <Typography sx={{ display: 'flex', gap: 1 }}>
-          {t("confirmation.childrenCount", { count: childrenNumber })}
+    <Stack spacing={2.5}>
+      {/* 1. Reservation Overview Card */}
+      <Box sx={{ p: 2.5, bgcolor: '#f8fafc', borderRadius: 3, border: '1px solid #e2e8f0' }}>
+        <Typography variant="subtitle2" fontWeight={700} color="#1e293b" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <span>📋</span> {t("success.bookingDetails", "รายละเอียดการจอง")}
         </Typography>
-      )}
-      {!!additionGuestNumber && (
-        <Typography sx={{ display: 'flex', gap: 1 }}>
-          {t("confirmation.extraBedsCount", { count: additionGuestNumber })}
-        </Typography>
-      )}
-      {!!additionTowel && (
-        <Typography sx={{ display: 'flex', gap: 1 }}>
-          {t("confirmation.extraTowelsCount", { count: additionTowel })}
-        </Typography>
-      )}
-      <Typography sx={{ display: 'flex', gap: 1 }}>
-        {t("confirmation.customerNameDisplay", { name })}
-      </Typography>
-      <Typography sx={{ display: 'flex', gap: 1 }}>
-        {t("confirmation.phoneNumberDisplay", { phone: phoneNumber })}
-      </Typography>
 
-      <Divider />
+        <Grid container spacing={1.5}>
+          <Grid size={{ xs: 6, sm: 6 }}>
+            <Typography variant="caption" color="text.secondary">Check-in</Typography>
+            <Typography variant="body2" fontWeight={600} color="#0b538eff">
+              {FormatDate(checkinDate, 4)}
+            </Typography>
+          </Grid>
+          <Grid size={{ xs: 6, sm: 6 }}>
+            <Typography variant="caption" color="text.secondary">Check-out</Typography>
+            <Typography variant="body2" fontWeight={600} color="#0b538eff">
+              {FormatDate(checkoutDate, 4)}
+            </Typography>
+          </Grid>
 
-      {/* Price Summary */}
-      <Typography sx={{ fontSize: 16, fontWeight: 600 }}>{t("confirmation.summary", "สรุปราคา")}</Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Typography>{t("confirmation.roomCharge", { nights })}</Typography>
-        <Typography fontWeight={500}>{totalRoomPrice.toLocaleString()} {t("success.thb")}</Typography>
-      </Box>
-      {!!additionGuestNumber && (
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography>{t("confirmation.extraBedCharge", { count: additionGuestNumber })}</Typography>
-          <Typography fontWeight={500}>
-            {((additionGuestNumber || 0) * additionGuestNumberPrice).toLocaleString()} {t("success.thb")}
-          </Typography>
-        </Box>
-      )}
-      {!!additionTowel && (
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography>{t("confirmation.extraTowelCharge", { count: additionTowel })}</Typography>
-          <Typography fontWeight={500}>
-            {((additionTowel || 0) * additionTowelPrice).toLocaleString()} {t("success.thb")}
-          </Typography>
-        </Box>
-      )}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Typography>
-          {t("confirmation.depositCharge", { nights })}
-          <span style={{ fontSize: 12, color: '#7d7d7dff' }}>{t("confirmation.depositRefundable", " (คืนหลัง Check-out)")}</span>
-        </Typography>
-        <Typography fontWeight={500}>{actualDeposit.toLocaleString()} {t("success.thb")}</Typography>
+          <Grid size={{ xs: 6, sm: 6 }}>
+            <Typography variant="caption" color="text.secondary">{t("success.nightsLabel", "ระยะเวลา")}</Typography>
+            <Typography variant="body2" fontWeight={600} color="#1e293b">
+              {t("confirmation.totalNights", { nights })}
+            </Typography>
+          </Grid>
+          <Grid size={{ xs: 6, sm: 6 }}>
+            <Typography variant="caption" color="text.secondary">{t("member.guestsTitle", "ผู้เข้าพัก")}</Typography>
+            <Typography variant="body2" fontWeight={600} color="#1e293b">
+              {guestNumber} {t("success.peopleCount", { count: guestNumber })}
+              {childrenNumber ? ` + ${t("success.childLabel")} ${childrenNumber}` : ''}
+              {additionGuestNumber ? ` (+${additionGuestNumber})` : ''}
+            </Typography>
+          </Grid>
+
+          <Grid size={12}>
+            <Divider sx={{ my: 0.5, borderColor: '#e2e8f0' }} />
+            <Typography variant="caption" color="text.secondary" display="block">
+              {t("dateSelection.customerName")}: <span style={{ fontWeight: 600, color: '#1e293b' }}>{name}</span> • {t("dateSelection.phoneNumber")}: <span style={{ fontWeight: 600, color: '#1e293b' }}>{phoneNumber}</span>
+            </Typography>
+          </Grid>
+        </Grid>
       </Box>
 
-      {/* Discount Code Input */}
-      <Divider />
-      <Stack direction="row" spacing={1} alignItems="flex-start">
-        <TextField
-          label={t("confirmation.discountCodeLabel", "รหัสส่วนลด (ถ้ามี)")}
-          variant="outlined"
-          onChange={(e) => handleDiscountCodeChange(e.target.value.toUpperCase())}
-          value={discountCode}
-          sx={{ flex: 1 }}
-          slotProps={{
-            input: {
-              inputProps: {
-                maxLength: 20,
-                style: { textTransform: 'uppercase' },
+      {/* 2. Payment Options Selection (Pay Full vs Pay Deposit) */}
+      <Box>
+        <Typography variant="subtitle2" fontWeight={700} color="#1e293b" sx={{ mb: 1.5 }}>
+          {t("payment.paymentChannel", "เลือกรูปแบบการชำระเงิน")}
+        </Typography>
+
+        <Grid container spacing={1.5}>
+          {/* Option A: Pay Full */}
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Box
+              onClick={() => onIsOnlyDepositChange(false)}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                cursor: 'pointer',
+                border: `2px solid ${!isOnlyDeposit ? '#B03052' : '#e2e8f0'}`,
+                bgcolor: !isOnlyDeposit ? 'rgba(176, 48, 82, 0.04)' : '#fff',
+                transition: 'all 0.2s',
+                '&:hover': { borderColor: '#B03052' },
+              }}
+            >
+              <Typography variant="subtitle2" fontWeight={700} color={!isOnlyDeposit ? '#B03052' : '#334155'}>
+                💎 {i18n.language === 'en' ? 'Pay in Full' : 'จ่ายเต็มจำนวน'}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                {i18n.language === 'en' ? 'Room total + security deposit' : 'ชำระค่าห้องพักและมัดจำครบถ้วน'}
+              </Typography>
+            </Box>
+          </Grid>
+
+          {/* Option B: Pay Deposit Only */}
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Box
+              onClick={() => onIsOnlyDepositChange(true)}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                cursor: 'pointer',
+                border: `2px solid ${isOnlyDeposit ? '#B03052' : '#e2e8f0'}`,
+                bgcolor: isOnlyDeposit ? 'rgba(176, 48, 82, 0.04)' : '#fff',
+                transition: 'all 0.2s',
+                '&:hover': { borderColor: '#B03052' },
+              }}
+            >
+              <Typography variant="subtitle2" fontWeight={700} color={isOnlyDeposit ? '#B03052' : '#334155'}>
+                🏷️ {i18n.language === 'en' ? 'Deposit Only' : 'จ่ายเฉพาะมัดจำ'}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                {i18n.language === 'en' ? 'Pay deposit now, rest on Check-in' : 'ล็อควันด้วยมัดจำ จ่ายส่วนเหลือวันเข้าพัก'}
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
+      </Box>
+
+      {/* 3. Discount Code Input */}
+      <Box sx={{ p: 2, bgcolor: '#fff', borderRadius: 3, border: '1px solid #e2e8f0' }}>
+        <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+          {t("confirmation.discountCodeLabel", "รหัสส่วนลด (ถ้ามี)")}
+        </Typography>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <TextField
+            size="small"
+            variant="outlined"
+            onChange={(e) => handleDiscountCodeChange(e.target.value.toUpperCase())}
+            value={discountCode}
+            sx={{ flex: 1 }}
+            slotProps={{
+              input: {
+                sx: { borderRadius: 2.5 },
+                inputProps: {
+                  maxLength: 20,
+                  style: { textTransform: 'uppercase' },
+                },
               },
-            },
-          }}
-          placeholder={t("confirmation.discountPlaceholder", "เช่น SAVE100")}
-          disabled={discountValidated}
-        />
-        <Button
-          variant="outlined"
-          onClick={handleValidateDiscount}
-          disabled={!discountCode || isValidatingDiscount || discountValidated}
-          sx={{ height: 56 }}
-        >
-          {isValidatingDiscount ? <CircularProgress size={20} /> : discountValidated ? t("confirmation.codeApplied", "ใช้แล้ว") : t("confirmation.applyCode", "ใช้โค้ด")}
-        </Button>
-      </Stack>
+            }}
+            placeholder={t("confirmation.discountPlaceholder", "เช่น SAVE100")}
+            disabled={discountValidated}
+          />
+          <Button
+            variant="contained"
+            size="medium"
+            onClick={handleValidateDiscount}
+            disabled={!discountCode || isValidatingDiscount || discountValidated}
+            sx={{
+              borderRadius: 2.5,
+              height: 40,
+              bgcolor: discountValidated ? '#16a34a' : '#2D336B',
+              boxShadow: 'none',
+              fontWeight: 600,
+            }}
+          >
+            {isValidatingDiscount ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : discountValidated ? t("confirmation.codeApplied", "ใช้แล้ว") : t("confirmation.applyCode", "ใช้โค้ด")}
+          </Button>
+        </Stack>
 
-      {/* Discount Result */}
-      {discountError && (
-        <Chip label={discountError} color="error" size="small" />
-      )}
-      {discountData && (
-        <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: '#e8f5e9' }}>
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography sx={{ fontWeight: 500 }}>{t("confirmation.codeLabel", "โค้ด")}: {discountCode}</Typography>
-            <Chip label={t("confirmation.codeValid", "ใช้ได้")} color="success" size="small" />
-          </Stack>
-          <Typography sx={{ color: '#15a13aff', fontWeight: 600, mt: 0.5 }}>
-            {t("confirmation.discountLabel", "ส่วนลด")}: -{discountAmount.toLocaleString('th-TH')} บาท
-            {Number(discountData.discountPercentage) > 0 && ` (${discountData.discountPercentage}%)`}
+        {discountError && (
+          <Typography variant="caption" color="error.main" sx={{ mt: 1, display: 'block', fontWeight: 500 }}>
+            {discountError}
           </Typography>
-        </Box>
-      )}
-
-      {/* Total */}
-      <Divider />
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography sx={{ fontSize: 18, fontWeight: 600 }}>{t("confirmation.totalAmount", "ยอดรวมทั้งสิ้น")}</Typography>
-        <Typography sx={{ fontSize: 22, fontWeight: 600, color: '#15a13aff' }}>
-          {totalPrice.toLocaleString('th-TH', { style: 'currency', currency: 'THB' })}
-        </Typography>
+        )}
+        {discountData && (
+          <Box sx={{ mt: 1.5, p: 1.2, borderRadius: 2, bgcolor: '#f0fdf4', border: '1px solid #bbf7d0' }}>
+            <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 600, display: 'block' }}>
+              ✓ {t("confirmation.discountLabel", "ส่วนลด")}: -{discountAmount.toLocaleString('th-TH')} {t("success.thb")}
+              {Number(discountData.discountPercentage) > 0 && ` (${discountData.discountPercentage}%)`}
+            </Typography>
+          </Box>
+        )}
       </Box>
 
-      {/* Deposit Only Option */}
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={isOnlyDeposit}
-            onChange={(e) => onIsOnlyDepositChange(e.target.checked)}
-          />
-        }
-        label={t("confirmation.depositOnly", "จ่ายเฉพาะค่ามัดจำก่อน (จ่ายส่วนที่เหลือตอน Check-in)")}
-      />
-      {isOnlyDeposit && (
-        <Box sx={{ bgcolor: '#fff3e0', p: 2, borderRadius: 2 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography sx={{ fontWeight: 500 }}>{t("confirmation.depositAmount", "ยอดชำระตอนนี้ (มัดจำ)")}</Typography>
-            <Typography sx={{ fontWeight: 600, color: '#15a13aff' }}>
-              {actualDeposit.toLocaleString('th-TH')} บาท
-            </Typography>
-          </Box>
+      {/* 4. Price Breakdown Summary */}
+      <Box sx={{ p: 2.5, bgcolor: '#fff', borderRadius: 3, border: '1px solid #e2e8f0' }}>
+        <Typography variant="subtitle2" fontWeight={700} color="#1e293b" sx={{ mb: 2 }}>
+          {t("confirmation.summary", "สรุปราคา")}
+        </Typography>
+
+        <Stack spacing={1.2}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography sx={{ fontWeight: 500 }}>{t("confirmation.remainingAmount", "ยอดค้างชำระ (จ่ายตอน Check-in)")}</Typography>
-            <Typography sx={{ fontWeight: 600, color: '#ed6c02' }}>
-              {(totalPrice - actualDeposit).toLocaleString('th-TH')} บาท
+            <Typography variant="body2" color="text.secondary">{t("confirmation.roomCharge", { nights })}</Typography>
+            <Typography variant="body2" fontWeight={600}>{totalRoomPrice.toLocaleString()} {t("success.thb")}</Typography>
+          </Box>
+
+          {!!additionGuestNumber && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="body2" color="text.secondary">{t("confirmation.extraBedCharge", { count: additionGuestNumber })}</Typography>
+              <Typography variant="body2" fontWeight={600}>
+                {((additionGuestNumber || 0) * additionGuestNumberPrice).toLocaleString()} {t("success.thb")}
+              </Typography>
+            </Box>
+          )}
+
+          {!!additionTowel && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="body2" color="text.secondary">{t("confirmation.extraTowelCharge", { count: additionTowel })}</Typography>
+              <Typography variant="body2" fontWeight={600}>
+                {((additionTowel || 0) * additionTowelPrice).toLocaleString()} {t("success.thb")}
+              </Typography>
+            </Box>
+          )}
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography variant="body2" color="text.secondary">
+              {t("confirmation.depositCharge", { nights })}
+              <span style={{ fontSize: 11, color: '#94a3b8' }}>{t("confirmation.depositRefundable", " (คืนหลัง Check-out)")}</span>
+            </Typography>
+            <Typography variant="body2" fontWeight={600}>{actualDeposit.toLocaleString()} {t("success.thb")}</Typography>
+          </Box>
+
+          {discountAmount > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="body2" sx={{ color: '#16a34a', fontWeight: 600 }}>{t("confirmation.discountLabel", "ส่วนลด")}</Typography>
+              <Typography variant="body2" sx={{ color: '#16a34a', fontWeight: 700 }}>
+                -{discountAmount.toLocaleString()} {t("success.thb")}
+              </Typography>
+            </Box>
+          )}
+
+          <Divider sx={{ my: 1 }} />
+
+          {/* Amount Due Calculation */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="subtitle1" fontWeight={700} color="#1e293b">
+              {isOnlyDeposit ? t("confirmation.depositAmount", "ยอดชำระตอนนี้ (มัดจำ)") : t("confirmation.totalAmount", "ยอดรวมทั้งสิ้น")}
+            </Typography>
+            <Typography variant="h6" fontWeight={700} color="#15a13aff">
+              {(isOnlyDeposit ? actualDeposit : totalPrice).toLocaleString('th-TH', { style: 'currency', currency: 'THB' })}
             </Typography>
           </Box>
-        </Box>
-      )}
-    </>
+
+          {isOnlyDeposit && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: '#fffbeb', p: 1.5, borderRadius: 2, border: '1px solid #fef3c7' }}>
+              <Typography variant="caption" fontWeight={600} color="#b45309">
+                {t("confirmation.remainingAmount", "ยอดค้างชำระ (จ่ายตอน Check-in)")}
+              </Typography>
+              <Typography variant="body2" fontWeight={700} color="#b45309">
+                {(totalPrice - actualDeposit).toLocaleString('th-TH')} {t("success.thb")}
+              </Typography>
+            </Box>
+          )}
+        </Stack>
+      </Box>
+    </Stack>
   );
 }
 

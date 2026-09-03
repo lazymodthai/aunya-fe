@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Chip,
   Grid,
   Step,
   StepLabel,
@@ -427,75 +428,166 @@ function Booking(props: Props) {
   };
 
   return (
-    <Grid container direction={'column'} gap={2} width={isMobile ? '100%' : 600}>
+    <Box sx={{ width: '100%', maxWidth: 700, mx: 'auto', px: { xs: 1.5, sm: 3 }, py: { xs: 2, sm: 4 } }}>
       {loading && <Loading />}
-      <Grid textAlign={'center'}>
-        <Typography sx={{ fontSize: 24 }}>{t("booking.title", "จองห้องพัก")}</Typography>
-      </Grid>
-      <Stepper activeStep={step} sx={{ mt: 2 }}>
-        {steps.map((label, index) => {
-          const stepProps: { completed?: boolean } = {};
-          const labelProps: { optional?: React.ReactNode } = {};
-          if (isStepSkipped(index)) {
-            stepProps.completed = false;
-          }
-          return (
-            <Step key={label} {...stepProps}>
-              <StepLabel {...labelProps}>{label}</StepLabel>
-            </Step>
-          );
-        })}
-      </Stepper>
-      <Grid
-        container
-        direction={'column'}
-        gap={2}
-        sx={{ border: '1px solid #A9B5DF', padding: 2, borderRadius: 2 }}
+
+      {/* Header Section */}
+      <Box sx={{ textAlign: 'center', mb: 3 }}>
+        <Chip
+          label={`✨ ${t('booking.badge', 'อันหยา พูลวิลล่า • ระบบจองห้องพัก')}`}
+          size="small"
+          sx={{
+            bgcolor: 'rgba(176, 48, 82, 0.08)',
+            color: '#B03052',
+            fontWeight: 700,
+            fontSize: '0.78rem',
+            mb: 1.5,
+            px: 1,
+            py: 0.5,
+            borderRadius: '12px',
+          }}
+        />
+        <Typography
+          variant="h4"
+          fontWeight={800}
+          color="#1e293b"
+          sx={{
+            fontSize: { xs: '1.6rem', sm: '2.1rem' },
+            letterSpacing: '-0.5px',
+          }}
+        >
+          {t('booking.title', 'จองห้องพัก')}
+        </Typography>
+      </Box>
+
+      {/* Modern Stepper */}
+      <Box sx={{ mb: 3.5 }}>
+        <Stepper
+          activeStep={step}
+          alternativeLabel
+          sx={{
+            '& .MuiStepIcon-root': {
+              color: '#e2e8f0',
+              width: 32,
+              height: 32,
+              '&.Mui-active': {
+                color: '#B03052',
+              },
+              '&.Mui-completed': {
+                color: '#16a34a',
+              },
+            },
+            '& .MuiStepLabel-label': {
+              fontSize: { xs: '0.75rem', sm: '0.85rem' },
+              fontWeight: 500,
+              mt: 0.8,
+              '&.Mui-active': {
+                fontWeight: 700,
+                color: '#B03052',
+              },
+              '&.Mui-completed': {
+                fontWeight: 600,
+                color: '#1e293b',
+              },
+            },
+            '& .MuiStepConnector-line': {
+              borderColor: '#e2e8f0',
+              borderTopWidth: 2,
+            },
+          }}
+        >
+          {steps.map((label, index) => {
+            const stepProps: { completed?: boolean } = {};
+            const labelProps: { optional?: React.ReactNode } = {};
+            if (isStepSkipped(index)) {
+              stepProps.completed = false;
+            }
+            return (
+              <Step key={label} {...stepProps}>
+                <StepLabel {...labelProps}>{label}</StepLabel>
+              </Step>
+            );
+          })}
+        </Stepper>
+      </Box>
+
+      {/* Form Content Card */}
+      <Box
+        sx={{
+          bgcolor: '#ffffff',
+          borderRadius: 4,
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.04)',
+          p: { xs: 2.5, sm: 3.5 },
+          position: 'relative',
+        }}
       >
         {renderStep()}
+
         {errorMessage && (
-          <Typography color="error" sx={{ textAlign: 'center' }}>
-            {errorMessage}
-          </Typography>
+          <Box sx={{ mt: 2, p: 1.5, borderRadius: 2.5, bgcolor: '#fef2f2', border: '1px solid #fecaca' }}>
+            <Typography variant="body2" color="error.main" sx={{ textAlign: 'center', fontWeight: 600 }}>
+              {errorMessage}
+            </Typography>
+          </Box>
         )}
-      </Grid>
-      <Grid container direction={'row'} spacing={2} justifyContent={'center'} sx={{ mt: 2 }} size={12}>
+      </Box>
+
+      {/* Action Navigation Buttons */}
+      <Grid container spacing={2} sx={{ mt: 1 }}>
         {step > 0 && step < 4 && (
-          <Grid size={6}>
+          <Grid size={{ xs: 6 }}>
             <Button
               fullWidth
               variant="outlined"
-              color="inherit"
-              disabled={step === 0}
               onClick={handleBack}
-              startIcon={<ArrowBackIosIcon />}
-              sx={{ height: 50, borderRadius: 2 }}
+              startIcon={<ArrowBackIosIcon sx={{ fontSize: 14 }} />}
+              sx={{
+                height: 48,
+                borderRadius: 3,
+                borderColor: '#cbd5e1',
+                color: '#475569',
+                fontWeight: 600,
+                '&:hover': { borderColor: '#94a3b8', bgcolor: '#f8fafc' },
+              }}
             >
-              {t("booking.buttons.back", "ย้อนกลับ")}
+              {t('booking.buttons.back', 'ย้อนกลับ')}
             </Button>
           </Grid>
         )}
-        <Grid size={step === 0 || step === 4 ? 12 : 6}>
+        <Grid size={{ xs: step === 0 || step === 4 ? 12 : 6 }}>
           <Button
             fullWidth
             variant="contained"
             onClick={handleNext}
-            endIcon={step === steps.length ? <CheckIcon /> : <ArrowForwardIosIcon />}
-            sx={{ height: 50, borderRadius: 2 }}
+            endIcon={step === steps.length ? <CheckIcon /> : <ArrowForwardIosIcon sx={{ fontSize: 14 }} />}
+            sx={{
+              height: 48,
+              borderRadius: 3,
+              bgcolor: '#B03052',
+              fontWeight: 700,
+              fontSize: '1rem',
+              boxShadow: '0 4px 14px rgba(176, 48, 82, 0.25)',
+              '&:hover': { bgcolor: '#962342', boxShadow: '0 6px 18px rgba(176, 48, 82, 0.35)' },
+              '&.Mui-disabled': {
+                bgcolor: '#e2e8f0',
+                color: '#94a3b8',
+              },
+            }}
             disabled={
               step !== 4 &&
               (!checkinDate || !checkoutDate || !guestNumber || !name || !phoneNumber || isInvalidPhoneNumber || !acceptedPDPA)
             }
           >
             {step === 4
-              ? t("booking.buttons.backToHome", "กลับหน้าหลัก")
+              ? t('booking.buttons.backToHome', 'กลับหน้าหลัก')
               : step === steps.length - 1
-              ? t("booking.buttons.confirm", "ยืนยัน")
-              : t("booking.buttons.next", "ถัดไป")}
+              ? t('booking.buttons.confirm', 'ยืนยัน')
+              : t('booking.buttons.next', 'ถัดไป')}
           </Button>
         </Grid>
       </Grid>
-    </Grid>
+    </Box>
   );
 }
 
