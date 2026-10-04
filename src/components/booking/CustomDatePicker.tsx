@@ -30,13 +30,16 @@ const CustomDatePicker = (props: Props) => {
   const [open, setOpen] = useState(false);
 
   const dynamicMinDate = useMemo(() => {
+    if (props.minDate !== undefined) {
+      return props.minDate || undefined;
+    }
     if (props.checkInDate) {
       return props.checkInDate;
     }
     if (props.disablePast === false) {
-      return props.minDate || undefined;
+      return undefined;
     }
-    return props.minDate || new Date();
+    return new Date();
   }, [props.checkInDate, props.minDate, props.disablePast]);
 
   // 2. Logic การคำนวณ maxDate ยังคงเดิม
@@ -203,7 +206,7 @@ const CustomDatePicker = (props: Props) => {
         open={open}
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}
-        disablePast={!props.checkInDate}
+        disablePast={props.disablePast === false ? false : !props.checkInDate}
         minDate={dynamicMinDate}
         maxDate={maxDate}
         shouldDisableDate={customShouldDisableDate}

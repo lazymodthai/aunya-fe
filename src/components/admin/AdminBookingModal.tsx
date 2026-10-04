@@ -350,6 +350,7 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({
                   value={checkoutDate}
                   onChange={(date: Date | null) => setCheckoutDate(date)}
                   minDate={checkinDate ? addDays(checkinDate, 1) : null}
+                  checkInDate={checkinDate}
                   disablePast={false}
                   size="small"
                   sx={{ width: '100%', bgcolor: '#ffffff', borderRadius: 2 }}
