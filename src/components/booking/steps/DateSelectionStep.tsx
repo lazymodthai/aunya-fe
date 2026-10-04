@@ -41,6 +41,7 @@ interface DateSelectionStepProps {
   maxTowels: number;
   advanceBookingMonths?: number;
   acceptedPDPA: boolean;
+  isAdmin?: boolean;
   onCheckinChange: (date: Date | null) => void;
   onCheckoutChange: (date: Date | null) => void;
   onGuestNumberChange: (value: number | null) => void;
@@ -73,6 +74,7 @@ function DateSelectionStep({
   maxTowels,
   advanceBookingMonths,
   acceptedPDPA,
+  isAdmin = false,
   onCheckinChange,
   onCheckoutChange,
   onGuestNumberChange,
@@ -166,6 +168,7 @@ function DateSelectionStep({
           disabledDates={disabledDates}
           disabledDateRange={disabledDateRange}
           maximumMonth={advanceBookingMonths || 6}
+          disablePast={!isAdmin}
         />
       </Box>
 

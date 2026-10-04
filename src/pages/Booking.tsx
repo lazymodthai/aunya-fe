@@ -190,6 +190,13 @@ function Booking(props: Props) {
     if (isInvalidPhoneNumber || !checkinDate || !checkoutDate || !guestNumber || !name || !phoneNumber)
       return;
 
+    const todayMidnight = new Date();
+    todayMidnight.setHours(0, 0, 0, 0);
+    const isPastBooking = checkinDate ? checkinDate < todayMidnight : false;
+    const adminStatus = userData?.isAdmin
+      ? (isPastBooking ? BookingStatus.CHECKED_OUT : BookingStatus.CONFIRMED)
+      : undefined;
+
     const currentPaidAmount = isOnlyDeposit ? actualDeposit : totalPrice;
     const currentRemainingAmount = isOnlyDeposit ? totalPrice - actualDeposit : 0;
 
@@ -210,6 +217,7 @@ function Booking(props: Props) {
       paidAmount: currentPaidAmount,
       remainingAmount: currentRemainingAmount,
       additionTowel: additionTowel || 0,
+      status: adminStatus,
     };
 
     try {
@@ -218,8 +226,12 @@ function Booking(props: Props) {
       const { data } = await BookingAPI.book(payload);
       setRefCode(data.refCode);
       setBookingId(data.id);
-      setRoomPrices(data.prices.map((p: any) => ({ date: p.date, price: Number(p.price) })));
-      setStep(2);
+      setRoomPrices((data.prices || []).map((p: any) => ({ date: p.date, price: Number(p.price) })));
+      if (userData?.isAdmin && (isPastBooking || adminStatus === BookingStatus.CONFIRMED || adminStatus === BookingStatus.CHECKED_OUT)) {
+        setStep(4);
+      } else {
+        setStep(2);
+      }
     } catch (error: any) {
       console.error(error);
       const errorMsg =
@@ -335,6 +347,7 @@ function Booking(props: Props) {
             maxTowels={maxTowels}
             advanceBookingMonths={advanceBookingMonths}
             acceptedPDPA={acceptedPDPA}
+            isAdmin={userData?.isAdmin ?? false}
             onCheckinChange={setCheckinDate}
             onCheckoutChange={setCheckoutDate}
             onGuestNumberChange={setGuestNumber}

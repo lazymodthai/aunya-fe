@@ -34,6 +34,7 @@ import {
   Login as LoginIcon,
   Logout as LogoutIcon,
   Clear as ClearIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
 import { MyBookingData } from '@apis/booking';
 import { BookingStatus } from '@constants/booking.enum';
@@ -43,9 +44,10 @@ import { parseLocalDate } from '@utils/date';
 interface BookingsTabProps {
   allBookings: MyBookingData[];
   onStatusChange: (booking: MyBookingData, newStatus: BookingStatus, additionalPayment?: number) => void;
+  onAddBooking?: () => void;
 }
 
-function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
+function BookingsTab({ allBookings, onStatusChange, onAddBooking }: BookingsTabProps) {
   const [slipModalOpen, setSlipModalOpen] = useState(false);
   const [selectedSlips, setSelectedSlips] = useState<{ fileUrl: string }[]>([]);
 
@@ -486,16 +488,30 @@ function BookingsTab({ allBookings, onStatusChange }: BookingsTabProps) {
   return (
     <Box>
       {/* Title & Quick Stats */}
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
         <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
           การจองทั้งหมด
         </Typography>
-        <Chip
-          label={`${allBookings.length} รายการ`}
-          color="primary"
-          size="small"
-          sx={{ fontWeight: 700 }}
-        />
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Chip
+            label={`${allBookings.length} รายการ`}
+            color="primary"
+            size="small"
+            sx={{ fontWeight: 700 }}
+          />
+          {onAddBooking && (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={onAddBooking}
+              sx={{ borderRadius: 2, fontWeight: 700, fontSize: { xs: '0.75rem', sm: '0.85rem' } }}
+            >
+              + บันทึกการจอง (จองย้อนหลัง)
+            </Button>
+          )}
+        </Stack>
       </Stack>
 
       {/* 1. Status Filter Pills (Horizontal Scrollable) */}

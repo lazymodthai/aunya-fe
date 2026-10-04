@@ -22,6 +22,7 @@ type Props = {
   disabledDates?: string[] // format: YYYY-MM-DD
   checkInDate?: Date | null
   maximumMonth?: number
+  disablePast?: boolean
   size?: 'small' | 'medium'
 }
 
@@ -32,11 +33,18 @@ const CustomDatePicker = (props: Props) => {
     if (props.checkInDate) {
       return props.checkInDate;
     }
+    if (props.disablePast === false) {
+      return props.minDate || undefined;
+    }
     return props.minDate || new Date();
-  }, [props.checkInDate, props.minDate]);
+  }, [props.checkInDate, props.minDate, props.disablePast]);
 
   // 2. Logic การคำนวณ maxDate ยังคงเดิม
   const maxDate = useMemo(() => {
+    if (props.disablePast === false) {
+      return undefined;
+    }
+
     if (props.checkInDate) {
       const checkIn = new Date(props.checkInDate);
       const targetYear = checkIn.getFullYear();
@@ -53,7 +61,7 @@ const CustomDatePicker = (props: Props) => {
     }
 
     return undefined;
-  }, [props.checkInDate, props.maximumMonth]);
+  }, [props.checkInDate, props.maximumMonth, props.disablePast]);
 
   const flatDisabledDates = useMemo(() => {
     const allDisabled: Date[] = [];

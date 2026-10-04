@@ -29,6 +29,7 @@ import DiscountCodeTab from '@components/admin/DiscountCodeTab';
 import GalleryTab from '@components/admin/GalleryTab';
 import SettingsTab from '@components/admin/SettingsTab';
 import SummaryTab from '@components/admin/SummaryTab';
+import { AdminBookingModal } from '@components/admin/AdminBookingModal';
 import { ROOM_ID } from '@configs/app-settings';
 import SettingsAPI from '@apis/settings';
 
@@ -49,6 +50,9 @@ function AdminPage() {
     booking: null,
     action: null,
   });
+
+  const [adminBookingDialogOpen, setAdminBookingDialogOpen] = useState(false);
+  const [adminBookingInitialDate, setAdminBookingInitialDate] = useState<string | null>(null);
 
   // Notifications
   const [noti, setNoti] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({
@@ -159,8 +163,9 @@ function AdminPage() {
     }
   };
 
-  const handleAddBooking = (date: string) => {
-    navigate(`/booking?startDate=${date}`);
+  const handleAddBooking = (date?: string) => {
+    setAdminBookingInitialDate(date || null);
+    setAdminBookingDialogOpen(true);
   };
 
   const handleStatusChange = async (booking: MyBookingData, newStatus: BookingStatus, additionalPayment?: number) => {
@@ -290,6 +295,7 @@ function AdminPage() {
             <BookingsTab
               allBookings={allBookings}
               onStatusChange={handleStatusChange}
+              onAddBooking={() => handleAddBooking()}
             />
           )}
 
@@ -343,6 +349,21 @@ function AdminPage() {
 
       {/* Notification */}
       <Noti type={noti.type} open={noti.open} value={noti.message} onClose={() => setNoti({ ...noti, open: false })} />
+
+      {/* Admin Booking / Retroactive Booking Modal */}
+      <AdminBookingModal
+        open={adminBookingDialogOpen}
+        initialDate={adminBookingInitialDate}
+        onClose={() => {
+          setAdminBookingDialogOpen(false);
+          setAdminBookingInitialDate(null);
+        }}
+        onSuccess={() => {
+          fetchAllBookings();
+          fetchCalendarData(currentMonth);
+        }}
+        showNoti={showNoti}
+      />
     </Box>
   );
 }

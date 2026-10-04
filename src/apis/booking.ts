@@ -30,6 +30,10 @@ export default class BookingAPI extends InstanceBookingAPI {
     return this.api.post(`${path}/book/`, payload);
   }
 
+  static adminBook(payload: BookingPayload): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
+    return this.api.post(`${path}/admin/book/`, payload);
+  }
+
   static getBookedDate(): Promise<{ data: any; headers: RawAxiosResponseHeaders; }> {
     return this.api.get(`${path}/dates`);
   }

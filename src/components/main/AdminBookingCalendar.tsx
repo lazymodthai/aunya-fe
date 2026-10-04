@@ -742,7 +742,7 @@ const AdminBookingCalendar: React.FC<AdminBookingCalendarProps> = ({
                 onClick={handleAddBooking}
                 sx={{ mt: 2 }}
               >
-                เพิ่มการจองใหม่
+                เพิ่มการจองใหม่ / บันทึกย้อนหลัง
               </Button>
             )}
           </Box>

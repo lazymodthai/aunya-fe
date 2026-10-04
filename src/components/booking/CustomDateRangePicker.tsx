@@ -35,10 +35,11 @@ interface DisabledDateRange {
 interface CustomDateRangePickerProps {
   checkinDate: Date | null;
   checkoutDate: Date | null;
-  onChange: (checkin: Date | null, checkout: Date | null) => void;
+  onChange: (checkin: Date | null, checkoutDate: Date | null) => void;
   disabledDates?: string[]; // format: YYYY-MM-DD
   disabledDateRange?: DisabledDateRange[];
   maximumMonth?: number;
+  disablePast?: boolean;
   label?: string;
 }
 
@@ -62,6 +63,7 @@ export const CustomDateRangePicker: React.FC<CustomDateRangePickerProps> = ({
   disabledDates,
   disabledDateRange,
   maximumMonth = 6,
+  disablePast = true,
 }) => {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
@@ -116,13 +118,13 @@ export const CustomDateRangePicker: React.FC<CustomDateRangePickerProps> = ({
 
   // Max selectable date
   const maxSelectableDate = useMemo(() => {
-    if (maximumMonth && maximumMonth > 0) {
+    if (maximumMonth && maximumMonth > 0 && disablePast !== false) {
       const today = new Date();
       const targetMonth = today.getMonth() + maximumMonth - 1;
       return new Date(today.getFullYear(), targetMonth + 1, 0, 23, 59, 59, 999);
     }
     return undefined;
-  }, [maximumMonth]);
+  }, [maximumMonth, disablePast]);
 
   const isDateDisabled = (date: Date) => {
     const today = new Date();
@@ -131,10 +133,10 @@ export const CustomDateRangePicker: React.FC<CustomDateRangePickerProps> = ({
     d.setHours(0, 0, 0, 0);
 
     // Disable past
-    if (d < today) return true;
+    if (disablePast !== false && d < today) return true;
 
     // Disable beyond max range
-    if (maxSelectableDate && d > maxSelectableDate) return true;
+    if (disablePast !== false && maxSelectableDate && d > maxSelectableDate) return true;
 
     // Disable booked dates
     return flatDisabledDates.some((disabledDate) => {
@@ -201,20 +203,36 @@ export const CustomDateRangePicker: React.FC<CustomDateRangePickerProps> = ({
     onChange(null, null);
   };
 
+  const isPrevDisabled = useMemo(() => {
+    if (disablePast === false) return false;
+    const prev = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+    const today = new Date();
+    today.setDate(1);
+    today.setHours(0, 0, 0, 0);
+    return prev < today;
+  }, [currentMonth, disablePast]);
+
+  const isNextDisabled = useMemo(() => {
+    if (disablePast === false) return false;
+    if (!maxSelectableDate) return false;
+    const next = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+    return next > maxSelectableDate;
+  }, [currentMonth, disablePast, maxSelectableDate]);
+
   // Month navigation
   const handlePrevMonth = () => {
     const prev = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
     const today = new Date();
     today.setDate(1);
     today.setHours(0, 0, 0, 0);
-    if (prev >= today) {
+    if (disablePast === false || prev >= today) {
       setCurrentMonth(prev);
     }
   };
 
   const handleNextMonth = () => {
     const next = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
-    if (!maxSelectableDate || next <= maxSelectableDate) {
+    if (disablePast === false || !maxSelectableDate || next <= maxSelectableDate) {
       setCurrentMonth(next);
     }
   };
@@ -452,10 +470,10 @@ const ENG_SHORT_MONTH_NAMES = [
               {monthTitle}
             </Typography>
             <Stack direction="row" spacing={0.5}>
-              <IconButton onClick={handlePrevMonth} size="small" sx={{ border: '1px solid #e2e8f0' }}>
+              <IconButton onClick={handlePrevMonth} disabled={isPrevDisabled} size="small" sx={{ border: '1px solid #e2e8f0' }}>
                 <ChevronLeftIcon fontSize="small" />
               </IconButton>
-              <IconButton onClick={handleNextMonth} size="small" sx={{ border: '1px solid #e2e8f0' }}>
+              <IconButton onClick={handleNextMonth} disabled={isNextDisabled} size="small" sx={{ border: '1px solid #e2e8f0' }}>
                 <ChevronRightIcon fontSize="small" />
               </IconButton>
             </Stack>
