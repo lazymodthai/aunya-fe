@@ -70,12 +70,27 @@ export const CustomDateRangePicker: React.FC<CustomDateRangePickerProps> = ({
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [open, setOpen] = useState(false);
+  const [selectingField, setSelectingField] = useState<'checkin' | 'checkout'>('checkin');
   const [currentMonth, setCurrentMonth] = useState<Date>(() => {
     return checkinDate ? new Date(checkinDate.getFullYear(), checkinDate.getMonth(), 1) : new Date();
   });
   const [tempCheckin, setTempCheckin] = useState<Date | null>(checkinDate);
   const [tempCheckout, setTempCheckout] = useState<Date | null>(checkoutDate);
   const [hoverDate, setHoverDate] = useState<Date | null>(null);
+
+  const handleOpenCheckin = () => {
+    setSelectingField('checkin');
+    setOpen(true);
+  };
+
+  const handleOpenCheckout = () => {
+    if (!checkinDate) {
+      setSelectingField('checkin');
+    } else {
+      setSelectingField('checkout');
+    }
+    setOpen(true);
+  };
 
   // Sync state when dialog opens
   useEffect(() => {
@@ -142,6 +157,17 @@ export const CustomDateRangePicker: React.FC<CustomDateRangePickerProps> = ({
     });
   };
 
+  const isDateBooked = (date: Date) => {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    const time = d.getTime();
+    return flatDisabledDates.some((disabledDate) => {
+      const disabled = new Date(disabledDate);
+      disabled.setHours(0, 0, 0, 0);
+      return time === disabled.getTime();
+    });
+  };
+
   const isDateDisabled = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -155,75 +181,69 @@ export const CustomDateRangePicker: React.FC<CustomDateRangePickerProps> = ({
     // Disable beyond max range
     if (disablePast !== false && maxSelectableDate && time > maxSelectableDate.getTime()) return true;
 
-    const isBooked = flatDisabledDates.some((disabledDate) => {
-      const disabled = new Date(disabledDate);
-      disabled.setHours(0, 0, 0, 0);
-      return time === disabled.getTime();
-    });
+    const booked = isDateBooked(date);
 
-    // When actively selecting Check-out (Check-in selected, Check-out pending)
-    if (tempCheckin && !tempCheckout) {
-      const checkinTime = new Date(tempCheckin);
-      checkinTime.setHours(0, 0, 0, 0);
-
-      if (time > checkinTime.getTime()) {
-        // Can check out on this date UNLESS there is a booked night strictly between check-in and this date
-        // Note: The date itself CAN be booked (it is the next guest's check-in date)
-        return hasDisabledDateBetween(tempCheckin, date);
-      } else if (time === checkinTime.getTime()) {
-        // Check-in date itself is not disabled
-        return false;
-      } else {
-        // A date before check-in can be clicked to reset check-in date, disabled only if booked
-        return isBooked;
-      }
+    // MODE 1: Selecting Check-in date
+    // A booked date can NEVER be selected as Check-in date!
+    if (selectingField === 'checkin') {
+      return booked;
     }
 
-    // If both check-in and check-out are already selected:
-    if (tempCheckin && tempCheckout) {
-      const checkoutTime = new Date(tempCheckout);
-      checkoutTime.setHours(0, 0, 0, 0);
-      if (time === checkoutTime.getTime()) {
-        return false;
-      }
+    // MODE 2: Selecting Check-out date
+    // Must have a tempCheckin
+    if (!tempCheckin) {
+      return booked;
     }
 
-    // Default (selecting Check-in): cannot check in on a booked night
-    return isBooked;
+    const checkinTime = new Date(tempCheckin);
+    checkinTime.setHours(0, 0, 0, 0);
+
+    // Any date <= tempCheckin cannot be selected as Check-out
+    if (time <= checkinTime.getTime()) {
+      return true;
+    }
+
+    // A date after tempCheckin can be selected as Check-out if there are NO booked dates strictly between checkin and this date
+    // (Notice: The checkout date ITSELF is allowed to be booked because the guest leaves before the next guest arrives)
+    return hasDisabledDateBetween(tempCheckin, date);
   };
 
   const handleDateClick = (date: Date) => {
     if (isDateDisabled(date)) return;
 
-    const clickedTime = new Date(date);
-    clickedTime.setHours(0, 0, 0, 0);
-
-    if (!tempCheckin || (tempCheckin && tempCheckout)) {
-      // Step 1: Select new Check-in date
+    if (selectingField === 'checkin') {
+      // User selected a valid check-in date
       setTempCheckin(date);
       setTempCheckout(null);
       setHoverDate(null);
-    } else if (tempCheckin && !tempCheckout) {
+      // Switch mode to selecting checkout
+      setSelectingField('checkout');
+    } else {
+      // Selecting Check-out date
+      if (!tempCheckin) {
+        setTempCheckin(date);
+        setSelectingField('checkout');
+        return;
+      }
+
       const checkinTime = new Date(tempCheckin);
       checkinTime.setHours(0, 0, 0, 0);
+      const clickedTime = new Date(date);
+      clickedTime.setHours(0, 0, 0, 0);
 
-      // Step 2: Select Check-out date
       if (clickedTime.getTime() <= checkinTime.getTime()) {
-        // Clicked on or before check-in -> treat as new check-in
-        setTempCheckin(date);
-        setTempCheckout(null);
-        setHoverDate(null);
-      } else if (hasDisabledDateBetween(tempCheckin, date)) {
-        // Booked date in between -> cannot checkout after a booked night
         return;
-      } else {
-        // Valid Check-out date selected!
-        setTempCheckout(date);
-        setHoverDate(null);
-        // Automatically apply & close
-        onChange(tempCheckin, date);
-        setOpen(false);
       }
+
+      if (hasDisabledDateBetween(tempCheckin, date)) {
+        return;
+      }
+
+      // Valid check-out date selected!
+      setTempCheckout(date);
+      setHoverDate(null);
+      onChange(tempCheckin, date);
+      setOpen(false);
     }
   };
 
@@ -343,45 +363,46 @@ const ENG_SHORT_MONTH_NAMES = [
     <Box sx={{ width: '100%' }}>
       {/* 1. Unified Trigger Card */}
       <Paper
-        onClick={() => setOpen(true)}
         variant="outlined"
         sx={{
           p: { xs: 1.2, sm: 1.8 },
           borderRadius: 3,
-          cursor: 'pointer',
           borderColor: open || (checkinDate && checkoutDate) ? '#b03052' : '#cbd5e1',
           borderWidth: open || (checkinDate && checkoutDate) ? 2 : 1,
           bgcolor: '#ffffff',
           boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
           transition: 'all 0.2s ease',
-          '&:hover': {
-            borderColor: '#b03052',
-            boxShadow: '0 4px 14px rgba(176, 48, 82, 0.12)',
-          },
         }}
       >
         <Stack direction="row" alignItems="center" spacing={{ xs: 1, sm: 2 }} sx={{ width: '100%' }}>
           {/* Check-in Box */}
           <Box
+            onClick={handleOpenCheckin}
             sx={{
               flex: 1,
-              bgcolor: checkinDate ? '#fff5f7' : '#f8fafc',
+              bgcolor: (open && selectingField === 'checkin') || checkinDate ? '#fff5f7' : '#f8fafc',
               py: { xs: 1.2, sm: 1.5 },
               px: { xs: 1, sm: 1.5 },
               borderRadius: 2.5,
-              border: '1px solid',
-              borderColor: checkinDate ? '#fecdd3' : '#e2e8f0',
+              border: '1.5px solid',
+              borderColor: (open && selectingField === 'checkin') ? '#b03052' : checkinDate ? '#fecdd3' : '#e2e8f0',
               textAlign: 'center',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              '&:hover': {
+                borderColor: '#b03052',
+                boxShadow: '0 2px 8px rgba(176, 48, 82, 0.1)',
+              },
             }}
           >
             <Typography
               variant="caption"
               sx={{
-                color: '#64748b',
+                color: (open && selectingField === 'checkin') ? '#b03052' : '#64748b',
                 fontSize: { xs: '0.72rem', sm: '0.78rem' },
                 fontWeight: 700,
                 textTransform: 'uppercase',
@@ -427,25 +448,32 @@ const ENG_SHORT_MONTH_NAMES = [
 
           {/* Check-out Box */}
           <Box
+            onClick={handleOpenCheckout}
             sx={{
               flex: 1,
-              bgcolor: checkoutDate ? '#fff5f7' : '#f8fafc',
+              bgcolor: (open && selectingField === 'checkout') || checkoutDate ? '#fff5f7' : '#f8fafc',
               py: { xs: 1.2, sm: 1.5 },
               px: { xs: 1, sm: 1.5 },
               borderRadius: 2.5,
-              border: '1px solid',
-              borderColor: checkoutDate ? '#fecdd3' : '#e2e8f0',
+              border: '1.5px solid',
+              borderColor: (open && selectingField === 'checkout') ? '#b03052' : checkoutDate ? '#fecdd3' : '#e2e8f0',
               textAlign: 'center',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              '&:hover': {
+                borderColor: '#b03052',
+                boxShadow: '0 2px 8px rgba(176, 48, 82, 0.1)',
+              },
             }}
           >
             <Typography
               variant="caption"
               sx={{
-                color: '#64748b',
+                color: (open && selectingField === 'checkout') ? '#b03052' : '#64748b',
                 fontSize: { xs: '0.72rem', sm: '0.78rem' },
                 fontWeight: 700,
                 textTransform: 'uppercase',
@@ -487,27 +515,99 @@ const ENG_SHORT_MONTH_NAMES = [
           },
         }}
       >
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 0.5, pt: 1.5, px: 2 }}>
-          <Box>
-            <Typography variant="h6" fontWeight={700} sx={{ fontSize: '1.2rem', color: '#1e293b' }}>
-              {tempCheckin && !tempCheckout
-                ? t('dateSelection.checkout', 'เลือกวัน Check-out')
-                : t('dateSelection.checkin', 'เลือกวัน Check-in')}
+        <DialogTitle sx={{ pb: 1, pt: 1.5, px: 2 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+            <Typography variant="h6" fontWeight={700} sx={{ fontSize: '1.15rem', color: '#1e293b' }}>
+              {selectingField === 'checkin'
+                ? t('dateSelection.checkin', 'เลือกวัน Check-in')
+                : t('dateSelection.checkout', 'เลือกวัน Check-out')}
             </Typography>
-            {tempCheckin && !tempCheckout && (
-              <Typography variant="caption" sx={{ color: '#b03052', fontWeight: 600 }}>
-                {t('dateSelection.checkin', 'Check-in')}: {formatDateShort(tempCheckin)}
+            <IconButton onClick={() => setOpen(false)} size="small" sx={{ color: '#94a3b8' }}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Stack>
+
+          {/* Interactive Check-in / Check-out Tab Selector */}
+          <Stack direction="row" spacing={1} sx={{ bgcolor: '#f1f5f9', p: 0.5, borderRadius: 2 }}>
+            <Box
+              onClick={() => setSelectingField('checkin')}
+              sx={{
+                flex: 1,
+                py: 0.8,
+                px: 1,
+                borderRadius: 1.5,
+                textAlign: 'center',
+                cursor: 'pointer',
+                bgcolor: selectingField === 'checkin' ? '#ffffff' : 'transparent',
+                boxShadow: selectingField === 'checkin' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{
+                  display: 'block',
+                  color: selectingField === 'checkin' ? '#b03052' : '#64748b',
+                  fontWeight: 700,
+                  fontSize: '0.72rem',
+                }}
+              >
+                CHECK-IN
               </Typography>
-            )}
-            {tempCheckin && tempCheckout && (
-              <Typography variant="caption" sx={{ color: '#b03052', fontWeight: 600 }}>
-                {formatDateShort(tempCheckin)} - {formatDateShort(tempCheckout)}
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
+                  color: tempCheckin ? '#1e293b' : '#94a3b8',
+                }}
+              >
+                {tempCheckin ? formatDateShort(tempCheckin) : 'เลือกวันที่'}
               </Typography>
-            )}
-          </Box>
-          <IconButton onClick={() => setOpen(false)} size="small" sx={{ color: '#94a3b8' }}>
-            <CloseIcon fontSize="small" />
-          </IconButton>
+            </Box>
+
+            <Box
+              onClick={() => {
+                if (tempCheckin) {
+                  setSelectingField('checkout');
+                }
+              }}
+              sx={{
+                flex: 1,
+                py: 0.8,
+                px: 1,
+                borderRadius: 1.5,
+                textAlign: 'center',
+                cursor: tempCheckin ? 'pointer' : 'not-allowed',
+                opacity: tempCheckin ? 1 : 0.6,
+                bgcolor: selectingField === 'checkout' ? '#ffffff' : 'transparent',
+                boxShadow: selectingField === 'checkout' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{
+                  display: 'block',
+                  color: selectingField === 'checkout' ? '#b03052' : '#64748b',
+                  fontWeight: 700,
+                  fontSize: '0.72rem',
+                }}
+              >
+                CHECK-OUT
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
+                  color: tempCheckout ? '#1e293b' : '#94a3b8',
+                }}
+              >
+                {tempCheckout ? formatDateShort(tempCheckout) : 'เลือกวันที่'}
+              </Typography>
+            </Box>
+          </Stack>
         </DialogTitle>
 
         <DialogContent sx={{ px: { xs: 1, sm: 2 }, py: 1 }}>
