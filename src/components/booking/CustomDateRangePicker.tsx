@@ -126,40 +126,77 @@ export const CustomDateRangePicker: React.FC<CustomDateRangePickerProps> = ({
     return undefined;
   }, [maximumMonth, disablePast]);
 
+  const hasDisabledDateBetween = (start: Date, end: Date) => {
+    const s = new Date(start);
+    s.setHours(0, 0, 0, 0);
+    const e = new Date(end);
+    e.setHours(0, 0, 0, 0);
+    const min = Math.min(s.getTime(), e.getTime());
+    const max = Math.max(s.getTime(), e.getTime());
+
+    return flatDisabledDates.some((disabledDate) => {
+      const d = new Date(disabledDate);
+      d.setHours(0, 0, 0, 0);
+      const time = d.getTime();
+      return time > min && time < max;
+    });
+  };
+
   const isDateDisabled = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
+    const time = d.getTime();
 
     // Disable past
-    if (disablePast !== false && d < today) return true;
+    if (disablePast !== false && time < today.getTime()) return true;
 
     // Disable beyond max range
-    if (disablePast !== false && maxSelectableDate && d > maxSelectableDate) return true;
+    if (disablePast !== false && maxSelectableDate && time > maxSelectableDate.getTime()) return true;
 
-    // Disable booked dates
-    return flatDisabledDates.some((disabledDate) => {
+    const isBooked = flatDisabledDates.some((disabledDate) => {
       const disabled = new Date(disabledDate);
       disabled.setHours(0, 0, 0, 0);
-      return d.getTime() === disabled.getTime();
+      return time === disabled.getTime();
     });
-  };
 
-  const hasDisabledDateBetween = (start: Date, end: Date) => {
-    const s = new Date(start).getTime();
-    const e = new Date(end).getTime();
-    const min = Math.min(s, e);
-    const max = Math.max(s, e);
+    // When actively selecting Check-out (Check-in selected, Check-out pending)
+    if (tempCheckin && !tempCheckout) {
+      const checkinTime = new Date(tempCheckin);
+      checkinTime.setHours(0, 0, 0, 0);
 
-    return flatDisabledDates.some((disabledDate) => {
-      const d = new Date(disabledDate).getTime();
-      return d > min && d < max;
-    });
+      if (time > checkinTime.getTime()) {
+        // Can check out on this date UNLESS there is a booked night strictly between check-in and this date
+        // Note: The date itself CAN be booked (it is the next guest's check-in date)
+        return hasDisabledDateBetween(tempCheckin, date);
+      } else if (time === checkinTime.getTime()) {
+        // Check-in date itself is not disabled
+        return false;
+      } else {
+        // A date before check-in can be clicked to reset check-in date, disabled only if booked
+        return isBooked;
+      }
+    }
+
+    // If both check-in and check-out are already selected:
+    if (tempCheckin && tempCheckout) {
+      const checkoutTime = new Date(tempCheckout);
+      checkoutTime.setHours(0, 0, 0, 0);
+      if (time === checkoutTime.getTime()) {
+        return false;
+      }
+    }
+
+    // Default (selecting Check-in): cannot check in on a booked night
+    return isBooked;
   };
 
   const handleDateClick = (date: Date) => {
     if (isDateDisabled(date)) return;
+
+    const clickedTime = new Date(date);
+    clickedTime.setHours(0, 0, 0, 0);
 
     if (!tempCheckin || (tempCheckin && tempCheckout)) {
       // Step 1: Select new Check-in date
@@ -167,17 +204,18 @@ export const CustomDateRangePicker: React.FC<CustomDateRangePickerProps> = ({
       setTempCheckout(null);
       setHoverDate(null);
     } else if (tempCheckin && !tempCheckout) {
+      const checkinTime = new Date(tempCheckin);
+      checkinTime.setHours(0, 0, 0, 0);
+
       // Step 2: Select Check-out date
-      if (date.getTime() <= tempCheckin.getTime()) {
+      if (clickedTime.getTime() <= checkinTime.getTime()) {
         // Clicked on or before check-in -> treat as new check-in
         setTempCheckin(date);
         setTempCheckout(null);
         setHoverDate(null);
       } else if (hasDisabledDateBetween(tempCheckin, date)) {
-        // There is a booked date in between -> reset start to this date
-        setTempCheckin(date);
-        setTempCheckout(null);
-        setHoverDate(null);
+        // Booked date in between -> cannot checkout after a booked night
+        return;
       } else {
         // Valid Check-out date selected!
         setTempCheckout(date);
@@ -284,13 +322,15 @@ const ENG_SHORT_MONTH_NAMES = [
   };
 
   const nights = useMemo(() => {
-    const start = tempCheckin || checkinDate;
-    const end = tempCheckout || checkoutDate;
-    if (start && end) {
-      return Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+    if (checkinDate && checkoutDate) {
+      const s = new Date(checkinDate);
+      s.setHours(0, 0, 0, 0);
+      const e = new Date(checkoutDate);
+      e.setHours(0, 0, 0, 0);
+      return Math.max(1, Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)));
     }
     return 0;
-  }, [tempCheckin, tempCheckout, checkinDate, checkoutDate]);
+  }, [checkinDate, checkoutDate]);
 
   const monthTitle = useMemo(() => {
     const monthIndex = currentMonth.getMonth();
@@ -450,11 +490,18 @@ const ENG_SHORT_MONTH_NAMES = [
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 0.5, pt: 1.5, px: 2 }}>
           <Box>
             <Typography variant="h6" fontWeight={700} sx={{ fontSize: '1.2rem', color: '#1e293b' }}>
-              {!tempCheckin ? t('dateSelection.checkin', 'เลือกวัน Check-in') : t('dateSelection.checkout', 'เลือกวัน Check-out')}
+              {tempCheckin && !tempCheckout
+                ? t('dateSelection.checkout', 'เลือกวัน Check-out')
+                : t('dateSelection.checkin', 'เลือกวัน Check-in')}
             </Typography>
-            {tempCheckin && (
+            {tempCheckin && !tempCheckout && (
               <Typography variant="caption" sx={{ color: '#b03052', fontWeight: 600 }}>
                 {t('dateSelection.checkin', 'Check-in')}: {formatDateShort(tempCheckin)}
+              </Typography>
+            )}
+            {tempCheckin && tempCheckout && (
+              <Typography variant="caption" sx={{ color: '#b03052', fontWeight: 600 }}>
+                {formatDateShort(tempCheckin)} - {formatDateShort(tempCheckout)}
               </Typography>
             )}
           </Box>
@@ -504,29 +551,34 @@ const ENG_SHORT_MONTH_NAMES = [
                 return <Grid key={`empty-${index}`} size={12 / 7} />;
               }
 
-              const isStart = tempCheckin && day.toDateString() === tempCheckin.toDateString();
-              const isEnd = tempCheckout && day.toDateString() === tempCheckout.toDateString();
+              const dayTime = new Date(day).setHours(0, 0, 0, 0);
+              const startTime = tempCheckin ? new Date(tempCheckin).setHours(0, 0, 0, 0) : null;
+              const endTime = tempCheckout ? new Date(tempCheckout).setHours(0, 0, 0, 0) : null;
+              const hoverTime = hoverDate ? new Date(hoverDate).setHours(0, 0, 0, 0) : null;
+
+              const isStart = startTime !== null && dayTime === startTime;
+              const isEnd = endTime !== null && dayTime === endTime;
               const isHoverEnd =
-                tempCheckin &&
-                !tempCheckout &&
-                hoverDate &&
-                day.toDateString() === hoverDate.toDateString() &&
-                hoverDate > tempCheckin;
+                startTime !== null &&
+                endTime === null &&
+                hoverTime !== null &&
+                dayTime === hoverTime &&
+                hoverTime > startTime;
 
               // Range calculation
               const isInSelectedRange =
-                tempCheckin &&
-                tempCheckout &&
-                day > tempCheckin &&
-                day < tempCheckout;
+                startTime !== null &&
+                endTime !== null &&
+                dayTime > startTime &&
+                dayTime < endTime;
 
               const isInHoverRange =
-                tempCheckin &&
-                !tempCheckout &&
-                hoverDate &&
-                day > tempCheckin &&
-                day < hoverDate &&
-                !hasDisabledDateBetween(tempCheckin, hoverDate);
+                startTime !== null &&
+                endTime === null &&
+                hoverTime !== null &&
+                dayTime > startTime &&
+                dayTime < hoverTime &&
+                !hasDisabledDateBetween(tempCheckin!, hoverDate!);
 
               const inRange = isInSelectedRange || isInHoverRange;
               const disabled = isDateDisabled(day);
@@ -557,7 +609,7 @@ const ENG_SHORT_MONTH_NAMES = [
                       }}
                     />
                   )}
-                  {isStart && (tempCheckout || (hoverDate && hoverDate > tempCheckin)) && (
+                  {isStart && (endTime !== null || (hoverTime !== null && hoverTime > startTime!)) && (
                     <Box
                       sx={{
                         position: 'absolute',
@@ -570,7 +622,7 @@ const ENG_SHORT_MONTH_NAMES = [
                       }}
                     />
                   )}
-                  {(isEnd || isHoverEnd) && tempCheckin && (
+                  {(isEnd || isHoverEnd) && startTime !== null && (
                     <Box
                       sx={{
                         position: 'absolute',
@@ -597,7 +649,7 @@ const ENG_SHORT_MONTH_NAMES = [
                       justifyContent: 'center',
                       position: 'relative',
                       zIndex: 1,
-                      cursor: disabled ? 'not-allowed' : 'pointer',
+                      cursor: (disabled && !isStart && !isEnd) ? 'not-allowed' : 'pointer',
                       bgcolor: isStart || isEnd
                         ? '#b03052'
                         : isHoverEnd
@@ -607,17 +659,17 @@ const ENG_SHORT_MONTH_NAMES = [
                         : 'transparent',
                       color: isStart || isEnd || isHoverEnd
                         ? '#ffffff'
-                        : disabled
+                        : (disabled && !isStart && !isEnd)
                         ? '#cbd5e1'
                         : inRange
                         ? '#b03052'
                         : '#1e293b',
                       fontWeight: isStart || isEnd || isHoverEnd || inRange ? 700 : 500,
                       fontSize: '0.88rem',
-                      textDecoration: disabled ? 'line-through' : 'none',
+                      textDecoration: (disabled && !isStart && !isEnd) ? 'line-through' : 'none',
                       transition: 'all 0.15s ease',
                       '&:hover': {
-                        bgcolor: disabled
+                        bgcolor: (disabled && !isStart && !isEnd)
                           ? 'transparent'
                           : isStart || isEnd
                           ? '#8e2340'
